@@ -48,7 +48,7 @@ export default function VerifyOTPScreen() {
 
     try {
       const success = await verifyOTP(otp);
-      if (otp==="1234") {
+      if (success) {
         // If verification is successful, user will be redirected to main app
         router.push("/")
       } else {

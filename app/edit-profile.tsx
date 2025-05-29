@@ -25,8 +25,7 @@ export default function EditProfileScreen() {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phoneNumber: user?.phoneNumber || '',
-    whatsappNumber: user?.whatsappNumber || '',
+    whatsappNumber: user?.whatsappMobile || '',
     state: user?.state || '',
     city: user?.city || '',
   });
@@ -100,14 +99,6 @@ export default function EditProfileScreen() {
             onChangeText={(text) => setFormData({ ...formData, email: text })}
             placeholder="Enter your email"
             keyboardType="email-address"
-          />
-
-          <Input
-            label="Primary Number"
-            value={formData.phoneNumber}
-            onChangeText={(text) => setFormData({ ...formData, phoneNumber: text })}
-            placeholder="Enter your phone number"
-            keyboardType="phone-pad"
           />
 
           <Input

@@ -22,6 +22,7 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+package-lock.json
 
 # macos
 .DS_Store
