@@ -54,8 +54,8 @@ export default function ProfileDetailsScreen() {
           {renderInfoItem('Name', user?.name || 'Not set')}
           {renderInfoItem('Role', 'Property Owner')}
           {renderInfoItem('Email ID', user?.email || 'Not set')}
-          {renderInfoItem('Primary Number', user?.phoneNumber || 'Not set')}
-          {renderInfoItem('WhatsApp Number', user?.whatsappNumber || 'Not set')}
+          {renderInfoItem('Primary Number', user?.mobile || 'Not set')}
+          {renderInfoItem('WhatsApp Number', user?.whatsappMobile || 'Not set')}
           {renderInfoItem('State', user?.state || 'Not set')}
           {renderInfoItem('City', user?.city || 'Not set')}
         </View>

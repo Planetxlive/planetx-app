@@ -32,15 +32,15 @@ export default function LoginScreen() {
       setError('Please enter a valid phone number');
       return;
     }
-
+    
     setError('');
     setIsLoading(true);
-
+    
     try {
       // Format phone number with country code if needed
       const formattedNumber = phoneNumber.startsWith('+') 
-        ? phoneNumber 
-        : `+91${phoneNumber}`;
+      ? phoneNumber 
+      : `+91${phoneNumber}`;
       
       await signIn(formattedNumber);
       // Navigation to OTP screen is handled in the signIn function
