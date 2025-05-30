@@ -103,7 +103,7 @@ export default function NearbyScreen() {
       <FlatList
         data={properties}
         renderItem={renderProperty}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />

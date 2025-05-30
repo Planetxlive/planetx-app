@@ -21,7 +21,9 @@ export default function MyPropertyScreen() {
   const { user } = useAuth();
   const { getPropertiesByOwnerId } = useProperties();
 
+  // console.log(user?.id)
   const myProperties = getPropertiesByOwnerId(user?.id || '');
+  
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -40,7 +42,7 @@ export default function MyPropertyScreen() {
 
       <FlatList
         data={myProperties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => <PropertyCard property={item} />}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={

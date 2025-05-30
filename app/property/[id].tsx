@@ -18,7 +18,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { PropertyType, useProperties } from '@/context/PropertyContext';
+import { PropertyCategory, useProperties } from '@/context/PropertyContext';
 import ImageCarousel from '@/components/ImageCarousel';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
@@ -75,7 +75,7 @@ interface PropertyOwner {
 interface Property {
   id: string;
   title: string;
-  type: PropertyType;
+  type: PropertyCategory;
   location: string;
   price: string;
   pricePerSqft: string;
@@ -203,7 +203,7 @@ const transformPropertyData = (data: any): Property => {
   return {
     id: data.id,
     title: data.title,
-    type: category as PropertyType,
+    type: category as PropertyCategory,
     location: `${data.location.address}, ${data.location.city}, ${data.location.state}, ${data.location.country}`,
     price: data.price
       ? `₹${data.price.toLocaleString('en-IN')}${data.priceUnit === 'perMonth' ? '/mo' : ''}`

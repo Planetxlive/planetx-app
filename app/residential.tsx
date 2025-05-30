@@ -17,11 +17,11 @@ import { ArrowLeft } from 'lucide-react-native';
 export default function ResidentialScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { getPropertiesByType } = useProperties();
+  const { getPropertiesByCategory } = useProperties();
 
   const residentialProperties = [
-    ...getPropertiesByType('House/Villa'),
-    ...getPropertiesByType('Flat/Apartment'),
+    ...getPropertiesByCategory("Residential"),
+    // ...getPropertiesByCategory('Flat/Apartment'),
   ];
 
   return (
@@ -38,7 +38,7 @@ export default function ResidentialScreen() {
 
       <FlatList
         data={residentialProperties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => <PropertyCard property={item} />}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={

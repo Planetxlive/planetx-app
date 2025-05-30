@@ -17,10 +17,10 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
   const router = useRouter();
   const { toggleFavorite, favorites } = useProperties();
   
-  const isFavorite = favorites.includes(property.id);
+  const isFavorite = favorites.includes(property._id);
 
   const handlePress = () => {
-    router.push(`/property/${property.id}`);
+    router.push(`/property/${property._id}`);
   };
 
   const formatPrice = (price: number) => {
@@ -33,6 +33,13 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     }
   };
 
+  const getAverageRating = (reviews:Property["reviews"]) =>
+    Array.isArray(reviews) && reviews.length > 0
+      ? (
+          reviews.reduce((sum, r) => sum + (r.stars || 0), 0) / reviews.length
+        ).toFixed(1)
+      : null;
+
   return (
     <TouchableOpacity
       style={[
@@ -44,12 +51,12 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     >
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: property.images[0] }}
+          source={{ uri: property.images[0].url }}
           style={styles.image}
           resizeMode="cover"
         />
         <View style={styles.typeTag}>
-          <Text style={styles.typeText}>{property.type}</Text>
+          <Text style={styles.typeText}>{property.category}</Text>
         </View>
       </View>
       
@@ -60,22 +67,20 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
           </Text>
           <View style={styles.ratingContainer}>
             <Star size={14} color="#FFD700" fill="#FFD700" />
-            <Text style={styles.ratingText}>{property.rating}</Text>
+            <Text style={styles.ratingText}>{getAverageRating(property.reviews)}</Text>
           </View>
         </View>
         
         <View style={styles.locationRow}>
           <MapPin size={14} color={colors.grayDark} />
           <Text style={[styles.locationText, { color: colors.grayDark }]} numberOfLines={1}>
-            {property.location.address}, {property.location.city}
+            {property.title}
           </Text>
         </View>
         
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: colors.primaryColor }]}>
-            {property.priceUnit === 'perMonth' 
-              ? `₹${property.price}/ Month` 
-              : formatPrice(property.price)}
+            {property.pricing.expectedPrice}
           </Text>
         </View>
       </View>
