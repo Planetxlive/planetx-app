@@ -36,7 +36,7 @@ export default function HomeScreen() {
 
   const featuredProperties = properties.slice(0, 2);
   const residentialProperties = properties.filter((p: Property) => 
-    p.type === 'House/Villa' || p.type === 'Flat/Apartment'
+    p.category === "Residential"
   ).slice(0, 2);
   const nearbyProperties = properties.slice(0, 2);
 
@@ -77,7 +77,7 @@ export default function HomeScreen() {
             <PropertyCard property={item} horizontal />
           </View>
         )}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item._id.toString()}
         contentContainerStyle={styles.horizontalList}
       />
     </View>

@@ -23,7 +23,7 @@ export default function AllPropertiesScreen() {
 
   const filteredProperties = properties.filter((property) =>
     property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.location.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    property.location.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
     property.location.city.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -57,7 +57,7 @@ export default function AllPropertiesScreen() {
 
       <FlatList
         data={filteredProperties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => <PropertyCard property={item} />}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
