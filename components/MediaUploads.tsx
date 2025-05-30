@@ -20,7 +20,7 @@ interface MediaUploadProps {
 }
 
 export default function MediaUpload({ formData, setFormData }: MediaUploadProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   const { control, handleSubmit, formState: { errors } } = useForm({

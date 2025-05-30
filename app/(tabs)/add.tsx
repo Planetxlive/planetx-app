@@ -21,7 +21,7 @@ import { ArrowLeft, Camera, Upload, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function AddPropertyScreen() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { user } = useAuth();
   const { addProperty } = useProperties();
@@ -43,11 +43,14 @@ export default function AddPropertyScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const propertyTypes: PropertyType[] = [
-    'House/Villa',
-    'Flat/Apartment',
-    'Plot/Land',
-    'Commercial',
-    'Warehouse',
+        "Residential",
+        "Pg",
+        "Hotel",
+        "Office",
+        "Shop",
+        "Warehouse",
+        "Shared Warehouse",
+        "EventSpace",
   ];
 
   const listingTypes = ['Buy', 'Rent', 'Paying Guest', 'Rent Hourly'];

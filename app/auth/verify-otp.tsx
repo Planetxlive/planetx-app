@@ -19,13 +19,19 @@ import { ArrowLeft } from 'lucide-react-native';
 export default function VerifyOTPScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme] || Colors['light'];
-  const { verifyOTP } = useAuth();
+  const { verifyOTP, pendingPhoneNumber } = useAuth();
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isResending, setIsResending] = useState(false);
-  const router =useRouter();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!pendingPhoneNumber) {
+      router.replace('/auth/login');
+    }
+  }, [pendingPhoneNumber]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -113,7 +119,7 @@ export default function VerifyOTPScreen() {
               We've sent a Verification Code to
             </Text>
             <Text style={[styles.phoneNumber, { color: colors.text }]}>
-              +91 98765 43210
+              {pendingPhoneNumber}
             </Text>
 
             <View style={styles.otpContainer}>

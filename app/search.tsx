@@ -9,7 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useProperties, Property, PropertyType } from '@/context/PropertyContext';
+import { useProperties, Property, PropertyCategory } from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
@@ -17,26 +17,29 @@ import { ArrowLeft, Search as SearchIcon, X, ChevronDown } from 'lucide-react-na
 
 export default function SearchScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme];
+  const colors = Colors[colorScheme ?? 'light'];
   const router = useRouter();
   const { properties } = useProperties();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedType, setSelectedType] = useState<PropertyType | null>(null);
+  const [selectedType, setSelectedType] = useState<PropertyCategory | null>(null);
   const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
-  const propertyTypes: PropertyType[] = [
-    'House/Villa',
-    'Flat/Apartment',
-    'Plot/Land',
-    'Commercial',
+  const propertyTypes: PropertyCategory[] = [
+    'Residential',
+    'Pg',
+    'Hotel',
+    'Office',
+    'Shop',
     'Warehouse',
+    'Shared Warehouse',
+    'EventSpace'
   ];
   
-  const listingTypes = ['Buy', 'Rent', 'Paying Guest', 'Rent Hourly'];
+  const listingTypes = ['For Sale', 'For Rent', 'Paying Guest', 'Rent Hourly'];
 
   // Filter properties based on search query and filters
   const filteredProperties = properties.filter((property) => {
@@ -45,28 +48,27 @@ export default function SearchScreen() {
       searchQuery &&
       !property.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !property.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !property.location.address.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !property.location.city.toLowerCase().includes(searchQuery.toLowerCase())
     ) {
       return false;
     }
 
     // Property type filter
-    if (selectedType && property.type !== selectedType) {
+    if (selectedType && property.category !== selectedType) {
       return false;
     }
 
     // Listing type filter
-    if (selectedListingType && property.listingType !== selectedListingType) {
+    if (selectedListingType && property.propertyType !== selectedListingType) {
       return false;
     }
 
     // Price range filter
-    if (minPrice && property.price < parseFloat(minPrice)) {
+    if (minPrice && property.pricing.expectedPrice < parseFloat(minPrice)) {
       return false;
     }
 
-    if (maxPrice && property.price > parseFloat(maxPrice)) {
+    if (maxPrice && property.pricing.expectedPrice > parseFloat(maxPrice)) {
       return false;
     }
 
@@ -263,7 +265,7 @@ export default function SearchScreen() {
 
       <FlatList
         data={filteredProperties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={

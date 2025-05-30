@@ -15,7 +15,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { User, Chrome as Home, Heart, Globe, Bell, MessageSquare, Share, FileText, Book, LogOut, ChevronRight, CreditCard as Edit } from 'lucide-react-native';
 
 const MenuItem = ({ icon: Icon, title, onPress, color = 'black', isLogout = false }:any) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   return (
@@ -44,7 +44,7 @@ const MenuItem = ({ icon: Icon, title, onPress, color = 'black', isLogout = fals
 };
 
 export default function ProfileScreen() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { user, signOut } = useAuth();
 

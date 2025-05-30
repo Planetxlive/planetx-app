@@ -22,7 +22,7 @@ interface AmenitiesProps {
 }
 
 export default function Amenities({ formData, setFormData }: AmenitiesProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const schema = formData.propertyCategory === 'Residential' ? residentialAmenitiesSchema : pgAmenitiesSchema;
 

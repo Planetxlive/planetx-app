@@ -19,7 +19,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { Phone } from 'lucide-react-native';
 
 export default function LoginScreen() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { signIn } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -39,8 +39,8 @@ export default function LoginScreen() {
     try {
       // Format phone number with country code if needed
       const formattedNumber = phoneNumber.startsWith('+') 
-      ? phoneNumber 
-      : `+91${phoneNumber}`;
+        ? phoneNumber 
+        : `+91${phoneNumber.replace(/\s+/g, '')}`;
       
       await signIn(formattedNumber);
       // Navigation to OTP screen is handled in the signIn function

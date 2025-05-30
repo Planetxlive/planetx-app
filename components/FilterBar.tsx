@@ -11,7 +11,7 @@ type FilterBarProps = {
 };
 
 export default function FilterBar({ selectedType, onSelectType, types }: FilterBarProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   const handleSelect = (type: string | null) => {

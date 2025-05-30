@@ -34,7 +34,7 @@ export default function Button({
   style,
   textStyle,
 }: ButtonProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   const getButtonStyles = () => {

@@ -5,7 +5,7 @@ import { useColorScheme } from 'react-native';
 // import Privacy from './Privacy';
 
 const TermsAndConditions = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const isDarkMode = colorScheme === 'dark';
 
   const dynamicStyles = StyleSheet.create({

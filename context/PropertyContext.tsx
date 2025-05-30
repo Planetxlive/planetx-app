@@ -150,6 +150,7 @@ interface PropertyContextType {
     propertyType: Property['propertyType']
   ) => Property[];
   getPropertiesByCity: (city: string) => Property[];
+  getPropertiesByPriceRange: (minPrice: number, maxPrice: number) => Property[];
   createPropertyTitle: (prop: Property) => string;
   toggleFavorite: (id: string) => void;
   favorites: string[];
@@ -253,6 +254,12 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
+  const getPropertiesByPriceRange = (minPrice: number, maxPrice: number) => {
+    return properties.filter(
+      (p) => p.pricing.expectedPrice >= minPrice && p.pricing.expectedPrice <= maxPrice
+    );
+  };
+
   const toggleFavorite = (propertyId: string) => {
     if (favorites.includes(propertyId)) {
       setFavorites(favorites.filter((id) => id !== propertyId));
@@ -274,6 +281,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
         getPropertiesByCategory,
         getPropertiesByPostingType,
         getPropertiesByCity,
+        getPropertiesByPriceRange,
         toggleFavorite,
         favorites,
       }}

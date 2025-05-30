@@ -12,7 +12,7 @@ type PropertyCardProps = {
 };
 
 export default function PropertyCard({ property, horizontal = false }: PropertyCardProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { toggleFavorite, favorites } = useProperties();

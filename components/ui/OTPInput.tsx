@@ -29,7 +29,7 @@ export default function OTPInput({
   style,
   error,
 }: OTPInputProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const [isFocused, setIsFocused] = useState<boolean[]>(Array(length).fill(false));

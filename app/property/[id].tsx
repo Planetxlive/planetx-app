@@ -18,7 +18,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { PropertyCategory, useProperties } from '@/context/PropertyContext';
+import { PropertyCategory, useProperties, Property as ContextProperty } from '@/context/PropertyContext';
 import ImageCarousel from '@/components/ImageCarousel';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
@@ -72,10 +72,99 @@ interface PropertyOwner {
   WhatsApp: string;
 }
 
+interface PropertyPricingData {
+  expectedPrice?: number;
+  PricePerSqft?: number;
+  basePricePerNight?: number;
+  finalPrice?: number;
+  price?: { amount: number };
+  rentalDetails?: { monthlyRent: number };
+  monthlyRent?: number;
+  maintenanceFrequency?: string;
+  maintenancePrice?: number;
+}
+
+interface PropertyDetailsData {
+  propertyName?: string;
+  totalRooms?: number;
+  starRating?: number;
+  officeType?: string;
+  furnishedStatus?: string;
+  totalArea?: { size: number };
+  carpetArea?: { size: number };
+  floorDetails?: {
+    officeOnFloor?: number;
+    totalFloors?: number;
+  };
+}
+
+interface PropertyData {
+  _id: string;
+  category?: string;
+  subCategory?: string;
+  location?: {
+    houseNumber?: string;
+    apartment?: string;
+    subLocality?: string;
+    locality?: string;
+    city?: string;
+    state?: string;
+  };
+  pricing?: PropertyPricingData;
+  availabilityStatus?: string;
+  furnishingStatus?: string;
+  about?: {
+    bedrooms?: number;
+    bathrooms?: number;
+    balconies?: number;
+  };
+  propertyArea?: {
+    carpetArea?: number;
+  };
+  propertyOnFloor?: number;
+  totalFloors?: number;
+  ageOfProperty?: number;
+  availableFrom?: string;
+  facing?: string;
+  powerBackup?: string;
+  waterSource?: string;
+  roadWidth?: string;
+  flooring?: string;
+  description?: string;
+  images?: Array<{ url?: string; name?: string }>;
+  amenities?: Record<string, boolean> | string[];
+  furnishingDetails?: Record<string, boolean | number> | string[];
+  societyBuildingFeatures?: Record<string, boolean>;
+  otherFeatures?: Record<string, boolean>;
+  nearbyPlaces?: Record<string, boolean>;
+  reviews?: Array<{ stars?: number }>;
+  user?: {
+    name?: string;
+    mobile?: string;
+    whatsappMobile?: string;
+  };
+  propertyDetails?: PropertyDetailsData;
+  carpetArea?: { size: number };
+  parking?: {
+    covered?: number;
+    open?: number;
+  };
+}
+
+interface Review {
+  _id: string;
+  user: {
+    name: string;
+  };
+  stars: number;
+  text: string;
+  createdAt: string;
+}
+
 interface Property {
   id: string;
-  title: string;
   type: PropertyCategory;
+  title: string;
   location: string;
   price: string;
   pricePerSqft: string;
@@ -102,148 +191,509 @@ interface Property {
   };
 }
 
-interface Review {
-  _id: string;
-  user: {
-    name: string;
-  };
-  stars: number;
-  text: string;
-  createdAt: string;
-}
-
 // Transform property data to match React page structure
-const transformPropertyData = (data: any): Property => {
-  const category = data.type || 'Residential';
+const transformPropertyData = (data: PropertyData): Property => {
+  const category = data.category || 'Residential';
 
   const amenitiesMap: Record<string, string> = {
-    Parking: 'Parking',
-    Gym: 'Gym',
-    'Swimming Pool': 'Swimming Pool',
-    '24/7 Security': '24/7 Security',
-    'Modular Kitchen': 'Modular Kitchen',
-    Terrace: 'Terrace',
-    Garden: 'Garden',
-    'Air Conditioning': 'Air Conditioning',
-    'Power Backup': 'Power Backup',
-    Lift: 'Lift',
-    'Conference Room': 'Conference Room',
-    'Corner Plot': 'Corner Plot',
-    'Road Facing': 'Road Facing',
-    'Gated Community': 'Gated Community',
-    'Loading Dock': 'Loading Dock',
-    'High Ceiling': 'High Ceiling',
-    Security: 'Security',
+    maintenanceStaff: 'Maintenance Staff',
+    vastuCompliant: 'Vastu Compliant',
+    securityFireAlarm: 'Security & Fire Alarm',
+    visitorParking: 'Visitor Parking',
+    gasLine: 'Gas Line',
+    wifiCable: 'WiFi & Cable',
+    waterSupply: 'Water Supply',
+    powerBackup: 'Power Backup',
+    parking: 'Parking',
+    clubHouse: 'Club House',
+    childrensPlayArea: 'Children\'s Play Area',
+    sportsFacilities: 'Sports Facilities',
+    joggingWalkingTracks: 'Jogging & Walking Tracks',
+    swimmingPool: 'Swimming Pool',
+    gym: 'Gym',
+    cinemaRoom: 'Cinema Room',
+    libraryReadingRoom: 'Library & Reading Room',
+    projector: 'Projector',
+    screen: 'Screen',
+    soundSystem: 'Sound System',
+    lightingSetup: 'Lighting Setup',
+    airConditioning: 'Air Conditioning',
+    cateringServices: 'Catering Services',
+    decorationServices: 'Decoration Services',
+    stageSetup: 'Stage Setup',
+    podium: 'Podium',
+    securityServices: 'Security Services',
+    cleaningServices: 'Cleaning Services',
+    hotWater: 'Hot Water',
+    laundryService: 'Laundry Service',
+    housekeeping: 'Housekeeping',
+    roomService: 'Room Service',
+    restaurant: 'Restaurant',
+    bar: 'Bar',
+    conferenceRoom: 'Conference Room',
+    lift: 'Lift',
+    cctv: 'CCTV',
+    security24x7: '24x7 Security',
+    firstAidKit: 'First Aid Kit',
+    fireExtinguisher: 'Fire Extinguisher',
+    wheelChairAccess: 'Wheelchair Access',
+    fireSafety: 'Fire Safety',
+    pantry: 'Pantry',
+    cafeteria: 'Cafeteria',
+    receptionService: 'Reception Service',
+    gymFitnessCentre: 'Gym & Fitness Centre',
+    breakoutArea: 'Breakout Area',
+    commonRefrigerator: 'Common Refrigerator',
+    roWater: 'RO Water',
+    cookingAllowed: 'Cooking Allowed',
+    twoWheelerParking: 'Two-Wheeler Parking',
+    fourWheelerParking: 'Four-Wheeler Parking',
+    geyser: 'Geyser',
+    studyTable: 'Study Table',
+    wardrobe: 'Wardrobe',
+    tv: 'TV',
+    microwave: 'Microwave',
+    recreationRoom: 'Recreation Room',
+    readingRoom: 'Reading Room',
+    garden: 'Garden',
+    highSpeedWiFi: 'High-Speed WiFi',
+    printingServices: 'Printing Services',
+    conferenceRooms: 'Conference Rooms',
+    phoneBooths: 'Phone Booths',
+    teaCoffee: 'Tea/Coffee',
+    access24x7: '24x7 Access',
+    security: 'Security',
+    receptionServices: 'Reception Services',
+    elevator: 'Elevator',
+    loadingDock: 'Loading Dock',
+    coldStorageFacility: 'Cold Storage Facility',
+  };
+
+  const otherFeaturesMap: Record<string, string> = {
+    separateEntryForServantRoom: 'Separate Entry for Servant Room',
+    noOpenDrainageAround: 'No Open Drainage Around',
+    petFriendly: 'Pet-Friendly',
+    wheelchairFriendly: 'Wheelchair Friendly',
+    rainWaterHarvesting: 'Rain Water Harvesting',
+    cornerProperty: 'Corner Property',
+    poojaRoom: 'Pooja Room',
+    guestRoom: 'Guest Room',
+    servantRoom: 'Servant Room',
+    studyRoom: 'Study Room',
+    shopFrontage: 'Shop Frontage',
+    height: 'Height',
+    parkingAvailability: 'Parking Availability',
+    electricityLoad: 'Electricity Load',
+    shutterType: 'Shutter Type',
+    advertisingSpace: 'Advertising Space',
+    entryType: 'Entry Type',
+    ventilation: 'Ventilation',
+    powerSupply: 'Power Supply',
+    flooringType: 'Flooring Type',
+    hazardousMaterialStorage: 'Hazardous Material Storage',
+    temperatureControlled: 'Temperature Controlled',
+    fireSprinklerSystem: 'Fire Sprinkler System',
+    fireSafetyCertificate: 'Fire Safety Certificate',
+    buildingStabilityCertificate: 'Building Stability Certificate',
+    environmentalClearance: 'Environmental Clearance',
+    eventPlannerSupport: 'Event Planner Support',
+    technicalStaffOnSite: 'Technical Staff On-Site',
+    customizableLayouts: 'Customizable Layouts',
+    loungeArea: 'Lounge Area',
+  };
+
+  const societyFeaturesMap: Record<string, string> = {
+    swimmingPool: 'Swimming Pool',
+    security24x7: '24/7 Security',
+    gymFitnessCentre: 'Gym & Fitness Centre',
+    shoppingCenter: 'Shopping Center',
+    clubHouse: 'Club House',
+    childrensPlayArea: 'Children\'s Play Area',
+    sportsFacilities: 'Sports Facilities',
+    joggingWalkingTracks: 'Jogging & Walking Tracks',
+    gardenParks: 'Garden & Parks',
+    communityHalls: 'Community Halls',
+    cinemaRoom: 'Cinema Room',
+    libraryReadingRoom: 'Library & Reading Room',
   };
 
   const furnishingMap: Record<string, string> = {
     fans: 'Fans',
     lights: 'Lights',
+    tv: 'TV',
+    beds: 'Beds',
     ac: 'AC',
     wardrobes: 'Wardrobes',
+    exhaustFans: 'Exhaust Fans',
+    curtains: 'Curtains',
+    floorLamps: 'Floor Lamps',
+    diningTable: 'Dining Table',
+    sofa: 'Sofa',
+    stove: 'Stove',
+    kitchenCabinets: 'Kitchen Cabinets',
+    chimney: 'Chimney',
+    coffeeTable: 'Coffee Table',
+    refrigerator: 'Refrigerator',
+    microwave: 'Microwave',
+    dishwasher: 'Dishwasher',
+    waterPurifier: 'Water Purifier',
+    washingMachine: 'Washing Machine',
+    workstations: 'Workstations',
+    meetingRooms: 'Meeting Rooms',
+    conferenceRooms: 'Conference Rooms',
   };
 
   const nearbyPlacesMap: Record<string, string> = {
     hospital: 'Hospital',
     school: 'School',
+    metro: 'Metro Station',
+    mall: 'Mall',
     market: 'Market',
+    railway: 'Railway Station',
+    airport: 'Airport',
+    highway: 'Highway',
+    busStation: 'Bus Station',
   };
 
-  const amenities = data.features?.map((feature: string) => ({
-    icon: 'map-pin',
-    label: amenitiesMap[feature] || feature,
-  })) || [];
+  const arrayToObject = (arr: string[], map: Record<string, string>) =>
+    arr?.reduce((acc, key) => {
+      if (map[key]) acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>) || {};
 
-  const furnishing: PropertyFeature[] = []; // Add furnishing logic if available in data
-  const nearbyPlaces = Object.keys(nearbyPlacesMap).map((key) => ({
-    icon: 'map-pin',
-    label: nearbyPlacesMap[key],
-  }));
+  const amenitiesObj = Array.isArray(data.amenities)
+    ? arrayToObject(data.amenities, amenitiesMap)
+    : data.amenities || {};
 
-  const pricing = {
-    expectedPrice: data.price || null,
-    PricePerSqft: data.priceUnit === 'perSqFt' ? data.price : null,
+  const furnishingObj = Array.isArray(data.furnishingDetails)
+    ? arrayToObject(data.furnishingDetails, furnishingMap)
+    : data.furnishingDetails || {};
+
+  const amenities = Object.entries(amenitiesObj).reduce((acc, [key, value]) => {
+    if (value && amenitiesMap[key]) {
+      acc.push({ icon: 'user', label: amenitiesMap[key] });
+    }
+    return acc;
+  }, [] as PropertyFeature[]);
+
+  const furnishing = Object.entries(furnishingObj).reduce((acc, [key, value]) => {
+    if ((typeof value === 'number' && value > 0) || (typeof value === 'boolean' && value)) {
+      acc.push({
+        icon: 'fan',
+        label: `${typeof value === 'number' ? value : 1} ${furnishingMap[key] || key}`,
+      });
+    }
+    return acc;
+  }, [] as PropertyFeature[]);
+
+  const societyFeatures = Object.entries(data.societyBuildingFeatures || {}).reduce(
+    (acc, [key, value]) => {
+      if (value && societyFeaturesMap[key]) {
+        acc.push({ icon: 'swimming-pool', label: societyFeaturesMap[key] });
+      }
+      return acc;
+    },
+    [] as PropertyFeature[]
+  );
+
+  const otherFeatures = Object.entries(data.otherFeatures || {}).reduce(
+    (acc, [key, value]) => {
+      if (value && otherFeaturesMap[key]) {
+        acc.push({ icon: 'door', label: otherFeaturesMap[key] });
+      }
+      return acc;
+    },
+    [] as PropertyFeature[]
+  );
+
+  const nearbyPlaces = Object.entries(data.nearbyPlaces || {}).reduce(
+    (acc, [key, value]) => {
+      if (value && nearbyPlacesMap[key]) {
+        acc.push({ icon: 'train', label: nearbyPlacesMap[key] });
+      }
+      return acc;
+    },
+    [] as PropertyFeature[]
+  );
+
+  let pricing: PropertyPricingData = {};
+  let features = [];
+  let propertyDetails = [];
+  let areaDetails = [];
+
+  switch (category) {
+    case 'Residential':
+      pricing = {
+        expectedPrice: data.pricing?.expectedPrice ?? undefined,
+        PricePerSqft: data.pricing?.PricePerSqft ?? undefined,
+      };
+      features = [
+        {
+          icon: 'layout',
+          label: data.about ? `${data.about.bedrooms || 0} BHK & ${data.about.bathrooms || 0} Baths` : 'N/A',
+        },
+        {
+          icon: 'square',
+          label: data.propertyArea?.carpetArea ? `${data.propertyArea.carpetArea} sq.ft.` : 'N/A',
+        },
+        {
+          icon: 'layers',
+          label: data.propertyOnFloor ? `${data.propertyOnFloor} / ${data.totalFloors || 'N/A'} floors` : 'N/A',
+        },
+        {
+          icon: 'tag',
+          label: pricing.PricePerSqft ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / sq.ft.` : 'N/A',
+        },
+        {
+          icon: 'home',
+          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+        },
+      ];
+      propertyDetails = [
+        { label: 'Bedrooms', value: data.about?.bedrooms || 'N/A' },
+        { label: 'Bathrooms', value: data.about?.bathrooms || 'N/A' },
+        { label: 'Balconies', value: data.about?.balconies || 'N/A' },
+        { label: 'Total no. of Floor', value: data.totalFloors || 'N/A' },
+        { label: 'Property on Floor', value: data.propertyOnFloor || 'N/A' },
+        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        {
+          label: 'Available From',
+          value: data.availableFrom ? new Date(data.availableFrom).toLocaleDateString() : 'N/A',
+        },
+        { label: 'Age of Property', value: data.ageOfProperty ? `${data.ageOfProperty} years` : 'N/A' },
+        { label: 'Furnishing Status', value: data.furnishingStatus || 'N/A' },
+        { label: 'Facing', value: data.facing || 'N/A' },
+        { label: 'Power backup', value: data.powerBackup || 'N/A' },
+        { label: 'Wheelchair Friendly', value: data.otherFeatures?.wheelchairFriendly ? 'Yes' : 'No' },
+        { label: 'Water Source', value: data.waterSource || 'N/A' },
+        { label: 'Width of facing road', value: data.roadWidth || 'N/A' },
+        { label: 'Type of flooring', value: data.flooring || 'N/A' },
+        { label: 'Property ID', value: data._id },
+      ];
+      areaDetails = [
+        {
+          label: 'Carpet Area',
+          value: data.propertyArea?.carpetArea ? `${data.propertyArea.carpetArea} Sq.ft.` : 'N/A',
+          subValue: data.propertyArea?.carpetArea
+            ? `${(data.propertyArea.carpetArea * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+        {
+          label: 'Built-up Area',
+          value: data.propertyArea?.carpetArea
+            ? `${(data.propertyArea.carpetArea * 1.1).toFixed(0)} Sq.ft.` : 'N/A',
+          subValue: data.propertyArea?.carpetArea
+            ? `${(data.propertyArea.carpetArea * 1.1 * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+        {
+          label: 'Super Built-up Area',
+          value: data.propertyArea?.carpetArea
+            ? `${(data.propertyArea.carpetArea * 1.2).toFixed(0)} Sq.ft.` : 'N/A',
+          subValue: data.propertyArea?.carpetArea
+            ? `${(data.propertyArea.carpetArea * 1.2 * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+      ];
+      break;
+
+    case 'Hotel':
+      pricing = {
+        expectedPrice: data.pricing?.basePricePerNight ?? data.pricing?.finalPrice ?? undefined,
+      };
+      features = [
+        {
+          icon: 'layout',
+          label: data.propertyDetails?.totalRooms ? `${data.propertyDetails.totalRooms} Rooms` : 'N/A',
+        },
+        {
+          icon: 'star',
+          label: data.propertyDetails?.starRating ? `${data.propertyDetails.starRating} Star` : 'N/A',
+        },
+        {
+          icon: 'home',
+          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+        },
+      ];
+      propertyDetails = [
+        { label: 'Property Name', value: data.propertyDetails?.propertyName || 'N/A' },
+        { label: 'Total Rooms', value: data.propertyDetails?.totalRooms || 'N/A' },
+        { label: 'Star Rating', value: data.propertyDetails?.starRating || 'N/A' },
+        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        { label: 'Property ID', value: data._id },
+      ];
+      areaDetails = [
+        {
+          label: 'Total Area',
+          value: data.propertyDetails?.totalArea?.size ? `${data.propertyDetails.totalArea.size} Sq.ft.` : 'N/A',
+          subValue: data.propertyDetails?.totalArea?.size
+            ? `${(data.propertyDetails.totalArea.size * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+      ];
+      break;
+
+    case 'Office':
+    case 'Shop':
+    case 'Warehouse':
+    case 'EventSpace':
+    case 'PG':
+      pricing = {
+        expectedPrice:
+          data.pricing?.price?.amount ||
+          data.pricing?.rentalDetails?.monthlyRent ||
+          data.pricing?.monthlyRent ||
+          null,
+      };
+      features = [
+        {
+          icon: 'layout',
+          label: data.propertyDetails?.propertyName || data.subCategory || category,
+        },
+        {
+          icon: 'square',
+          label: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+            ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} sq.ft.` : 'N/A',
+        },
+        {
+          icon: 'layers',
+          label: data.propertyDetails?.floorDetails
+            ? `${data.propertyDetails.floorDetails.officeOnFloor || 'N/A'} / ${data.propertyDetails.floorDetails.totalFloors || 'N/A'} floors`
+            : 'N/A',
+        },
+      ];
+      propertyDetails = [
+        { label: 'Type', value: data.propertyDetails?.officeType || data.subCategory || category },
+        { label: 'Total Floors', value: data.propertyDetails?.floorDetails?.totalFloors || 'N/A' },
+        { label: 'Property on Floor', value: data.propertyDetails?.floorDetails?.officeOnFloor || 'N/A' },
+        { label: 'Furnished Status', value: data.propertyDetails?.furnishedStatus || data.furnishingStatus || 'N/A' },
+        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        { label: 'Property ID', value: data._id },
+      ];
+      areaDetails = [
+        {
+          label: 'Carpet Area',
+          value: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+            ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
+          subValue: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+            ? `${((data.propertyDetails?.carpetArea?.size || data.carpetArea?.size) * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+      ];
+      break;
+
+    default:
+      pricing = {
+        expectedPrice: Array.isArray(data.pricing) ? data.pricing[0] : data.pricing?.expectedPrice || null,
+      };
+      features = [
+        {
+          icon: 'home',
+          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+        },
+      ];
+      propertyDetails = [
+        { label: 'Category', value: category },
+        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        { label: 'Property ID', value: data._id },
+      ];
+      areaDetails = [
+        {
+          label: 'Total Area',
+          value: data.carpetArea?.size ? `${data.carpetArea.size} Sq.ft.` : 'N/A',
+          subValue: data.carpetArea?.size
+            ? `${(data.carpetArea.size * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+        },
+      ];
+  }
+
+  const calculateRatingDistribution = (reviews: Array<{ stars?: number }>) => {
+    const total = reviews.length;
+    if (total === 0) return { excellent: 0, good: 0, average: 0, belowAverage: 0, poor: 0 };
+
+    const getCount = (min: number, max: number) =>
+      reviews.filter((r) => (r.stars ?? 0) >= min && (r.stars ?? 0) < max).length;
+
+    return {
+      excellent: Math.round((getCount(4.5, Infinity) / total) * 100),
+      good: Math.round((getCount(3.5, 4.5) / total) * 100),
+      average: Math.round((getCount(2.5, 3.5) / total) * 100),
+      belowAverage: Math.round((getCount(1.5, 2.5) / total) * 100),
+      poor: Math.round((getCount(0, 1.5) / total) * 100),
+    };
   };
 
-  const features = [
-    {
-      icon: 'layout',
-      label: data.bedrooms ? `${data.bedrooms} BHK & ${data.bathrooms || 0} Baths` : 'N/A',
-    },
-    {
-      icon: 'square',
-      label: data.area ? `${data.area} ${data.areaUnit}` : 'N/A',
-    },
-    {
-      icon: 'tag',
-      label: pricing.PricePerSqft ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / ${data.areaUnit}` : 'N/A',
-    },
-    {
-      icon: 'home',
-      label: 'New Property', // Age not provided in mock data
-    },
-  ];
+  const propertyType: PropertyCategory = (() => {
+    switch (category) {
+      case 'Residential':
+        return 'Residential';
+      case 'Hotel':
+        return 'Hotel';
+      case 'Office':
+        return 'Office';
+      case 'Shop':
+        return 'Shop';
+      case 'Warehouse':
+        return 'Warehouse';
+      case 'EventSpace':
+        return 'EventSpace';
+      case 'PG':
+        return 'Pg';
+      default:
+        return 'Residential';
+    }
+  })();
 
-  const propertyDetails = [
-    { label: 'Bedrooms', value: data.bedrooms || 'N/A' },
-    { label: 'Bathrooms', value: data.bathrooms || 'N/A' },
-    { label: 'Area', value: data.area ? `${data.area} ${data.areaUnit}` : 'N/A' },
-    { label: 'Availability Status', value: data.listingType || 'N/A' },
-    { label: 'Property ID', value: data.id },
-  ];
-
-  const areaDetails = [
-    {
-      label: 'Total Area',
-      value: data.area ? `${data.area} ${data.areaUnit}` : 'N/A',
-      subValue: data.area && data.areaUnit === 'sqft' ? `${(data.area * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
-    },
-  ];
+  const owner: PropertyOwner = {
+    name: data.user?.name || 'Unknown Owner',
+    image: '/placeholder.svg?height=80&width=80',
+    rating: data.reviews?.length
+      ? Number((data.reviews.reduce((sum, r) => sum + (r.stars ?? 0), 0) / data.reviews.length).toFixed(1))
+      : 0,
+    reviews: data.reviews?.length || 0,
+    phone: data.user?.mobile || '+91 00000 00000',
+    WhatsApp: data.user?.whatsappMobile || '+91 00000 00000',
+  };
 
   return {
-    id: data.id,
-    title: data.title,
-    type: category as PropertyCategory,
-    location: `${data.location.address}, ${data.location.city}, ${data.location.state}, ${data.location.country}`,
-    price: data.price
-      ? `₹${data.price.toLocaleString('en-IN')}${data.priceUnit === 'perMonth' ? '/mo' : ''}`
+    id: data._id,
+    type: propertyType,
+    title: `${category} in ${data.location?.locality || 'Unknown'}`,
+    location: [
+      data.location?.houseNumber,
+      data.location?.apartment,
+      data.location?.subLocality,
+      data.location?.locality,
+      data.location?.city,
+      data.location?.state,
+    ]
+      .filter(Boolean)
+      .join(', '),
+    price: data.pricing?.expectedPrice
+      ? `₹${data.pricing.expectedPrice.toLocaleString('en-IN')}`
+      : data.pricing?.price?.amount
+      ? `₹${data.pricing.price.amount.toLocaleString('en-IN')}`
+      : data.pricing?.monthlyRent
+      ? `₹${data.pricing.monthlyRent.toLocaleString('en-IN')}/mo`
       : 'Price N/A',
-    pricePerSqft: pricing.PricePerSqft ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / ${data.areaUnit}` : 'N/A',
+    pricePerSqft: data.pricing?.PricePerSqft ? `₹${data.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft` : 'N/A',
     isNegotiable: true,
-    tags: [category, data.listingType, 'Unfurnished'].filter(Boolean),
+    tags: [category, data.availabilityStatus || 'N/A', data.furnishingStatus || 'Unfurnished'].filter(Boolean),
     features,
-    owner: {
-      name: data.owner?.name || 'Unknown Owner',
-      image: data.owner?.image || 'https://via.placeholder.com/80',
-      rating: data.owner?.rating || 0,
-      reviews: data.owner?.reviews || 0,
-      phone: data.owner?.phone || '+91 00000 00000',
-      WhatsApp: data.owner?.phone || '+91 00000 00000',
-    },
+    owner,
     description: data.description || 'No description available.',
-    images: data.images.map((img: string, index: number) => ({
-      src: img,
-      alt: `Image ${index + 1}`,
-      label: `Image ${index + 1}`,
-    })),
+    images: data.images?.map((img, index) => ({
+      src: img.url || '/placeholder.svg?height=400&width=600',
+      alt: img.name || `Image ${index + 1}`,
+      label: img.name || `Image ${index + 1}`,
+    })) || [],
     amenities,
+    otherFeatures,
+    societyFeatures,
     furnishing,
-    societyFeatures: [], // Not provided in mock data
-    otherFeatures: [], // Not provided in mock data
     propertyDetails,
     areaDetails,
     parking: [
-      { label: 'Covered Parking', value: data.parking?.covered || '0' },
-      { label: 'Open Parking', value: data.parking?.open || '0' },
+      { label: 'Covered Parking', value: String(data.parking?.covered ?? 0) },
+      { label: 'Open Parking', value: String(data.parking?.open ?? 0) },
     ],
     nearbyPlaces,
-    ratingDistribution: {
-      excellent: 0,
-      good: 0,
-      average: 0,
-      belowAverage: 0,
-      poor: 0,
-    },
+    ratingDistribution: calculateRatingDistribution(data.reviews || []),
   };
 };
 
@@ -254,7 +704,7 @@ interface TabButtonProps {
 }
 
 const TabButton: React.FC<TabButtonProps> = ({ title, isActive, onPress }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   return (
@@ -283,7 +733,7 @@ interface FeatureIconProps {
 }
 
 const FeatureIcon: React.FC<FeatureIconProps> = ({ type }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   switch (type) {
@@ -306,14 +756,14 @@ interface ImageModalProps {
 }
 
 const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   if (!image) return null;
 
   return (
     <Modal visible={true} animationType="fade" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.backgroundOverlay }]}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
         <TouchableOpacity
           style={[styles.modalCloseButton, { backgroundColor: colors.cardBackground }]}
           onPress={onClose}
@@ -338,14 +788,14 @@ interface ShareModalProps {
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({ visible, onClose, onShare }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   if (!visible) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.backgroundOverlay }]}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
         <View style={[styles.shareModalContent, { backgroundColor: colors.cardBackground }]}>
           <View style={styles.shareModalHeader}>
             <Text style={[styles.shareModalTitle, { color: colors.text }]}>Share Property</Text>
@@ -354,25 +804,25 @@ const ShareModal: React.FC<ShareModalProps> = ({ visible, onClose, onShare }) =>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.successLight }]}
+            style={[styles.shareButton, { backgroundColor: colors.successColor + '20' }]}
             onPress={() => onShare('whatsapp')}
             activeOpacity={0.7}
           >
             <Text style={[styles.shareButtonText, { color: colors.successColor }]}>WhatsApp</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.primaryLight }]}
+            style={[styles.shareButton, { backgroundColor: colors.primaryColor + '20' }]}
             onPress={() => onShare('facebook')}
             activeOpacity={0.7}
           >
             <Text style={[styles.shareButtonText, { color: colors.primaryColor }]}>Facebook</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.infoLight }]}
+            style={[styles.shareButton, { backgroundColor: colors.accentColor + '20' }]}
             onPress={() => onShare('twitter')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.shareButtonText, { color: colors.infoColor }]}>Twitter</Text>
+            <Text style={[styles.shareButtonText, { color: colors.accentColor }]}>Twitter</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -399,14 +849,14 @@ const NotifyModal: React.FC<NotifyModalProps> = ({
   setNotificationText,
   onSubmit,
 }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   if (!visible) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.backgroundOverlay }]}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
         <View style={[styles.notifyModalContent, { backgroundColor: colors.cardBackground }]}>
           <View style={styles.notifyModalHeader}>
             <Text style={[styles.notifyModalTitle, { color: colors.text }]}>Notify Owner</Text>
@@ -415,14 +865,14 @@ const NotifyModal: React.FC<NotifyModalProps> = ({
             </TouchableOpacity>
           </View>
           <TextInput
-            style={[styles.input, { borderColor: colors.border, color: colors.text }]}
+            style={[styles.input, { borderColor: colors.divider, color: colors.text }]}
             placeholder="Notification Title"
             value={notificationTitle}
             onChangeText={setNotificationTitle}
             placeholderTextColor={colors.grayDark}
           />
           <TextInput
-            style={[styles.input, { borderColor: colors.border, color: colors.text, height: 100 }]}
+            style={[styles.input, { borderColor: colors.divider, color: colors.text, height: 100 }]}
             placeholder="Notification Message"
             value={notificationText}
             onChangeText={setNotificationText}
@@ -431,7 +881,7 @@ const NotifyModal: React.FC<NotifyModalProps> = ({
           />
           <View style={styles.notifyButtonContainer}>
             <TouchableOpacity
-              style={[styles.notifyButton, { borderColor: colors.border }]}
+              style={[styles.notifyButton, { borderColor: colors.divider }]}
               onPress={() => {
                 setNotificationTitle('');
                 setNotificationText('');
@@ -468,14 +918,14 @@ interface OwnerModalProps {
 }
 
 const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNotify }) => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   if (!visible) return null;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.backgroundOverlay }]}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
         <View style={[styles.ownerModalContent, { backgroundColor: colors.cardBackground }]}>
           <View style={styles.ownerModalHeader}>
             <Text style={[styles.ownerModalTitle, { color: colors.text }]}>Property Owner</Text>
@@ -484,7 +934,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
             </TouchableOpacity>
           </View>
           <View style={styles.ownerModalBody}>
-            <View style={[styles.avatar, { backgroundColor: colors.primaryLight }]}>
+            <View style={[styles.avatar, { backgroundColor: colors.primaryColor + '20' }]}>
               <Text style={[styles.avatarText, { color: colors.text }]}>
                 {owner.name.slice(0, 2).toUpperCase()}
               </Text>
@@ -521,7 +971,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
                 <Text style={styles.ownerActionButtonText}>Call Owner</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.ownerActionButton, { borderColor: colors.border }]}
+                style={[styles.ownerActionButton, { borderColor: colors.divider }]}
                 onPress={onNotify}
                 activeOpacity={0.7}
               >
@@ -538,7 +988,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
 };
 
 export default function PropertyDetailScreen() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -745,9 +1195,9 @@ export default function PropertyDetailScreen() {
               {property.nearbyPlaces.map((place, index) => (
                 <View
                   key={index}
-                  style={[styles.tag, { backgroundColor: colors.primaryLight }]}
+                  style={[styles.tag, { backgroundColor: colors.primaryColor + '20' }]}
                 >
-                  <MapPin size= {14} color={colors.primaryColor} />
+                  <MapPin size={14} color={colors.primaryColor} />
                   <Text style={[styles.tagText, { color: colors.primaryColor }]}>
                     {place.label}
                   </Text>
@@ -772,7 +1222,7 @@ export default function PropertyDetailScreen() {
               {property.areaDetails.map((area, index) => (
                 <View
                   key={index}
-                  style={[styles.areaItem, { backgroundColor: colors.primaryLight }]}
+                  style={[styles.areaItem, { backgroundColor: colors.primaryColor + '20' }]}
                 >
                   <Text style={[styles.areaLabel, { color: colors.grayDark }]}>
                     {area.label}
@@ -811,7 +1261,7 @@ export default function PropertyDetailScreen() {
               {property.amenities.map((amenity, index) => (
                 <View
                   key={index}
-                  style={[styles.gridItem, { backgroundColor: colors.primaryLight }]}
+                  style={[styles.gridItem, { backgroundColor: colors.primaryColor + '20' }]}
                 >
                   <MapPin size={20} color={colors.primaryColor} />
                   <Text style={[styles.gridItemText, { color: colors.text }]}>
@@ -835,7 +1285,7 @@ export default function PropertyDetailScreen() {
                 property.furnishing.map((item, index) => (
                   <View
                     key={index}
-                    style={[styles.gridItem, { backgroundColor: colors.primaryLight }]}
+                    style={[styles.gridItem, { backgroundColor: colors.primaryColor + '20' }]}
                   >
                     <MapPin size={20} color={colors.warningColor} />
                     <Text style={[styles.gridItemText, { color: colors.text }]}>
@@ -863,7 +1313,7 @@ export default function PropertyDetailScreen() {
                     style={styles.galleryImage}
                     resizeMode="cover"
                   />
-                  <View style={[styles.galleryLabelContainer, { backgroundColor: colors.backgroundOverlay }]}>
+                  <View style={[styles.galleryLabelContainer, { backgroundColor: colors.overlay }]}>
                     <Text style={[styles.galleryLabel, { color: colors.text }]}>
                       {item.label}
                     </Text>
@@ -908,7 +1358,7 @@ export default function PropertyDetailScreen() {
                 ))}
               </View>
               <TextInput
-                style={[styles.reviewInput, { borderColor: colors.border, color: colors.text }]}
+                style={[styles.reviewInput, { borderColor: colors.divider, color: colors.text }]}
                 placeholder="Share your experience with this property..."
                 value={reviewText}
                 onChangeText={setReviewText}
@@ -943,7 +1393,7 @@ export default function PropertyDetailScreen() {
                 renderItem={({ item }) => (
                   <View style={[styles.reviewItem, { backgroundColor: colors.cardBackground }]}>
                     <View style={styles.reviewHeader}>
-                      <View style={[styles.avatar, { backgroundColor: colors.primaryLight }]}>
+                      <View style={[styles.avatar, { backgroundColor: colors.primaryColor + '20' }]}>
                         <Text style={[styles.avatarText, { color: colors.text }]}>
                           {(item.user?.name || 'Anonymous').slice(0, 2).toUpperCase()}
                         </Text>
@@ -959,7 +1409,7 @@ export default function PropertyDetailScreen() {
                           </Text>
                         </View>
                       </View>
-                      <Text style={[styles.reviewDate, { backgroundColor: colors.primaryLight, color: colors.grayDark }]}>
+                      <Text style={[styles.reviewDate, { backgroundColor: colors.primaryColor + '20', color: colors.grayDark }]}>
                         {new Date(item.createdAt).toLocaleDateString()}
                       </Text>
                     </View>
@@ -1121,7 +1571,7 @@ export default function PropertyDetailScreen() {
                 {property.pricePerSqft}
               </Text>
               {property.isNegotiable && (
-                <View style={[styles.negotiableTag, { backgroundColor: colors.successLight }]}>
+                <View style={[styles.negotiableTag, { backgroundColor: colors.successColor + '20' }]}>
                   <Text style={[styles.negotiableText, { color: colors.successColor }]}>
                     Negotiable
                   </Text>
@@ -1132,7 +1582,7 @@ export default function PropertyDetailScreen() {
               {property.tags.map((tag, index) => (
                 <View
                   key={index}
-                  style={[styles.tag, { backgroundColor: colors.primaryLight }]}
+                  style={[styles.tag, { backgroundColor: colors.primaryColor + '20' }]}
                 >
                   <Text style={[styles.tagText, { color: colors.primaryColor }]}>{tag}</Text>
                 </View>

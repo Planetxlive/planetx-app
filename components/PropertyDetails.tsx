@@ -136,7 +136,7 @@ interface PropertyDetailsProps {
 }
 
 export default function PropertyDetails({ formData, setFormData }: PropertyDetailsProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const schema = formData.propertyCategory === 'Residential' ? residentialSchema : pgSchema;
 

@@ -32,7 +32,7 @@ const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 83 : 60; // Approximate tab bar h
 const CONTENT_HEIGHT = SCREEN_HEIGHT - TAB_BAR_HEIGHT;
 
 export default function HighlightScreen() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { properties } = useProperties();

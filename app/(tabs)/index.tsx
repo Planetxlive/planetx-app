@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -15,30 +15,65 @@ import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { Search, Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { properties } = useProperties();
-  const [location, setLocation] = useState('Karol Bagh, Delhi');
+  const [location, setLocation] = useState('Noida');
   const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
+  const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>('All');
   const insets = useSafeAreaInsets();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/get-user/`;
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        const city = await res.data.user.city;
+        await setLocation(city);
+        console.log(location);
+        
+
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+  
 
   const listingTypes = ['Buy', 'Rent', 'Paying Guest', 'Rent Hourly'];
   const propertyTypes = [
-    'House/Villa',
-    'Flat/Apartment',
-    'Plot/Land',
-    'Commercial',
-    'Warehouse',
+        "Residential",
+        "Pg",
+        "Hotel",
+        "Office",
+        "Shop",
+        "Warehouse",
+        "Shared Warehouse",
+        "EventSpace",
   ];
 
   const featuredProperties = properties.slice(0, 2);
   const residentialProperties = properties.filter((p: Property) => 
     p.category === "Residential"
-  ).slice(0, 2);
-  const nearbyProperties = properties.slice(0, 2);
+  ).slice(0, 3);
+  const nearbyProperties = properties.filter((p: Property) => 
+    p.location.city === location
+  ).slice(0, 3);  
+  
 
   const handleSearch = () => {
     router.push('/search');
@@ -46,6 +81,10 @@ export default function HomeScreen() {
 
   const handleNotifications = () => {
     router.push('/notifications');
+  };
+
+  const handleViewAllProperties = () => {
+    router.push('/all-properties');
   };
 
   const renderPropertySection = ({ 
@@ -66,20 +105,28 @@ export default function HomeScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={data}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={280 + 8} // Card width + marginRight
-        decelerationRate="fast"
-        renderItem={({ item }) => (
-          <View style={styles.horizontalCard}>
-            <PropertyCard property={item} horizontal />
-          </View>
-        )}
-        keyExtractor={item => item._id.toString()}
-        contentContainerStyle={styles.horizontalList}
-      />
+      {data.length > 0 ? (
+        <FlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={280 + 8} // Card width + marginRight
+          decelerationRate="fast"
+          renderItem={({ item }) => (
+            <View style={styles.horizontalCard}>
+              <PropertyCard property={item} horizontal />
+            </View>
+          )}
+          keyExtractor={item => item._id.toString()}
+          contentContainerStyle={styles.horizontalList}
+        />
+      ) : (
+        <View style={styles.noPropertiesContainer}>
+          <Text style={[styles.noPropertiesText, { color: colors.text }]}>
+            No properties found
+          </Text>
+        </View>
+      )}
     </View>
   );
 
@@ -93,7 +140,13 @@ export default function HomeScreen() {
             onLocationChange={setLocation}
           />
         </View>
-        <View style={styles.headerIcons}>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+            onPress={handleViewAllProperties}
+          >
+            <Text style={[styles.iconButtonText, { color: colors.text }]}>All</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
             onPress={handleSearch}
@@ -113,47 +166,47 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
       >
-        <View style={styles.banner}>
-          <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>Find your</Text>
-            <Text style={styles.bannerTitle}>Project</Text>
-            <Text style={styles.bannerTitle}>with PLANET X</Text>
-          </View>
-        </View>
+            <View style={styles.banner}>
+              <View style={styles.bannerContent}>
+                <Text style={styles.bannerTitle}>Find your</Text>
+                <Text style={styles.bannerTitle}>Project</Text>
+                <Text style={styles.bannerTitle}>with PLANET X</Text>
+              </View>
+            </View>
 
-        <View style={styles.listingTypesContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.listingTypesContent}
-          >
-            {listingTypes.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.listingTypeButton,
-                  selectedListingType === type
-                    ? { backgroundColor: colors.grayLight }
-                    : { backgroundColor: 'transparent', borderColor: colors.grayLight, borderWidth: 1 },
-                ]}
-                onPress={() => 
-                  setSelectedListingType(
-                    selectedListingType === type ? null : type
-                  )
-                }
+            {/* <View style={styles.listingTypesContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.listingTypesContent}
               >
-                <Text
-                  style={[
-                    styles.listingTypeText,
-                    { color: colors.text },
-                  ]}
-                >
-                  {type}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                {listingTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.listingTypeButton,
+                      selectedListingType === type
+                        ? { backgroundColor: colors.grayLight }
+                        : { backgroundColor: 'transparent', borderColor: colors.grayLight, borderWidth: 1 },
+                    ]}
+                    onPress={() => 
+                      setSelectedListingType(
+                        selectedListingType === type ? null : type
+                      )
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.listingTypeText,
+                        { color: colors.text },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View> */}
 
         {/* {renderPropertySection({
           title: 'Featured Properties',
@@ -161,17 +214,82 @@ export default function HomeScreen() {
           onViewAll: () => router.push('/featured'),
         })} */}
 
-        {renderPropertySection({
-          title: 'Residential Properties',
-          data: residentialProperties,
-          onViewAll: () => router.push('/residential'),
-        })}
+            {/* Recommended Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Recommended</Text>
+                <TouchableOpacity onPress={handleViewAllProperties}>
+                  <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
+                    View all
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.listingTypesContent} // Reuse existing style
+              >
+                {['All', ...propertyTypes].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.listingTypeButton, // Reuse existing style
+                      selectedPropertyType === type
+                        ? { backgroundColor: colors.grayLight }
+                        : { backgroundColor: 'transparent', borderColor: colors.grayLight, borderWidth: 1 },
+                    ]}
+                    onPress={() => setSelectedPropertyType(type)}
+                  >
+                    <Text
+                      style={[
+                        styles.listingTypeText, // Reuse existing style
+                        { color: colors.text },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              {properties.filter((p: Property) => 
+                 selectedPropertyType === 'All' || p.category === selectedPropertyType
+              ).slice(0, 3).length > 0 ? (
+                <FlatList
+                  data={properties.filter((p: Property) => 
+                    selectedPropertyType === 'All' || p.category === selectedPropertyType
+                  ).slice(0, 3)}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={280 + 8} // Card width + marginRight
+                  decelerationRate="fast"
+                  renderItem={({ item }) => (
+                    <View style={styles.horizontalCard}> // Reuse existing style
+                      <PropertyCard property={item} horizontal />
+                    </View>
+                  )}
+                  keyExtractor={item => item._id.toString()}
+                  contentContainerStyle={styles.horizontalList} // Reuse existing style
+                />
+              ) : (
+                <View style={styles.noPropertiesContainer}>
+                  <Text style={[styles.noPropertiesText, { color: colors.text }]}>
+                    No {selectedPropertyType} Properties found
+                  </Text>
+                </View>
+              )}
+            </View>
 
-        {renderPropertySection({
-          title: 'Nearby Properties',
-          data: nearbyProperties,
-          onViewAll: () => router.push('/nearby'),
-        })}
+            {renderPropertySection({
+              title: 'Residential Properties',
+              data: residentialProperties,
+              onViewAll: () => router.push('/residential'),
+            })}
+
+            {renderPropertySection({
+              title: 'Nearby Properties',
+              data: nearbyProperties,
+              onViewAll: () => router.push('/nearby'),
+            })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -185,28 +303,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   locationContainer: {
     flex: 1,
+    marginRight: 12,
   },
   locationLabel: {
     fontSize: 12,
     marginBottom: 4,
     fontFamily: 'Inter-Regular',
   },
-  headerIcons: {
+  headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 6,
+  },
+  iconButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
   },
   scrollContent: {
     paddingBottom: 48,
@@ -270,5 +393,14 @@ const styles = StyleSheet.create({
   horizontalCard: {
     width: 300,
     marginRight: 12,
+  },
+  noPropertiesContainer: {
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noPropertiesText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
   },
 });

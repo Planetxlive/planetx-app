@@ -14,18 +14,67 @@ import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Search, SlidersHorizontal } from 'lucide-react-native';
+import FilterModal, { FilterOptions } from '@/components/FilterModal';
 
 export default function AllPropertiesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { properties } = useProperties();
+  const { properties, getPropertiesByCategory, getPropertiesByPostingType, getPropertiesByPriceRange } = useProperties();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<FilterOptions>({
+    minPrice: '',
+    maxPrice: '',
+    categories: [],
+    propertyTypes: [],
+  });
 
-  const filteredProperties = properties.filter((property) =>
-    property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.location.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.location.city.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const applyFilters = (filters: FilterOptions) => {
+    setActiveFilters(filters);
+  };
+
+  const getFilteredProperties = () => {
+    let filtered = [...properties];
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (property) =>
+          property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          property.location.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          property.location.city.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply category filter
+    if (activeFilters.categories.length > 0) {
+      filtered = filtered.filter(property => 
+        activeFilters.categories.includes(property.category)
+      );
+    }
+
+    // Apply property type filter
+    if (activeFilters.propertyTypes.length > 0) {
+      filtered = filtered.filter(property => 
+        activeFilters.propertyTypes.includes(property.propertyType as 'For Sale' | 'For Rent')
+      );
+    }
+
+    // Apply price range filter
+    if (activeFilters.minPrice || activeFilters.maxPrice) {
+      const minPrice = activeFilters.minPrice ? parseInt(activeFilters.minPrice) : 0;
+      const maxPrice = activeFilters.maxPrice ? parseInt(activeFilters.maxPrice) : Number.MAX_SAFE_INTEGER;
+      filtered = filtered.filter(
+        property => 
+          property.pricing.expectedPrice >= minPrice && 
+          property.pricing.expectedPrice <= maxPrice
+      );
+    }
+
+    return filtered;
+  };
+
+  const filteredProperties = getFilteredProperties();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -50,6 +99,7 @@ export default function AllPropertiesScreen() {
         </View>
         <TouchableOpacity
           style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
+          onPress={() => setShowFilters(true)}
         >
           <SlidersHorizontal size={20} color={colors.text} />
         </TouchableOpacity>
@@ -67,6 +117,12 @@ export default function AllPropertiesScreen() {
             </Text>
           </View>
         }
+      />
+
+      <FilterModal
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+        onApply={applyFilters}
       />
     </SafeAreaView>
   );

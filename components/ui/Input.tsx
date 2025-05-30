@@ -48,7 +48,7 @@ export default function Input({
   rightIcon,
   editable = true,
 }: InputProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const [showPassword, setShowPassword] = useState(false);
 

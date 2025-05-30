@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, Appearance, SafeAreaView, Touchable
 import { useColorScheme } from 'react-native';
 
 const ShareApp = () => {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const isDarkMode = colorScheme === 'dark';
 
   const dynamicStyles = StyleSheet.create({

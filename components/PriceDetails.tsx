@@ -34,7 +34,7 @@ interface PriceDetailsProps {
 }
 
 export default function PriceDetails({ formData, setFormData }: PriceDetailsProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const isResidential = formData.propertyCategory === 'Residential';
 

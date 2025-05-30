@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,118 +7,140 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
+  Platform,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { Heart, ArrowLeft } from 'lucide-react-native';
+import { Heart, ArrowLeft, Bell } from 'lucide-react-native';
+import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
 type Notification = {
-  id: string;
-  type: 'new_listing' | 'saved_property' | 'property_added' | 'review';
-  title: string;
-  message: string;
-  time: string;
-  user?: {
+  _id: string;
+  heading: string;
+  text: string;
+  date: string;
+  userId?: {
     name: string;
-    image: string;
+    image?: string;
   };
-  isLiked?: boolean;
+  unread?: boolean;
 };
-
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'new_listing',
-    title: 'New Listing Alert!',
-    message: 'has added a Flat/Apartment in your area.',
-    time: '2min ago',
-    user: {
-      name: 'John',
-      image: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-    },
-    isLiked: true,
-  },
-  {
-    id: '2',
-    type: 'saved_property',
-    title: 'Saved Property Update!',
-    message: 'saved 3HK Villa',
-    time: '46min ago',
-    user: {
-      name: 'Oscar',
-      image: 'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg',
-    },
-  },
-  {
-    id: '3',
-    type: 'property_added',
-    title: 'Property Added Successfully!',
-    message: 'Your property has been listed successfully and is now live on our platform.',
-    time: '2h ago',
-  },
-  {
-    id: '4',
-    type: 'review',
-    title: 'Review Update!',
-    message: 'has added a review on your Retail Property.',
-    time: '20d ago',
-    user: {
-      name: 'John',
-      image: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-    },
-    isLiked: true,
-  },
-];
 
 export default function NotificationsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const router = useRouter();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const scrollY = new Animated.Value(0);
 
-  const renderNotification = ({ item }: { item: Notification }) => (
-    <View style={[styles.notificationItem, { backgroundColor: colors.cardBackground }]}>
-      {item.user ? (
-        <Image source={{ uri: item.user.image }} style={styles.userImage} />
-      ) : (
-        <View style={[styles.iconContainer, { backgroundColor: colors.primaryColor + '20' }]}>
-          <Text style={[styles.checkmark, { color: colors.primaryColor }]}>✓</Text>
-        </View>
-      )}
+  useEffect(() => {
+    fetchNotifications();
+
+    // Set up interval to refresh notifications every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('accessToken');
       
-      <View style={styles.notificationContent}>
-        <View style={styles.notificationHeader}>
-          <Text style={[styles.notificationTitle, { color: colors.text }]}>
-            {item.title}
-          </Text>
-          <Text style={[styles.timeText, { color: colors.grayDark }]}>
-            {item.time}
-          </Text>
-        </View>
-        
-        <Text style={[styles.notificationMessage, { color: colors.grayDark }]}>
-          {item.user && (
-            <Text style={[styles.userName, { color: colors.primaryColor }]}>
-              {item.user.name}{' '}
-            </Text>
-          )}
-          {item.message}
-        </Text>
-      </View>
+      if (!token) {
+        router.replace('/auth/login');
+        return;
+      }
 
-      <TouchableOpacity style={styles.likeButton}>
-        <Heart
-          size={20}
-          color={item.isLiked ? colors.accentColor : colors.grayMedium}
-          fill={item.isLiked ? colors.accentColor : 'transparent'}
-        />
-      </TouchableOpacity>
-    </View>
-  );
+      const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+        headers: { Authorization: token },
+      });
+      
+      const userId = userResponse.data.user._id;
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_URL}/properties/notification/${userId}`,
+        { headers: { Authorization: token } }
+      );
+
+
+      setNotifications(response.data || []);
+    } catch (error: any) {
+      if (error.response?.data?.message === "No notifications found for this user.") {
+        return;
+      }
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderNotification = ({ item, index }: { item: Notification; index: number }) => {
+    const translateY = scrollY.interpolate({
+      inputRange: [-1, 0, 100 * index, 100 * (index + 2)],
+      outputRange: [0, 0, 0, -10],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          styles.notificationItem,
+          {
+            transform: [{ translateY }],
+          },
+        ]}
+      >
+        <LinearGradient
+          colors={[colors.cardBackground, colors.cardBackground + '80']}
+          style={styles.gradientBackground}
+        >
+          <View style={styles.notificationContent}>
+            <View style={styles.notificationHeader}>
+              {item.userId?.image ? (
+                <Image source={{ uri: item.userId.image }} style={styles.userImage} />
+              ) : (
+                <View style={[styles.iconContainer, { backgroundColor: colors.primaryColor + '20' }]}>
+                  <Bell size={20} color={colors.primaryColor} />
+                </View>
+              )}
+              <View style={styles.titleContainer}>
+                <Text style={[styles.notificationTitle, { color: colors.text }]}>
+                  {item.heading}
+                </Text>
+                <Text style={[styles.timeText, { color: colors.grayDark }]}>
+                  {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
+                </Text>
+              </View>
+            </View>
+            
+            <Text style={[styles.notificationMessage, { color: colors.grayDark }]}>
+              {item.userId && (
+                <Text style={[styles.userName, { color: colors.primaryColor }]}>
+                  {item.userId.name}{' '}
+                </Text>
+              )}
+              {item.text}
+            </Text>
+          </View>
+        </LinearGradient>
+      </Animated.View>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+      <BlurView intensity={80} style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -128,20 +150,44 @@ export default function NotificationsScreen() {
         <Text style={[styles.headerTitle, { color: colors.text }]}>
           Notifications
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity style={styles.readAllButton}>
           <Text style={[styles.readAllText, { color: colors.primaryColor }]}>
             Read all
           </Text>
         </TouchableOpacity>
-      </View>
+      </BlurView>
 
-      <FlatList
-        data={MOCK_NOTIFICATIONS}
-        renderItem={renderNotification}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primaryColor} />
+        </View>
+      ) : (
+        <Animated.FlatList
+          data={notifications}
+          renderItem={renderNotification}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { 
+              useNativeDriver: true,
+              listener: (event) => {
+                // Optional: Add any additional scroll handling here
+              }
+            }
+          )}
+          scrollEventThrottle={16}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Bell size={48} color={colors.grayDark} style={styles.emptyIcon} />
+              <Text style={[styles.emptyText, { color: colors.grayDark }]}>
+                No notifications yet
+              </Text>
+            </View>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -154,75 +200,130 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   backButton: {
-    marginRight: 12,
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: 'Inter-SemiBold',
     flex: 1,
+    textAlign: 'center',
+  },
+  readAllButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   readAllText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Medium',
   },
   listContent: {
     padding: 16,
+    paddingTop: 20,
   },
   notificationItem: {
-    flexDirection: 'row',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  userImage: {
-    width: 40,
-    height: 40,
+    marginBottom: 16,
     borderRadius: 20,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkmark: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  gradientBackground: {
+    padding: 16,
   },
   notificationContent: {
     flex: 1,
-    marginLeft: 12,
   },
   notificationHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 12,
+  },
+  userImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  titleContainer: {
+    flex: 1,
+    marginLeft: 12,
   },
   notificationTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Inter-SemiBold',
+    marginBottom: 4,
   },
   timeText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Inter-Regular',
+    opacity: 0.7,
   },
   notificationMessage: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Regular',
-    lineHeight: 20,
+    lineHeight: 22,
+    opacity: 0.9,
   },
   userName: {
     fontFamily: 'Inter-SemiBold',
   },
-  likeButton: {
-    padding: 8,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyIcon: {
+    marginBottom: 16,
+    opacity: 0.5,
+  },
+  emptyText: {
+    fontSize: 17,
+    fontFamily: 'Inter-Medium',
+    opacity: 0.7,
   },
 });

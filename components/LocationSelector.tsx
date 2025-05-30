@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import { ChevronDown } from 'lucide-react-native';
@@ -18,6 +18,100 @@ const COMMON_LOCATIONS = [
   'Ahmedabad',
   'Jaipur',
   'Lucknow',
+  'Surat',
+  'Kanpur',
+  'Nagpur',
+  'Indore',
+  'Thane',
+  'Bhopal',
+  'Visakhapatnam',
+  'Pimpri-Chinchwad',
+  'Patna',
+  'Vadodara',
+  'Ghaziabad',
+  'Ludhiana',
+  'Agra',
+  'Nashik',
+  'Faridabad',
+  'Meerut',
+  'Rajkot',
+  'Varanasi',
+  'Srinagar',
+  'Aurangabad',
+  'Dhanbad',
+  'Amritsar',
+  'Navi Mumbai',
+  'Allahabad',
+  'Ranchi',
+  'Howrah',
+  'Coimbatore',
+  'Jabalpur',
+  'Gwalior',
+  'Vijayawada',
+  'Jodhpur',
+  'Madurai',
+  'Raipur',
+  'Kota',
+  'Guwahati',
+  'Chandigarh',
+  'Solapur',
+  'Hubli-Dharwad',
+  'Mysore',
+  'Tiruchirappalli',
+  'Bareilly',
+  'Aligarh',
+  'Tiruppur',
+  'Gurgaon',
+  'Moradabad',
+  'Jalandhar',
+  'Bhubaneswar',
+  'Salem',
+  'Warangal',
+  'Guntur',
+  'Bhiwandi',
+  'Saharanpur',
+  'Gorakhpur',
+  'Bikaner',
+  'Amravati',
+  'Noida',
+  'Jamshedpur',
+  'Bhilai',
+  'Cuttack',
+  'Firozabad',
+  'Kochi',
+  'Nellore',
+  'Bhavnagar',
+  'Dehradun',
+  'Durgapur',
+  'Asansol',
+  'Rourkela',
+  'Nanded',
+  'Kolhapur',
+  'Ajmer',
+  'Akola',
+  'Gulbarga',
+  'Jamnagar',
+  'Ujjain',
+  'Loni',
+  'Siliguri',
+  'Jhansi',
+  'Ulhasnagar',
+  'Jammu',
+  'Sangli-Miraj',
+  'Mangalore',
+  'Erode',
+  'Belgaum',
+  'Kurnool',
+  'Ambattur',
+  'Rajahmundry',
+  'Tirunelveli',
+  'Malegaon',
+  'Gaya',
+  'Udaipur',
+  'Davanagere',
+  'Kozhikode',
+  'Akbarpur',
+  'Durg'
 ];
 
 type LocationSelectorProps = {
@@ -31,13 +125,17 @@ export default function LocationSelector({ location, onLocationChange }: Locatio
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredLocations = COMMON_LOCATIONS.filter(
-    (loc) => loc.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Use useMemo to optimize filtering for large lists
+  const filteredLocations = useMemo(() => {
+    return COMMON_LOCATIONS.filter((loc) =>
+      loc.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
 
   const handleSelectLocation = (selectedLocation: string) => {
     onLocationChange(selectedLocation);
     setModalVisible(false);
+    setSearchQuery(''); // Reset search query on selection
   };
 
   return (
@@ -54,7 +152,10 @@ export default function LocationSelector({ location, onLocationChange }: Locatio
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setSearchQuery(''); // Reset search query on modal close
+        }}
       >
         <View style={styles.modalOverlay}>
           <View
@@ -74,41 +175,54 @@ export default function LocationSelector({ location, onLocationChange }: Locatio
               style={styles.searchInput}
             />
 
-            <View style={styles.locationList}>
-              {filteredLocations.map((loc) => (
-                <TouchableOpacity
-                  key={loc}
-                  style={[
-                    styles.locationItem,
-                    {
-                      backgroundColor:
-                        loc === location
-                          ? colors.primaryColor + '20'
-                          : 'transparent',
-                    },
-                  ]}
-                  onPress={() => handleSelectLocation(loc)}
-                >
-                  <Text
+            <ScrollView
+              style={styles.locationList}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+            >
+              {filteredLocations.length > 0 ? (
+                filteredLocations.map((loc) => (
+                  <TouchableOpacity
+                    key={loc}
                     style={[
-                      styles.locationItemText,
+                      styles.locationItem,
                       {
-                        color:
+                        backgroundColor:
                           loc === location
-                            ? colors.primaryColor
-                            : colors.text,
+                            ? colors.primaryColor + '20'
+                            : 'transparent',
                       },
                     ]}
+                    onPress={() => handleSelectLocation(loc)}
                   >
-                    {loc}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <Text
+                      style={[
+                        styles.locationItemText,
+                        {
+                          color:
+                            loc === location
+                              ? colors.primaryColor
+                              : colors.text,
+                        },
+                      ]}
+                    >
+                      {loc}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={[styles.noResultsText, { color: colors.text }]}>
+                  No locations found
+                </Text>
+              )}
+            </ScrollView>
 
             <Button
               title="Close"
-              onPress={() => setModalVisible(false)}
+              onPress={() => {
+                setModalVisible(false);
+                setSearchQuery(''); // Reset search query on close
+              }}
               variant="outline"
               style={styles.closeButton}
             />
@@ -161,6 +275,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   locationList: {
+    maxHeight: '60%', // Limit the height of the scrollable area
     marginBottom: 16,
   },
   locationItem: {
@@ -171,6 +286,11 @@ const styles = StyleSheet.create({
   },
   locationItemText: {
     fontSize: 16,
+  },
+  noResultsText: {
+    fontSize: 16,
+    textAlign: 'center',
+    paddingVertical: 12,
   },
   closeButton: {
     marginTop: 8,

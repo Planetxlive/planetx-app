@@ -96,7 +96,7 @@ interface BasicInformationProps {
 }
 
 export default function BasicInformation({ formData, setFormData }: BasicInformationProps) {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   return (

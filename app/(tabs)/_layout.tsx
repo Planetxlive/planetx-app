@@ -7,7 +7,7 @@ import { Chrome as Home, Heart, Video, User, Plus } from 'lucide-react-native';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 
 function AddButton() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
   
@@ -25,7 +25,7 @@ function AddButton() {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
   return (

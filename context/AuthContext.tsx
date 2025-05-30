@@ -31,6 +31,7 @@ type AuthContextType = {
   verifyOTP: (otp: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   updateUserProfile: (data: Partial<User>) => Promise<void>;
+  pendingPhoneNumber: string | null;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -40,6 +41,7 @@ const AuthContext = createContext<AuthContextType>({
   verifyOTP: async () => false,
   signOut: async () => {},
   updateUserProfile: async () => {},
+  pendingPhoneNumber: null,
 });
 
 // Mock data for demo purposes
@@ -196,6 +198,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         verifyOTP,
         signOut,
         updateUserProfile,
+        pendingPhoneNumber,
       }}
     >
       {children}
