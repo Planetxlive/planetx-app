@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (user) {
         const token = await AsyncStorage.getItem('accessToken');
-        const updatedUser = { ...user, ...data };
+        // const updatedUser = { ...user, ...data };
         const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/update-user`;
         console.log(url);
         const res = await axios.patch(url, data, {

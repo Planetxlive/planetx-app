@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { useProperties } from '@/context/PropertyContext';
+import { Property, useProperties } from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
@@ -19,19 +19,29 @@ export default function MyPropertyScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { user } = useAuth();
-  const { getPropertiesByOwnerId } = useProperties();
+  const { getUserProperties } = useProperties();
+  const [userProperties, setUserProperties] = useState<Property[]>([]);
 
-  // console.log(user?.id)
-  const myProperties = getPropertiesByOwnerId(user?.id || '');
-  
+  useEffect(() => {
+    const fetchData = async () => {
+      const propertiesRes = await getUserProperties();
+      setUserProperties(propertiesRes);
+    };
+    fetchData();
+    console.log(userProperties);
+  });
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>My Properties</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>
+          My Properties
+        </Text>
         <TouchableOpacity
           style={[styles.addButton, { backgroundColor: colors.primaryColor }]}
           onPress={() => router.push('/add-property')}
@@ -41,7 +51,7 @@ export default function MyPropertyScreen() {
       </View>
 
       <FlatList
-        data={myProperties}
+        data={userProperties}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => <PropertyCard property={item} />}
         contentContainerStyle={styles.listContent}
@@ -51,7 +61,10 @@ export default function MyPropertyScreen() {
               You haven't listed any properties yet
             </Text>
             <TouchableOpacity
-              style={[styles.addPropertyButton, { backgroundColor: colors.primaryColor }]}
+              style={[
+                styles.addPropertyButton,
+                { backgroundColor: colors.primaryColor },
+              ]}
               onPress={() => router.push('/add-property')}
             >
               <Text style={styles.addPropertyButtonText}>Add Property</Text>
