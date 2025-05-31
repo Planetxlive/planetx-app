@@ -38,10 +38,11 @@ export default function ProfileDetailsScreen() {
 
       <ScrollView style={styles.content}>
         <View style={styles.profileSection}>
-          <Image
-            source={{ uri: user?.profileImage || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg' }}
-            style={styles.profileImage}
-          />
+          <View style={[styles.profileImage, { backgroundColor: colors.primaryColor, justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={[styles.initialsText, { color: colors.background }]}>
+              {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
+            </Text>
+          </View>
           <TouchableOpacity
             style={[styles.editButton, { backgroundColor: colors.primaryColor }]}
             onPress={() => router.push('/edit-profile')}
@@ -118,5 +119,9 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
+  },
+  initialsText: {
+    fontSize: 48,
+    fontFamily: 'Inter-Bold',
   },
 });

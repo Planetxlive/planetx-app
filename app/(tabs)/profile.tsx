@@ -101,10 +101,11 @@ export default function ProfileScreen() {
       <ScrollView>
         <View style={styles.header}>
           <View style={styles.profileSection}>
-            <Image
-              source={{ uri: user?.profileImage || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg' }}
-              style={styles.profileImage}
-            />
+            <View style={[styles.profileImage, { backgroundColor: colors.primaryColor, justifyContent: 'center', alignItems: 'center' }]}>
+              <Text style={[styles.initialsText, { color: colors.background }]}>
+                {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
+              </Text>
+            </View>
             <View style={styles.profileInfo}>
               <Text style={[styles.name, { color: colors.text }]}>
                 {user?.name || 'Hello, User'}
@@ -163,6 +164,10 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+  },
+  initialsText: {
+    fontSize: 32,
+    fontFamily: 'Inter-Bold',
   },
   profileInfo: {
     marginLeft: 16,

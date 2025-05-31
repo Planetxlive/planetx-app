@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,91 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Star } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import Constants from 'expo-constants';
 
 export default function FeedbackScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
+  const [feedbackType, setFeedbackType] = useState('');
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert(
+          'Authentication Required',
+          'Please log in to submit feedback.',
+          [{ text: 'OK', onPress: () => router.back() }]
+        );
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+    }
+  };
 
   const handleSubmit = async () => {
+    if (!feedbackType || !rating || !feedback.trim()) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
+
     setIsLoading(true);
-    // Implement feedback submission
-    setTimeout(() => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'Please log in to submit feedback.');
+        return;
+      }
+
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/centralfeedback`,
+        {
+          feedbackType,
+          stars: rating,
+          content: feedback,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (response.status === 201) {
+        setIsSubmitted(true);
+        Alert.alert('Success', 'Feedback submitted successfully!');
+        setTimeout(() => {
+          setFeedbackType('');
+          setRating(0);
+          setFeedback('');
+          setIsSubmitted(false);
+          router.back();
+        }, 2000);
+      }
+    } catch (error: any) {
+      console.error('Feedback submission error:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.error || 'Failed to submit feedback.'
+      );
+    } finally {
       setIsLoading(false);
-      router.back();
-    }, 1000);
+    }
   };
 
   return (
@@ -44,6 +108,30 @@ export default function FeedbackScreen() {
         <Text style={[styles.title, { color: colors.text }]}>
           How would you rate your experience?
         </Text>
+
+        <View style={styles.feedbackTypeContainer}>
+          <Text style={[styles.label, { color: colors.text }]}>Feedback Type</Text>
+          <View style={styles.feedbackTypeButtons}>
+            {['Website Experience', 'Service Quality', 'Other'].map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.feedbackTypeButton,
+                  feedbackType === type && styles.feedbackTypeButtonActive,
+                  { borderColor: colors.tabIconDefault }
+                ]}
+                onPress={() => setFeedbackType(type)}
+              >
+                <Text style={[
+                  styles.feedbackTypeText,
+                  { color: feedbackType === type ? colors.primaryColor : colors.text }
+                ]}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         <View style={styles.ratingContainer}>
           {[1, 2, 3, 4, 5].map((value) => (
@@ -86,7 +174,7 @@ export default function FeedbackScreen() {
           title="Submit Feedback"
           onPress={handleSubmit}
           loading={isLoading}
-          disabled={rating === 0 || !feedback.trim()}
+          disabled={rating === 0 || !feedback.trim() || !feedbackType}
           fullWidth
         />
       </View>
@@ -120,6 +208,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     marginBottom: 24,
     textAlign: 'center',
+  },
+  feedbackTypeContainer: {
+    marginBottom: 24,
+  },
+  feedbackTypeButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  feedbackTypeButton: {
+    flex: 1,
+    marginHorizontal: 4,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  feedbackTypeButtonActive: {
+    borderWidth: 2,
+  },
+  feedbackTypeText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
   },
   ratingContainer: {
     flexDirection: 'row',
