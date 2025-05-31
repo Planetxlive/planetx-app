@@ -6,6 +6,7 @@ import {
   FlatList,
   SafeAreaView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useProperties, Property } from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
@@ -15,11 +16,11 @@ import useColorScheme from '@/hooks/useColorScheme';
 export default function WishlistScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
-  const { properties, favorites } = useProperties();
+  const { properties, favorites, isLoading } = useProperties();
 
   // Get favorite properties
   const favoriteProperties = properties.filter((property) =>
-    favorites.includes(property.id)
+    favorites.includes(property._id)
   );
 
   const renderItem = ({ item }: { item: Property }) => (
@@ -41,6 +42,19 @@ export default function WishlistScreen() {
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primaryColor} />
+          <Text style={[styles.loadingText, { color: colors.text }]}>
+            Loading your wishlist...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -49,7 +63,7 @@ export default function WishlistScreen() {
 
       <FlatList
         data={favoriteProperties}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}
@@ -102,5 +116,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
 });

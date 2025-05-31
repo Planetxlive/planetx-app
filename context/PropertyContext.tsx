@@ -153,8 +153,9 @@ interface PropertyContextType {
   getPropertiesByCity: (city: string) => Property[];
   getPropertiesByPriceRange: (minPrice: number, maxPrice: number) => Property[];
   createPropertyTitle: (prop: Property) => string;
-  toggleFavorite: (id: string) => void;
+  toggleFavorite: (id: string) => Promise<void>;
   favorites: string[];
+  isLoading: boolean;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(
@@ -195,14 +196,42 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
       const props = await fetchAvailableProperties();
       setProperties(props);
+      await fetchWishlist();
     };
     fetchAll();
-  });
+  }, []);
+
+  const fetchWishlist = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) return;
+
+      const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+        headers: { Authorization: token },
+      });
+
+      if (!userResponse.data.user) return;
+
+      const currentUserId = userResponse.data.user._id;
+      const wishlistResponse = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_URL}/wishlist/get-wishlist/${currentUserId}`,
+        { headers: { Authorization: token } }
+      );
+
+      if (wishlistResponse.status === 200) {
+        const wishlistProperties = wishlistResponse.data.wishlistsData?.map((item: any) => item._id) || [];
+        setFavorites(wishlistProperties);
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
 
   const addProperty = async (
     property: Omit<Property, '_id' | 'createdAt' | 'updatedAt'>
@@ -263,11 +292,40 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const toggleFavorite = (propertyId: string) => {
-    if (favorites.includes(propertyId)) {
-      setFavorites(favorites.filter((id) => id !== propertyId));
-    } else {
-      setFavorites([...favorites, propertyId]);
+  const toggleFavorite = async (propertyId: string) => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Please login to manage wishlist');
+      }
+
+      const isInWishlist = favorites.includes(propertyId);
+
+      if (isInWishlist) {
+        await axios.delete(
+          `${process.env.EXPO_PUBLIC_API_URL}/wishlist/remove/${propertyId}`,
+          { headers: { Authorization: token } }
+        );
+        setFavorites(favorites.filter((id) => id !== propertyId));
+      } else {
+        const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+          headers: { Authorization: token },
+        });
+        const userId = userResponse.data.user._id;
+
+        await axios.post(
+          `${process.env.EXPO_PUBLIC_API_URL}/wishlist/add-wishlist`,
+          { userId, propertyIds: [propertyId] },
+          { headers: { Authorization: token } }
+        );
+        setFavorites([...favorites, propertyId]);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -305,6 +363,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
         getPropertiesByPriceRange,
         toggleFavorite,
         favorites,
+        isLoading,
       }}
     >
       {children}

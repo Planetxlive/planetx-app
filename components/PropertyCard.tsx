@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useProperties, Property } from '../context/PropertyContext';
 import { useRouter } from 'expo-router';
-import { MapPin, Star } from 'lucide-react-native';
+import { MapPin, Star, Heart } from 'lucide-react-native';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
+import { useToast } from 'react-native-toast-notifications';
 
 type PropertyCardProps = {
   property: Property;
@@ -15,12 +16,40 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
-  const { toggleFavorite, favorites } = useProperties();
+  const { toggleFavorite, favorites, isLoading } = useProperties();
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const toast = useToast();
   
   const isFavorite = favorites.includes(property._id);
 
   const handlePress = () => {
     router.push(`/property/${property._id}`);
+  };
+
+  const handleWishlistToggle = async () => {
+    try {
+      setIsWishlistLoading(true);
+      await toggleFavorite(property._id);
+      toast.show(
+        isFavorite ? 'Removed from wishlist' : 'Added to wishlist',
+        {
+          type: 'success',
+          placement: 'bottom',
+          duration: 2000,
+        }
+      );
+    } catch (error: any) {
+      toast.show(
+        error?.message || 'Failed to update wishlist',
+        {
+          type: 'error',
+          placement: 'bottom',
+          duration: 2000,
+        }
+      );
+    } finally {
+      setIsWishlistLoading(false);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -58,6 +87,21 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
         <View style={styles.typeTag}>
           <Text style={styles.typeText}>{property.category}</Text>
         </View>
+        <TouchableOpacity
+          style={styles.wishlistButton}
+          onPress={handleWishlistToggle}
+          disabled={isWishlistLoading || isLoading}
+        >
+          {isWishlistLoading || isLoading ? (
+            <ActivityIndicator size="small" color={colors.primaryColor} />
+          ) : (
+            <Heart
+              size={24}
+              color={isFavorite ? colors.primaryColor : colors.grayDark}
+              fill={isFavorite ? colors.primaryColor : 'none'}
+            />
+          )}
+        </TouchableOpacity>
       </View>
       
       <View style={styles.content}>
@@ -80,7 +124,7 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
         
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: colors.primaryColor }]}>
-            {property.pricing.expectedPrice}
+            {formatPrice(property.pricing.expectedPrice)}
           </Text>
         </View>
       </View>
@@ -167,5 +211,18 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  wishlistButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });
