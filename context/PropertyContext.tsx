@@ -145,6 +145,7 @@ interface PropertyContextType {
   deleteProperty: (id: string) => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
   getPropertiesByOwnerId: (ownerId: string) => Property[];
+  getUserProperties: () => Promise<Property[]>;
   getPropertiesByCategory: (category: PropertyCategory) => Property[];
   getPropertiesByPostingType: (
     propertyType: Property['propertyType']
@@ -256,7 +257,9 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getPropertiesByPriceRange = (minPrice: number, maxPrice: number) => {
     return properties.filter(
-      (p) => p.pricing.expectedPrice >= minPrice && p.pricing.expectedPrice <= maxPrice
+      (p) =>
+        p.pricing.expectedPrice >= minPrice &&
+        p.pricing.expectedPrice <= maxPrice
     );
   };
 
@@ -268,11 +271,29 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const getUserProperties = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/properties/alluser-properties`;
+    const res = await axios.get(url, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    let data: Property[] = res.data.properties;
+    data = data.map((val, ind) => {
+      val.title = createPropertyTitle(val);
+      return val;
+    });
+    return data;
+  };
+
   return (
     <PropertyContext.Provider
       value={{
         properties,
         createPropertyTitle,
+        getUserProperties,
         addProperty,
         updateProperty,
         deleteProperty,
