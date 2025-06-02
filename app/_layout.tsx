@@ -5,6 +5,7 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { AuthProvider } from '@/context/AuthContext';
 import { PropertyProvider } from '@/context/PropertyContext';
+import { BlogProvider } from '@/context/BlogContext';
 import { SplashScreen } from 'expo-router';
 
 // Prevent the splash screen from auto-hiding
@@ -35,12 +36,14 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <PropertyProvider>
-        <>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </>
+        <BlogProvider>
+          <>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </>
+        </BlogProvider>
       </PropertyProvider>
     </AuthProvider>
   );

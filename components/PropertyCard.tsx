@@ -30,23 +30,23 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     try {
       setIsWishlistLoading(true);
       await toggleFavorite(property._id);
-      toast.show(
-        isFavorite ? 'Removed from wishlist' : 'Added to wishlist',
-        {
-          type: 'success',
-          placement: 'bottom',
-          duration: 2000,
-        }
-      );
+      // toast.show(
+      //   isFavorite ? 'Removed from wishlist' : 'Added to wishlist',
+      //   {
+      //     type: 'success',
+      //     placement: 'bottom',
+      //     duration: 2000,
+      //   }
+      // );
     } catch (error: any) {
-      toast.show(
-        error?.message || 'Failed to update wishlist',
-        {
-          type: 'error',
-          placement: 'bottom',
-          duration: 2000,
-        }
-      );
+      // toast.show(
+      //   error?.message || 'Failed to update wishlist',
+      //   {
+      //     type: 'error',
+      //     placement: 'bottom',
+      //     duration: 2000,
+      //   }
+      // );
     } finally {
       setIsWishlistLoading(false);
     }

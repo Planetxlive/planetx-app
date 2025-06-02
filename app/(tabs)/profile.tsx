@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { User, Chrome as Home, Heart, Globe, Bell, MessageSquare, Share, FileText, Book, LogOut, ChevronRight, CreditCard as Edit } from 'lucide-react-native';
+import { User, Chrome as Home, Heart, Globe, Bell, MessageSquare, Share, FileText, Book, LogOut, ChevronRight, CreditCard as Edit, BookOpen } from 'lucide-react-native';
 
 const MenuItem = ({ icon: Icon, title, onPress, color = 'black', isLogout = false }:any) => {
   const colorScheme = useColorScheme() || 'light';
@@ -64,11 +64,11 @@ export default function ProfileScreen() {
       title: 'Wishlist',
       onPress: () => router.push('/wishlist'),
     },
-    // {
-    //   icon: Globe,
-    //   title: 'Language',
-    //   onPress: () => router.push('/language'),
-    // },
+    {
+      icon: BookOpen,
+      title: 'My Blog',
+      onPress: () => router.push('/my-blog'),
+    },
     {
       icon: Bell,
       title: 'Notification',

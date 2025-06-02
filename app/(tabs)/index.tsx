@@ -13,7 +13,7 @@ import PropertyCard from '@/components/PropertyCard';
 import LocationSelector from '@/components/LocationSelector';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { Search, Bell } from 'lucide-react-native';
+import { Search, Bell, FileText } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -87,6 +87,10 @@ export default function HomeScreen() {
     router.push('/all-properties');
   };
 
+  const handleBlog = () => {
+    router.push('/blog');
+  };
+
   const renderPropertySection = ({ 
     title, 
     data, 
@@ -152,6 +156,12 @@ export default function HomeScreen() {
             onPress={handleSearch}
           >
             <Search size={18} color={colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+            onPress={handleBlog}
+          >
+            <FileText size={18} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
