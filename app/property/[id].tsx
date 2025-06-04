@@ -1314,9 +1314,9 @@ export default function PropertyDetailScreen() {
                     resizeMode="cover"
                   />
                   <View style={[styles.galleryLabelContainer, { backgroundColor: colors.overlay }]}>
-                    <Text style={[styles.galleryLabel, { color: colors.text }]}>
+                    {/* <Text style={[styles.galleryLabel, { color: colors.text }]}>
                       {item.label}
-                    </Text>
+                    </Text> */}
                   </View>
                 </TouchableOpacity>
               )}
@@ -1513,7 +1513,7 @@ export default function PropertyDetailScreen() {
             images={property.images.map((img) => img.src)}
             height={400}
           />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.carouselButton, styles.leftButton, { backgroundColor: colors.cardBackground }]}
             onPress={prevImage}
             activeOpacity={0.7}
@@ -1526,14 +1526,14 @@ export default function PropertyDetailScreen() {
             activeOpacity={0.7}
           >
             <ArrowLeft size={24} color={colors.text} style={{ transform: [{ rotate: '180deg' }] }} />
-          </TouchableOpacity>
-          <View style={[styles.imageLabel, { backgroundColor: colors.cardBackground }]}>
+          </TouchableOpacity> */}
+          {/* <View style={[styles.imageLabel, { backgroundColor: colors.cardBackground }]}>
             <Text style={[styles.imageLabelText, { color: colors.text }]}>
               {property.images[currentImageIndex].label}
             </Text>
-          </View>
+          </View> */}
         </View>
-        <View style={[styles.thumbnailContainer, { backgroundColor: colors.cardBackground }]}>
+        {/* <View style={[styles.thumbnailContainer, { backgroundColor: colors.cardBackground }]}>
           <FlatList
             data={property.images}
             renderItem={({ item, index }) => (
@@ -1552,7 +1552,7 @@ export default function PropertyDetailScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.thumbnailContent}
           />
-        </View>
+        </View> */}
 
         <View style={styles.contentContainer}>
           <View style={styles.titleContainer}>

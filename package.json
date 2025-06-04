@@ -52,7 +52,9 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
-    "zod": "^3.25.30"
+    "zod": "^3.25.30",
+    "expo-av": "~15.1.4",
+    "expo-video": "~2.1.9"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

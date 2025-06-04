@@ -156,6 +156,16 @@ interface PropertyContextType {
   toggleFavorite: (id: string) => Promise<void>;
   favorites: string[];
   isLoading: boolean;
+  getAllVideos: () => Promise<Array<{
+    id: string;
+    video: string;
+    title: string;
+    location: Property['location'];
+    propertyType: Property['propertyType'];
+    category: Property['category'];
+    pricing: Property['pricing'];
+    user: string;
+  }>>;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(
@@ -283,7 +293,18 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
       (p) => p.location.city.toLowerCase() === city.toLowerCase()
     );
   };
-
+  const getAllVideos = async () => {
+    return properties.map(property => ({
+      id: property._id,
+      video: property.video,
+      title: property.title,
+      location: property.location,
+      propertyType: property.propertyType,
+      category: property.category,
+      pricing: property.pricing,
+      user: property.user
+    })).filter(p => p.video !== '');
+  };
   const getPropertiesByPriceRange = (minPrice: number, maxPrice: number) => {
     return properties.filter(
       (p) =>
@@ -364,6 +385,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
         toggleFavorite,
         favorites,
         isLoading,
+        getAllVideos,
       }}
     >
       {children}

@@ -56,7 +56,7 @@ export default function VerifyOTPScreen() {
       const success = await verifyOTP(otp);
       if (success) {
         // If verification is successful, user will be redirected to main app
-        window.location.href = "/";
+        router.replace('/');
       } else {
         setError('Invalid OTP. Please try again.');
       }

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,88 +10,170 @@ import {
   Dimensions,
   StatusBar,
   Platform,
+  ViewToken,
+  Animated,
+  Alert,
 } from 'react-native';
+import { Video, AVPlaybackStatus, ResizeMode, Audio } from 'expo-av';
 import { useProperties } from '@/context/PropertyContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { 
   Play, 
-  Pause, 
   MapPin, 
   Heart, 
-  MessageCircle, 
-  Share, 
-  Bookmark,
+  ArrowRight,
   User,
-  MoreVertical
+  MoreVertical,
+  Home,
+  Building2
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 83 : 60; // Approximate tab bar height
 const CONTENT_HEIGHT = SCREEN_HEIGHT - TAB_BAR_HEIGHT;
 
+interface VideoItem {
+  id: string;
+  videoUrl: string;
+  title: string;
+  description: string;
+  location: string;
+  price: number;
+  priceUnit: string;
+  user: {
+    name: string;
+    avatar: string;
+    verified: boolean;
+  };
+  stats: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+  timestamp: string;
+}
+
 export default function HighlightScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const router = useRouter();
-  const { properties } = useProperties();
-  const flatListRef = useRef(null);
+  const { getAllVideos, toggleFavorite, favorites } = useProperties();
+  const flatListRef = useRef<FlatList>(null);
+  const videoRefs = useRef<Record<string, Video>>({});
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [likedVideos, setLikedVideos] = useState(new Set());
-  const [savedVideos, setSavedVideos] = useState(new Set());
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
 
-  // Mock video data - in real app, this would come from API
-  const videoHighlights = properties.map((property, index) => ({
-    id: property.id,
-    videoUrl: property.images[0], // Using image as placeholder for video thumbnail
-    title: property.title,
-    description: `Amazing ${property.type.toLowerCase()} in ${property.location.city}`,
-    location: `${property.location.address}, ${property.location.city}`,
-    price: property.price,
-    priceUnit: property.priceUnit,
-    user: {
-      name: `User ${index + 1}`,
-      avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
-      verified: Math.random() > 0.5,
-    },
-    stats: {
-      likes: Math.floor(Math.random() * 1000) + 50,
-      comments: Math.floor(Math.random() * 100) + 10,
-      shares: Math.floor(Math.random() * 50) + 5,
-    },
-    timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
-  }));
+  useEffect(() => {
+    // Configure audio session for iOS
+    const configureAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+        });
+      } catch (error) {
+        console.error('Error configuring audio:', error);
+      }
+    };
 
-  const handleLike = (videoId:any) => {
-    const newLikedVideos = new Set(likedVideos);
-    if (likedVideos.has(videoId)) {
-      newLikedVideos.delete(videoId);
-    } else {
-      newLikedVideos.add(videoId);
+    configureAudio();
+  }, []);
+
+  React.useEffect(() => {
+    const loadVideos = async () => {
+      const videoData = await getAllVideos();
+      setVideos(videoData.map((property, index) => ({
+        id: property.id,
+        videoUrl: property.video,
+        title: property.title,
+        description: `Amazing ${property.propertyType.toLowerCase()} in ${property.location.city}`,
+        location: `${property.location.locality}, ${property.location.city}`,
+        price: property.pricing.expectedPrice,
+        priceUnit: property.propertyType === 'For Rent' ? 'perMonth' : 'total',
+        user: {
+          name: `User ${index + 1}`,
+          avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
+          verified: Math.random() > 0.5,
+        },
+        stats: {
+          likes: Math.floor(Math.random() * 1000) + 50,
+          comments: Math.floor(Math.random() * 100) + 10,
+          shares: Math.floor(Math.random() * 50) + 5,
+        },
+        timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
+      })));
+    };
+    loadVideos();
+  }, []);
+
+  const handleWishlist = async (videoId: string) => {
+    try {
+      await toggleFavorite(videoId);
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
     }
-    setLikedVideos(newLikedVideos);
   };
 
-  const handleSave = (videoId:any) => {
-    const newSavedVideos = new Set(savedVideos);
-    if (savedVideos.has(videoId)) {
-      newSavedVideos.delete(videoId);
-    } else {
-      newSavedVideos.add(videoId);
+  const handleViewProperty = (videoId: string) => {
+    router.push(`/property/${videoId}`);
+  };
+
+  const handlePlayPause = async (videoId: string) => {
+    try {
+      const videoRef = videoRefs.current[videoId];
+      if (videoRef) {
+        if (isPlaying) {
+          await videoRef.pauseAsync();
+        } else {
+          await videoRef.playAsync();
+        }
+        setIsPlaying(!isPlaying);
+      }
+    } catch (error) {
+      console.error('Error toggling play/pause:', error);
+      Alert.alert('Error', 'Failed to play/pause video. Please try again.');
     }
-    setSavedVideos(newSavedVideos);
   };
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const onViewableItemsChanged = useRef(({ viewableItems }:any) => {
+  const onViewableItemsChanged = useRef(async ({ viewableItems }: { 
+    viewableItems: ViewToken[]; 
+    changed: ViewToken[];
+  }) => {
     if (viewableItems.length > 0) {
-      setCurrentVideoIndex(viewableItems[0].index);
+      const newIndex = viewableItems[0].index ?? 0;
+      setCurrentVideoIndex(newIndex);
+      
+      // Pause all videos
+      Object.values(videoRefs.current).forEach(async (ref) => {
+        if (ref) {
+          try {
+            await ref.pauseAsync();
+          } catch (error) {
+            console.error('Error pausing video:', error);
+          }
+        }
+      });
+
+      // Play the current video
+      const currentVideoRef = videoRefs.current[videos[newIndex]?.id];
+      if (currentVideoRef) {
+        try {
+          await currentVideoRef.playAsync();
+          setIsPlaying(true);
+        } catch (error) {
+          console.error('Error playing video:', error);
+          Alert.alert('Error', 'Failed to play video. Please try again.');
+        }
+      }
     }
   }).current;
 
@@ -99,46 +181,61 @@ export default function HighlightScreen() {
     itemVisiblePercentThreshold: 50,
   };
 
-  const renderVideoItem = ({ item, index }:any) => {
-    const isLiked = likedVideos.has(item.id);
-    const isSaved = savedVideos.has(item.id);
+  const renderVideoItem = ({ item, index }: { item: VideoItem; index: number }) => {
+    const isInWishlist = favorites.includes(item.id);
 
     return (
       <View style={styles.videoContainer}>
-        {/* Video/Image Container */}
         <TouchableOpacity 
           style={styles.videoPlayer}
-          onPress={handlePlayPause}
+          onPress={() => handlePlayPause(item.id)}
           activeOpacity={1}
         >
-          <Image
+          <Video
+            ref={(ref) => {
+              if (ref) {
+                videoRefs.current[item.id] = ref;
+              }
+            }}
             source={{ uri: item.videoUrl }}
-            style={styles.videoImage}
-            resizeMode="cover"
+            style={styles.video}
+            resizeMode={ResizeMode.COVER}
+            isLooping
+            shouldPlay={index === currentVideoIndex}
+            useNativeControls={false}
+            isMuted={!isAudioEnabled}
+            onError={(error) => {
+              console.error('Video playback error:', error);
+              Alert.alert('Error', 'Failed to load video. Please try again.');
+            }}
           />
           
-          {/* Play/Pause Overlay */}
           {!isPlaying && (
             <View style={styles.playOverlay}>
-              <View style={styles.playButton}>
-                <Play size={30} color="white" fill="white" />
-              </View>
+              <BlurView intensity={20} style={styles.playButtonBlur}>
+                <View style={styles.playButton}>
+                  <Play size={30} color="white" fill="white" />
+                </View>
+              </BlurView>
             </View>
           )}
 
-          {/* Gradient Overlay */}
-          <View style={styles.gradientOverlay} />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.8)']}
+            locations={[0, 0.6, 1]}
+            style={styles.gradientOverlay}
+          />
         </TouchableOpacity>
 
-        {/* Content Overlay */}
         <View style={styles.contentOverlay}>
-          {/* User Info */}
           <View style={styles.userInfo}>
             <TouchableOpacity style={styles.userProfile}>
-              <Image
-                source={{ uri: item.user.avatar }}
-                style={styles.userAvatar}
-              />
+              <BlurView intensity={20} style={styles.userAvatarBlur}>
+                <Image
+                  source={{ uri: item.user.avatar }}
+                  style={styles.userAvatar}
+                />
+              </BlurView>
               <View style={styles.userDetails}>
                 <View style={styles.userNameContainer}>
                   <Text style={styles.userName}>{item.user.name}</Text>
@@ -153,12 +250,22 @@ export default function HighlightScreen() {
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.moreButton}>
-              <MoreVertical size={20} color="white" />
+              <BlurView intensity={20} style={styles.moreButtonBlur}>
+                <MoreVertical size={20} color="white" />
+              </BlurView>
             </TouchableOpacity>
           </View>
 
-          {/* Property Info */}
           <View style={styles.propertyInfo}>
+            <View style={styles.propertyTypeContainer}>
+              <BlurView intensity={20} style={styles.propertyTypeBlur}>
+                <Building2 size={16} color="#7C3AED" />
+                <Text style={styles.propertyType}>
+                  {item.priceUnit === 'perMonth' ? 'For Rent' : 'For Sale'}
+                </Text>
+              </BlurView>
+            </View>
+
             <Text style={styles.propertyTitle}>{item.title}</Text>
             <Text style={styles.propertyDescription}>{item.description}</Text>
             
@@ -168,57 +275,38 @@ export default function HighlightScreen() {
             </View>
 
             <Text style={styles.priceText}>
-              {item.priceUnit === 'perMonth' 
-                ? `₹${item.price}/ Month` 
-                : `₹${item.price}`}
+              {item?.priceUnit === 'perMonth' 
+                ? `₹${item?.price?.toLocaleString()}/ Month` 
+                : `₹${item?.price?.toLocaleString()}`}
             </Text>
           </View>
         </View>
 
-        {/* Action Buttons */}
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => handleLike(item.id)}
+            style={[styles.actionButton, isInWishlist && styles.actionButtonActive]}
+            onPress={() => handleWishlist(item.id)}
           >
-            <Heart 
-              size={28} 
-              color={isLiked ? "#FF3040" : "white"} 
-              fill={isLiked ? "#FF3040" : "transparent"}
-            />
-            <Text style={styles.actionText}>{item.stats.likes}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <MessageCircle size={28} color="white" />
-            <Text style={styles.actionText}>{item.stats.comments}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <Share size={28} color="white" />
-            <Text style={styles.actionText}>{item.stats.shares}</Text>
+            <BlurView intensity={20} style={styles.actionButtonBlur}>
+              <Heart 
+                size={28} 
+                color={isInWishlist ? "#FF3040" : "white"} 
+                fill={isInWishlist ? "#FF3040" : "transparent"}
+              />
+              <Text style={[styles.actionText, isInWishlist && styles.actionTextActive]}>
+                {isInWishlist ? 'Saved' : 'Save'}
+              </Text>
+            </BlurView>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => handleSave(item.id)}
+            style={styles.viewPropertyButton}
+            onPress={() => handleViewProperty(item.id)}
           >
-            <Bookmark 
-              size={28} 
-              color={isSaved ? "#FFD700" : "white"} 
-              fill={isSaved ? "#FFD700" : "transparent"}
-            />
-          </TouchableOpacity>
-
-          {/* Profile Picture with Follow Button */}
-          <TouchableOpacity style={styles.profileFollowContainer}>
-            <Image
-              source={{ uri: item.user.avatar }}
-              style={styles.profileImage}
-            />
-            <View style={styles.followButton}>
-              <Text style={styles.followText}>+</Text>
-            </View>
+            <BlurView intensity={20} style={styles.viewPropertyBlur}>
+              <Text style={styles.viewPropertyText}>View Details</Text>
+              <ArrowRight size={20} color="white" />
+            </BlurView>
           </TouchableOpacity>
         </View>
       </View>
@@ -231,7 +319,7 @@ export default function HighlightScreen() {
       
       <FlatList
         ref={flatListRef}
-        data={videoHighlights}
+        data={videos}
         keyExtractor={(item) => item.id}
         renderItem={renderVideoItem}
         pagingEnabled
@@ -265,7 +353,7 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  videoImage: {
+  video: {
     width: '100%',
     height: '100%',
   },
@@ -277,27 +365,32 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
-  playButton: {
+  playButtonBlur: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  playButton: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   gradientOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 200,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    height: 300,
   },
   contentOverlay: {
     position: 'absolute',
-    bottom: 120, // Increased bottom padding to account for tab bar
+    bottom: 100,
     left: 16,
     right: 80,
   },
@@ -305,18 +398,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 20,
   },
   userProfile: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  userAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  userAvatarBlur: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    overflow: 'hidden',
     marginRight: 12,
+  },
+  userAvatar: {
+    width: '100%',
+    height: '100%',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   userDetails: {
     flex: 1,
@@ -327,7 +427,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Inter-SemiBold',
   },
   verifiedBadge: {
@@ -352,46 +452,82 @@ const styles = StyleSheet.create({
   moreButton: {
     padding: 8,
   },
+  moreButtonBlur: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   propertyInfo: {
     marginBottom: 8,
   },
+  propertyTypeContainer: {
+    marginBottom: 12,
+  },
+  propertyTypeBlur: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  propertyType: {
+    color: '#7C3AED',
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    marginLeft: 6,
+  },
   propertyTitle: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: 'Inter-Bold',
-    marginBottom: 4,
+    marginBottom: 8,
+    lineHeight: 30,
   },
   propertyDescription: {
     color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Regular',
-    marginBottom: 8,
+    marginBottom: 12,
+    lineHeight: 20,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   locationText: {
     color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginLeft: 4,
+    marginLeft: 6,
   },
   priceText: {
     color: '#7C3AED',
-    fontSize: 20,
+    fontSize: 26,
     fontFamily: 'Inter-Bold',
   },
   actionButtonsContainer: {
     position: 'absolute',
     right: 16,
-    bottom: 120, // Increased bottom padding to account for tab bar
+    bottom: 100,
     alignItems: 'center',
   },
   actionButton: {
+    marginBottom: 16,
+    overflow: 'hidden',
+    borderRadius: 30,
+  },
+  actionButtonBlur: {
+    padding: 12,
     alignItems: 'center',
-    marginBottom: 20,
+  },
+  actionButtonActive: {
+    backgroundColor: 'rgba(255, 48, 64, 0.2)',
   },
   actionText: {
     color: 'white',
@@ -399,32 +535,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     marginTop: 4,
   },
-  profileFollowContainer: {
+  actionTextActive: {
+    color: '#FF3040',
+  },
+  viewPropertyButton: {
+    overflow: 'hidden',
+    borderRadius: 30,
+  },
+  viewPropertyBlur: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  followButton: {
-    position: 'absolute',
-    bottom: -6,
-    backgroundColor: '#7C3AED',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  followText: {
+  viewPropertyText: {
     color: 'white',
-    fontSize: 12,
-    fontFamily: 'Inter-Bold',
+    fontSize: 15,
+    fontFamily: 'Inter-SemiBold',
+    marginRight: 8,
   },
 });
