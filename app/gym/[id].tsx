@@ -45,10 +45,10 @@ export default function GymDetailScreen() {
     return null;
   }
 
-  const isFavorite = favorites.includes(gym.id);
+  const isFavorite = favorites.includes(gym._id);
 
   const handleFavoriteToggle = () => {
-    toggleFavorite(gym.id);
+    toggleFavorite(gym._id);
   };
 
   const handleShare = async () => {
@@ -202,13 +202,13 @@ export default function GymDetailScreen() {
             {gym.gymDescription}
           </Text>
 
-          {gym.amenities.length > 0 && (
+          {gym.amenitites.length > 0 && (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Amenities
               </Text>
               <View style={styles.featuresGrid}>
-                {gym.amenities.map((amenity, index) => (
+                {gym.amenitites.map((amenity, index) => (
                   <View key={index} style={[styles.featureItem, { backgroundColor: colors.grayLight }]}>
                     <Check size={16} color={colors.successColor} />
                     <Text style={[styles.featureText, { color: colors.text }]}>{amenity}</Text>

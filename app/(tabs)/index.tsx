@@ -172,7 +172,7 @@ export default function HomeScreen() {
               <GymCard gym={item} horizontal />
             </View>
           )}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item._id}
           contentContainerStyle={styles.horizontalList}
         />
       ) : (

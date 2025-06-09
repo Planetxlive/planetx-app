@@ -18,10 +18,11 @@ export default function GymCard({ gym, horizontal = false, style }: GymCardProps
   const router = useRouter();
   const { toggleFavorite, favorites } = useGym();
   
-  const isFavorite = favorites.includes(gym.id);
+  const isFavorite = favorites.includes(gym._id);
 
   const handlePress = () => {
-    router.push(`/gym/${gym.id}`);
+
+    router.push(`/gym/${gym._id}`);
   };
 
   const formatPrice = (pricing: Gym['pricing']) => {
@@ -129,14 +130,14 @@ export default function GymCard({ gym, horizontal = false, style }: GymCardProps
         </View>
 
         <View style={styles.amenitiesRow}>
-          {gym.amenities.slice(0, 2).map((amenity, index) => (
+          {(gym.amenitites || []).slice(0, 2).map((amenity, index) => (
             <View key={index} style={[styles.amenityTag, { backgroundColor: colors.grayLight }]}>
               <Text style={[styles.amenityText, { color: colors.text }]}>{amenity}</Text>
             </View>
           ))}
-          {gym.amenities.length > 2 && (
+          {gym.amenitites.length > 2 && (
             <Text style={[styles.moreAmenities, { color: colors.grayDark }]}>
-              +{gym.amenities.length - 2} more
+              +{gym.amenitites.length - 2} more
             </Text>
           )}
         </View>
