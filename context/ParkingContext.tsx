@@ -1,6 +1,13 @@
-import React, { createContext, useState, useContext } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-export type ParkingType = 'standard' | 'disabled' | 'electric' | 'compact' | 'premium';
+export type ParkingType =
+  | 'standard'
+  | 'disabled'
+  | 'electric'
+  | 'compact'
+  | 'premium';
 export type ParkingSize = 'small' | 'medium' | 'large';
 
 export type ParkingSpot = {
@@ -40,7 +47,9 @@ export type ParkingSpot = {
 
 type ParkingContextType = {
   parkingSpots: ParkingSpot[];
-  addParkingSpot: (spot: Omit<ParkingSpot, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addParkingSpot: (
+    spot: Omit<ParkingSpot, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<void>;
   updateParkingSpot: (id: string, spot: Partial<ParkingSpot>) => Promise<void>;
   deleteParkingSpot: (id: string) => Promise<void>;
   getParkingSpotById: (id: string) => ParkingSpot | undefined;
@@ -180,33 +189,75 @@ const ParkingContext = createContext<ParkingContextType>({
   favorites: [],
 });
 
-export const ParkingProvider = ({ children }: { children: React.ReactNode }) => {
-  const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>(MOCK_PARKING_SPOTS);
+export const ParkingProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [parkingSpots, setParkingSpots] =
+    useState<ParkingSpot[]>(MOCK_PARKING_SPOTS);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const addParkingSpot = async (spot: Omit<ParkingSpot, 'id' | 'createdAt' | 'updatedAt'>) => {
+  useEffect(() => {
+    const fetchAll = async () => {
+      const token = await AsyncStorage.getItem('accessToken');
+
+      const res = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_URL}/Parking/`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      setParkingSpots(res.data.parkings);
+    };
+    fetchAll();
+  }, []);
+
+  const addParkingSpot = async (
+    spot: Omit<ParkingSpot, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
     const newSpot: ParkingSpot = {
       ...spot,
       id: Math.random().toString(36).substring(2, 11),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     setParkingSpots([...parkingSpots, newSpot]);
   };
 
   const updateParkingSpot = async (id: string, spot: Partial<ParkingSpot>) => {
     setParkingSpots(
       parkingSpots.map((s) =>
-        s.id === id
-          ? { ...s, ...spot, updatedAt: new Date().toISOString() }
-          : s
+        s.id === id ? { ...s, ...spot, updatedAt: new Date().toISOString() } : s
       )
+    );
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.put(
+      `${process.env.EXPO_PUBLIC_API_URL}/Parking/update/${id}`,
+      spot,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
     );
   };
 
   const deleteParkingSpot = async (id: string) => {
     setParkingSpots(parkingSpots.filter((s) => s.id !== id));
+    const token = await AsyncStorage.getItem('accessToken');
+
+    const res = await axios.get(
+      `${process.env.EXPO_PUBLIC_API_URL}/Parking/delete/${id}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
   };
 
   const getParkingSpotById = (id: string) => {
@@ -222,7 +273,9 @@ export const ParkingProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   const getParkingSpotsByCity = (city: string) => {
-    return parkingSpots.filter((s) => s.city.toLowerCase() === city.toLowerCase());
+    return parkingSpots.filter(
+      (s) => s.city.toLowerCase() === city.toLowerCase()
+    );
   };
 
   const getAvailableParkingSpots = () => {
