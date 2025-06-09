@@ -9,7 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProperties, Property } from '@/context/PropertyContext';
+import { useGym, Gym } from '@/context/GymContext';
+import { useParking, ParkingSpot } from '@/context/ParkingContext';
 import PropertyCard from '@/components/PropertyCard';
+import GymCard from '@/components/GymCard';
+import ParkingCard from '@/components/ParkingCard';
 import LocationSelector from '@/components/LocationSelector';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
@@ -23,6 +27,8 @@ export default function HomeScreen() {
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { properties } = useProperties();
+  const { gyms } = useGym();
+  const { parkingSpots } = useParking();
   const [location, setLocation] = useState('Noida');
   const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
   const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>('All');
@@ -72,7 +78,9 @@ export default function HomeScreen() {
   ).slice(0, 3);
   const nearbyProperties = properties.filter((p: Property) => 
     p.location.city === location
-  ).slice(0, 3);  
+  ).slice(0, 3);
+  const featuredGyms = gyms.slice(0, 3);
+  const featuredParking = parkingSpots.slice(0, 3);
   
 
   const handleSearch = () => {
@@ -128,6 +136,92 @@ export default function HomeScreen() {
         <View style={styles.noPropertiesContainer}>
           <Text style={[styles.noPropertiesText, { color: colors.text }]}>
             No properties found
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderGymSection = ({ 
+    title, 
+    data, 
+    onViewAll 
+  }: { 
+    title: string; 
+    data: Gym[]; 
+    onViewAll: () => void 
+  }) => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        <TouchableOpacity onPress={onViewAll}>
+          <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
+            View all
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {data.length > 0 ? (
+        <FlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={280 + 8}
+          decelerationRate="fast"
+          renderItem={({ item }) => (
+            <View style={styles.horizontalCard}>
+              <GymCard gym={item} horizontal />
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.horizontalList}
+        />
+      ) : (
+        <View style={styles.noPropertiesContainer}>
+          <Text style={[styles.noPropertiesText, { color: colors.text }]}>
+            No gyms found
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderParkingSection = ({ 
+    title, 
+    data, 
+    onViewAll 
+  }: { 
+    title: string; 
+    data: ParkingSpot[]; 
+    onViewAll: () => void 
+  }) => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        <TouchableOpacity onPress={onViewAll}>
+          <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
+            View all
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {data.length > 0 ? (
+        <FlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={280 + 8}
+          decelerationRate="fast"
+          renderItem={({ item }) => (
+            <View style={styles.horizontalCard}>
+              <ParkingCard parkingSpot={item} horizontal />
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.horizontalList}
+        />
+      ) : (
+        <View style={styles.noPropertiesContainer}>
+          <Text style={[styles.noPropertiesText, { color: colors.text }]}>
+            No parking spots found
           </Text>
         </View>
       )}
@@ -299,6 +393,18 @@ export default function HomeScreen() {
               title: 'Nearby Properties',
               data: nearbyProperties,
               onViewAll: () => router.push('/nearby'),
+            })}
+
+            {renderGymSection({
+              title: 'Featured Gyms',
+              data: featuredGyms,
+              onViewAll: () => router.push('/gym'),
+            })}
+
+            {renderParkingSection({
+              title: 'Featured Parking Spots',
+              data: featuredParking,
+              onViewAll: () => router.push('/parking'),
             })}
       </ScrollView>
     </SafeAreaView>

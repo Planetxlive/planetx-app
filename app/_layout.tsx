@@ -7,6 +7,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { PropertyProvider } from '@/context/PropertyContext';
 import { BlogProvider } from '@/context/BlogContext';
 import { SplashScreen } from 'expo-router';
+import { GymProvider } from '@/context/GymContext';
+import { ParkingProvider } from '@/context/ParkingContext';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -37,12 +39,16 @@ export default function RootLayout() {
     <AuthProvider>
       <PropertyProvider>
         <BlogProvider>
+          <ParkingProvider>
+        <GymProvider>
           <>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />
           </>
+          </GymProvider>
+          </ParkingProvider>
         </BlogProvider>
       </PropertyProvider>
     </AuthProvider>
