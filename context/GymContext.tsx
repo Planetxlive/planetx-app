@@ -327,7 +327,6 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
           Authorization: token,
         },
       });
-      console.log(res.data.gyms);
       setGyms(res.data.gyms);
     };
     fetchAll();
