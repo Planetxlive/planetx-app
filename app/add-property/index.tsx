@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { useProperties, PropertyType } from '@/context/PropertyContext';
+import { useProperties } from '@/context/PropertyContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft } from 'lucide-react-native';
@@ -28,71 +28,9 @@ export default function AddPropertyScreen() {
   const { user } = useAuth();
   const { addProperty } = useProperties();
   const [currentStep, setCurrentStep] = useState<Step>('basic');
-  const [formData, setFormData] = useState({
-    listingType: 'Buy' as 'Buy' | 'Rent' | 'Paying Guest' | 'Rent Hourly',
-    propertyCategory: 'Residential' as 'Residential' | 'Pg' | 'Hotel' | 'Office' | 'Shop' | 'Warehouse' | 'Shared Warehouse' | 'EventSpace',
-    propertyType: 'Flat/Apartment' as PropertyType,
-    title: '',
-    city: '',
-    state: '',
-    locality: '',
-    subLocality: '',
-    apartment: '',
-    houseNo: '',
-    bedrooms: '1',
-    bathrooms: '1',
-    balconies: '0',
-    carpetArea: '',
-    builtUpArea: '',
-    totalFloors: '',
-    propertyOnFloor: '',
-    furnishingStatus: 'Unfurnished',
-    coveredParking: '0',
-    openParking: '0',
-    availabilityStatus: 'Ready to move',
-    buildingType: 'Resale',
-    reraStatus: 'RERA-Registered',
-    images: [] as string[],
-    video: '',
-    amenities: [] as string[],
-    powerBackup: 'None',
-    facing: 'North',
-    waterSource: [] as string[],
-    features: [] as string[],
-    flooring: '',
-    roadWidth: '',
-    locationAdvantages: [] as string[],
-    expectedPrice: '',
-    pricePerSqft: '',
-    isAllInclusive: false,
-    isNegotiable: true,
-    excludedCharges: true,
-    maintenance: '',
-    // Additional fields for other property types
-    pgSubCategory: 'Boys PG',
-    pgSharingType: 'Single Sharing',
-    pgBedCount: '1',
-    pgAttachedBathroom: false,
-    pgBalcony: false,
-    pgRoomSize: '',
-    pgMealIncluded: false,
-    pgMealType: 'Vegetarian',
-    pgMealFrequency: 'Breakfast',
-    pgCustomizationAllowed: false,
-    hotelPropertyName: '',
-    hotelType: 'Budget',
-    hotelStarRating: '3',
-    hotelTotalRooms: '10',
-    hotelRoomType: 'Standard',
-    hotelRoomSize: 'Medium',
-    hotelBeds: '1',
-    hotelBathroomType: 'Attached',
-    hotelAirConditioning: true,
-    hotelSmokingAllowed: false,
-    hotelOccupancy: '2',
-    hotelPricePerNight: '',
-    hotelAvailability: true,
-  });
+  const [propertyType, setPropertyType] = useState<string>('For Sale');
+  const [propertyCategory, setPropertyCategory] =
+    useState<string>('Residential');
 
   const handleNext = () => {
     switch (currentStep) {
@@ -131,82 +69,48 @@ export default function AddPropertyScreen() {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      const propertyData = {
-        title: formData.title,
-        description: `${formData.bedrooms} BHK ${formData.propertyType} in ${formData.locality}`,
-        type: formData.propertyType,
-        price: parseFloat(formData.expectedPrice),
-        priceUnit: formData.listingType === 'Buy' ? 'total' as const : 'perMonth' as const,
-        area: parseFloat(formData.carpetArea),
-        areaUnit: 'sqft' as const,
-        bedrooms: parseInt(formData.bedrooms),
-        bathrooms: parseInt(formData.bathrooms),
-        location: {
-          address: `${formData.houseNo}, ${formData.apartment}, ${formData.locality}`,
-          city: formData.city,
-          state: formData.state,
-          country: 'India',
-        },
-        features: formData.features,
-        furnishing: [formData.furnishingStatus],
-        nearbyPlaces: formData.locationAdvantages.map(place => ({ name: place })),
-        images: formData.images,
-        owner: {
-          id: user?.id || '',
-          name: user?.name || '',
-          image: user?.profileImage || '',
-          phone: user?.phoneNumber || '',
-          rating: 0,
-          reviews: 0,
-        },
-        parking: {
-          covered: parseInt(formData.coveredParking),
-          open: parseInt(formData.openParking),
-        },
-        ownerId: user?.id || '',
-        listingType: formData.listingType,
-      };
-
-      await addProperty(propertyData);
-      router.replace('/(tabs)');
-    } catch (error) {
-      console.error('Error adding property:', error);
-    }
-  };
+  const handleSubmit = async () => {};
 
   const renderStepIndicator = () => (
     <View style={styles.stepIndicator}>
-      {['basic', 'details', 'media', 'amenities', 'price'].map((step, index) => (
-        <View key={step} style={styles.stepContainer}>
-          <View
-            style={[
-              styles.stepDot,
-              {
-                backgroundColor:
-                  currentStep === step
-                    ? colors.primaryColor
-                    : ['basic', 'details', 'media', 'amenities', 'price'].indexOf(currentStep) >
-                      index
-                    ? colors.successColor
-                    : colors.grayLight,
-              },
-            ]}
-          >
-            {['basic', 'details', 'media', 'amenities', 'price'].indexOf(currentStep) > index && (
-              <Text style={styles.checkmark}>✓</Text>
-            )}
+      {['basic', 'details', 'media', 'amenities', 'price'].map(
+        (step, index) => (
+          <View key={step} style={styles.stepContainer}>
+            <View
+              style={[
+                styles.stepDot,
+                {
+                  backgroundColor:
+                    currentStep === step
+                      ? colors.primaryColor
+                      : [
+                          'basic',
+                          'details',
+                          'media',
+                          'amenities',
+                          'price',
+                        ].indexOf(currentStep) > index
+                      ? colors.successColor
+                      : colors.grayLight,
+                },
+              ]}
+            >
+              {['basic', 'details', 'media', 'amenities', 'price'].indexOf(
+                currentStep
+              ) > index && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            {index < 4 && <View style={styles.stepLine} />}
           </View>
-          {index < 4 && <View style={styles.stepLine} />}
-        </View>
-      ))}
+        )
+      )}
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      {/* <View style={styles.header}>
         <TouchableOpacity onPress={handleBack}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
@@ -218,19 +122,34 @@ export default function AddPropertyScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {currentStep === 'basic' && (
-          <BasicInformation formData={formData} setFormData={setFormData} />
+          <BasicInformation propertyType={propertyType} setPropertyType={setPropertyType} propertyCategory={propertyCategory} setPropertyCategory={setPropertyCategory} />
+          // <Text style={{
+          //   color: "white"
+          // }}>basic</Text>
         )}
         {currentStep === 'details' && (
-          <PropertyDetails formData={formData} setFormData={setFormData} />
+          // <PropertyDetails formData={formData} setFormData={setFormData} />
+          <Text style={{
+            color: "white"
+          }}>details</Text>
         )}
         {currentStep === 'media' && (
-          <MediaUpload formData={formData} setFormData={setFormData} />
+          // <MediaUpload formData={formData} setFormData={setFormData} />
+          <Text style={{
+            color: "white"
+          }}>media</Text>
         )}
         {currentStep === 'amenities' && (
-          <Amenities formData={formData} setFormData={setFormData} />
+          // <Amenities formData={formData} setFormData={setFormData} />
+          <Text style={{
+            color: "white"
+          }}>amenities</Text>
         )}
         {currentStep === 'price' && (
-          <PriceDetails formData={formData} setFormData={setFormData} />
+          // <PriceDetails formData={formData} setFormData={setFormData} />
+          <Text style={{
+            color: "white"
+          }}>price</Text>
         )}
       </ScrollView>
 
@@ -240,6 +159,18 @@ export default function AddPropertyScreen() {
           onPress={handleNext}
           fullWidth
         />
+      </View> */}
+      <View style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%"
+      }}>
+        <Text style={{
+          color: colors.text,
+          fontWeight: "700",
+          fontSize: 30
+        }}>This feature is comming soon</Text>
       </View>
     </SafeAreaView>
   );

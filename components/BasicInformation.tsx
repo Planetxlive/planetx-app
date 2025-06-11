@@ -1,101 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { PropertyType } from '@/context/PropertyContext';
+import { PropertyCategory } from '@/context/PropertyContext';
 
-const listingTypeOptions = [
-  'Buy', 'Rent', 'Paying Guest', 'Rent Hourly'
-] as const;
+// const listingTypeOptions = [
+//   'Buy', 'Rent', 'Paying Guest', 'Rent Hourly'
+// ] as const;
 
-const propertyCategoryOptions = [
-  'Residential', 'Pg', 'Hotel', 'Office', 'Shop', 'Warehouse', 'Shared Warehouse', 'EventSpace'
-] as const;
+// const propertyCategoryOptions = [
+//   'Residential', 'Pg', 'Hotel', 'Office', 'Shop', 'Warehouse', 'Shared Warehouse', 'EventSpace'
+// ] as const;
 
-type PropertyCategory = typeof propertyCategoryOptions[number];
+// type PropertyCategory = typeof propertyCategoryOptions[number];
 
-const propertyTypeOptions: Record<PropertyCategory, PropertyType[]> = {
-  Residential: ['Flat/Apartment', 'House/Villa', 'Plot/Land'],
-  Pg: ['Flat/Apartment'],
-  Hotel: ['Commercial'],
-  Office: ['Commercial'],
-  Shop: ['Commercial'],
-  Warehouse: ['Warehouse'],
-  'Shared Warehouse': ['Warehouse'],
-  EventSpace: ['Commercial'],
-};
+// const propertyTypeOptions: Record<PropertyCategory, PropertyType[]> = {
+//   Residential: ['Flat/Apartment', 'House/Villa', 'Plot/Land'],
+//   Pg: ['Flat/Apartment'],
+//   Hotel: ['Commercial'],
+//   Office: ['Commercial'],
+//   Shop: ['Commercial'],
+//   Warehouse: ['Warehouse'],
+//   'Shared Warehouse': ['Warehouse'],
+//   EventSpace: ['Commercial'],
+// };
 
-interface FormData {
-  listingType: 'Buy' | 'Rent' | 'Paying Guest' | 'Rent Hourly';
-  propertyCategory: PropertyCategory;
-  propertyType: PropertyType;
-  title: string;
-  city: string;
-  state: string;
-  locality: string;
-  subLocality: string;
-  apartment: string;
-  houseNo: string;
-  bedrooms: string;
-  bathrooms: string;
-  balconies: string;
-  carpetArea: string;
-  builtUpArea: string;
-  totalFloors: string;
-  propertyOnFloor: string;
-  furnishingStatus: string;
-  coveredParking: string;
-  openParking: string;
-  availabilityStatus: string;
-  buildingType: string;
-  reraStatus: string;
-  images: string[];
-  video: string;
-  amenities: string[];
-  powerBackup: string;
-  facing: string;
-  waterSource: string[];
-  features: string[];
-  flooring: string;
-  roadWidth: string;
-  locationAdvantages: string[];
-  expectedPrice: string;
-  pricePerSqft: string;
-  isAllInclusive: boolean;
-  isNegotiable: boolean;
-  excludedCharges: boolean;
-  maintenance: string;
-  pgSubCategory: string;
-  pgSharingType: string;
-  pgBedCount: string;
-  pgAttachedBathroom: boolean;
-  pgBalcony: boolean;
-  pgRoomSize: string;
-  pgMealIncluded: boolean;
-  pgMealType: string;
-  pgMealFrequency: string;
-  pgCustomizationAllowed: boolean;
-  hotelPropertyName: string;
-  hotelType: string;
-  hotelStarRating: string;
-  hotelTotalRooms: string;
-  hotelRoomType: string;
-  hotelRoomSize: string;
-  hotelBeds: string;
-  hotelBathroomType: string;
-  hotelAirConditioning: boolean;
-  hotelSmokingAllowed: boolean;
-  hotelOccupancy: string;
-  hotelPricePerNight: string;
-  hotelAvailability: boolean;
+// interface FormData {
+//   listingType: 'Buy' | 'Rent' | 'Paying Guest' | 'Rent Hourly';
+//   propertyCategory: PropertyCategory;
+//   propertyType: PropertyType;
+//   title: string;
+//   city: string;
+//   state: string;
+//   locality: string;
+//   subLocality: string;
+//   apartment: string;
+//   houseNo: string;
+//   bedrooms: string;
+//   bathrooms: string;
+//   balconies: string;
+//   carpetArea: string;
+//   builtUpArea: string;
+//   totalFloors: string;
+//   propertyOnFloor: string;
+//   furnishingStatus: string;
+//   coveredParking: string;
+//   openParking: string;
+//   availabilityStatus: string;
+//   buildingType: string;
+//   reraStatus: string;
+//   images: string[];
+//   video: string;
+//   amenities: string[];
+//   powerBackup: string;
+//   facing: string;
+//   waterSource: string[];
+//   features: string[];
+//   flooring: string;
+//   roadWidth: string;
+//   locationAdvantages: string[];
+//   expectedPrice: string;
+//   pricePerSqft: string;
+//   isAllInclusive: boolean;
+//   isNegotiable: boolean;
+//   excludedCharges: boolean;
+//   maintenance: string;
+//   pgSubCategory: string;
+//   pgSharingType: string;
+//   pgBedCount: string;
+//   pgAttachedBathroom: boolean;
+//   pgBalcony: boolean;
+//   pgRoomSize: string;
+//   pgMealIncluded: boolean;
+//   pgMealType: string;
+//   pgMealFrequency: string;
+//   pgCustomizationAllowed: boolean;
+//   hotelPropertyName: string;
+//   hotelType: string;
+//   hotelStarRating: string;
+//   hotelTotalRooms: string;
+//   hotelRoomType: string;
+//   hotelRoomSize: string;
+//   hotelBeds: string;
+//   hotelBathroomType: string;
+//   hotelAirConditioning: boolean;
+//   hotelSmokingAllowed: boolean;
+//   hotelOccupancy: string;
+//   hotelPricePerNight: string;
+//   hotelAvailability: boolean;
+// }
+
+// interface BasicInformationProps {
+//   formData: FormData;
+//   setFormData: (data: FormData) => void;
+// }r
+
+interface BasicInformationProps{
+  propertyType: string;
+  setPropertyType: React.Dispatch<React.SetStateAction<string>>;
+  propertyCategory: string;
+  setPropertyCategory: React.Dispatch<React.SetStateAction<string>>;
 }
 
-interface BasicInformationProps {
-  formData: FormData;
-  setFormData: (data: FormData) => void;
-}
-
-export default function BasicInformation({ formData, setFormData }: BasicInformationProps) {
+export default function BasicInformation({ propertyType, setPropertyType, propertyCategory, setPropertyCategory }: BasicInformationProps) {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
@@ -105,21 +112,30 @@ export default function BasicInformation({ formData, setFormData }: BasicInforma
 
       <Text style={[styles.label, { color: colors.text }]}>Are you looking for</Text>
       <View style={styles.optionsContainer}>
-        {listingTypeOptions.map((type) => (
+        {[
+        "Residential",
+        "Pg",
+        "Hotel",
+        "Office",
+        "Shop",
+        "Warehouse",
+        "Shared Warehouse",
+        "EventSpace",
+      ].map((type) => (
           <TouchableOpacity
             key={type}
             style={[
               styles.optionButton,
-              formData.listingType === type && {
+              propertyCategory === type && {
                 backgroundColor: colors.primaryColor,
               },
             ]}
-            onPress={() => setFormData({ ...formData, listingType: type })}
+            onPress={() => setPropertyCategory(type)}
           >
             <Text
               style={[
                 styles.optionText,
-                formData.listingType === type && { color: 'white' },
+                propertyCategory === type && { color: 'white' },
               ]}
             >
               {type}
@@ -128,48 +144,25 @@ export default function BasicInformation({ formData, setFormData }: BasicInforma
         ))}
       </View>
 
-      <Text style={[styles.label, { color: colors.text }]}>What kind of property</Text>
-      <View style={styles.optionsContainer}>
-        {propertyCategoryOptions.map((type) => (
-          <TouchableOpacity
-            key={type}
-            style={[
-              styles.optionButton,
-              formData.propertyCategory === type && {
-                backgroundColor: colors.primaryColor,
-              },
-            ]}
-            onPress={() => setFormData({ ...formData, propertyCategory: type, propertyType: propertyTypeOptions[type][0] })}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                formData.propertyCategory === type && { color: 'white' },
-              ]}
-            >
-              {type}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      
 
-      <Text style={[styles.label, { color: colors.text }]}>Select Property Type</Text>
+       <Text style={[styles.label, { color: colors.text }]}>What kind of property</Text>
       <View style={styles.optionsContainer}>
-        {propertyTypeOptions[formData.propertyCategory]?.map((type) => (
+        {["For Sale", "For Rent", "Commercial"].map((type) => (
           <TouchableOpacity
             key={type}
             style={[
               styles.optionButton,
-              formData.propertyType === type && {
+              propertyType === type && {
                 backgroundColor: colors.primaryColor,
               },
             ]}
-            onPress={() => setFormData({ ...formData, propertyType: type })}
+            onPress={() => setPropertyType(type)}
           >
             <Text
               style={[
                 styles.optionText,
-                formData.propertyType === type && { color: 'white' },
+                propertyType === type && { color: 'white' },
               ]}
             >
               {type}

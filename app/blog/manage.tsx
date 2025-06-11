@@ -20,6 +20,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Image as ImageIcon, Loader2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/ui/Button';
+import { uploadPropertyImages } from '@/lib/s3';
 
 const CATEGORIES: BlogCategory[] = [
   'Roommate Wanted',
@@ -73,8 +74,11 @@ export default function ManageBlogPost() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [assets, setAssets] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
   const post = getPostById(id as string);
+
+  if (post?.userId !== user?.id) router.push('/(tabs)');
 
   const [formData, setFormData] = useState({
     category: post?.category || ('' as BlogCategory),
@@ -102,7 +106,8 @@ export default function ManageBlogPost() {
       });
 
       if (!result.canceled && result.assets[0]) {
-        setFormData(prev => ({ ...prev, image: result.assets[0].uri }));
+        setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
+        setAssets(result.assets);
       }
     } catch (err) {
       console.error('Error uploading image:', err);
@@ -124,9 +129,12 @@ export default function ManageBlogPost() {
 
     setIsLoading(true);
     try {
-      await updatePost(id as string, formData);
+      const urls = (await uploadPropertyImages(assets))[0];
+      console.log(urls);
+      console.log({ ...formData, image: urls });
+      await updatePost(id as string, { ...formData, image: urls });
       Alert.alert('Success', 'Post updated successfully');
-      router.push('/blog');
+      router.push('/my-blog');
     } catch (err) {
       console.error('Error updating post:', err);
       Alert.alert('Error', 'Failed to update post. Please try again.');
@@ -228,7 +236,9 @@ export default function ManageBlogPost() {
 
   if (!post) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <ArrowLeft size={24} color={colors.text} />
@@ -241,9 +251,29 @@ export default function ManageBlogPost() {
       </SafeAreaView>
     );
   }
-
+  if (isLoading)
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <Text style={{ color: colors.text, fontWeight: '700', fontSize: 30 }}>
+            Loading...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -260,7 +290,9 @@ export default function ManageBlogPost() {
 
         <ScrollView style={styles.content}>
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Category</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Category
+            </Text>
             <View style={styles.categoryContainer}>
               {CATEGORIES.map((category) => (
                 <TouchableOpacity
@@ -290,20 +322,38 @@ export default function ManageBlogPost() {
           </View>
 
           {renderFormField('title', 'Title', 'Enter post title')}
-          {renderFormField('description', 'Description', 'Provide detailed information', true, 6)}
+          {renderFormField(
+            'description',
+            'Description',
+            'Provide detailed information',
+            true,
+            6
+          )}
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Location</Text>
-            {renderLocationField('houseNumber', 'House Number (Optional)', false)}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Location
+            </Text>
+            {renderLocationField(
+              'houseNumber',
+              'House Number (Optional)',
+              false
+            )}
             {renderLocationField('apartment', 'Apartment (Optional)', false)}
-            {renderLocationField('subLocality', 'Sub Locality (Optional)', false)}
+            {renderLocationField(
+              'subLocality',
+              'Sub Locality (Optional)',
+              false
+            )}
             {renderLocationField('locality', 'Locality', true)}
             {renderLocationField('city', 'City', true)}
             {renderLocationField('state', 'State', true)}
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>Add Image</Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Add Image
+            </Text>
             <TouchableOpacity
               style={[
                 styles.imageUpload,
@@ -312,11 +362,16 @@ export default function ManageBlogPost() {
               onPress={handleImagePick}
             >
               {formData.image ? (
-                <Image source={{ uri: formData.image }} style={styles.uploadedImage} />
+                <Image
+                  source={{ uri: formData.image }}
+                  style={styles.uploadedImage}
+                />
               ) : (
                 <>
                   <ImageIcon size={24} color={colors.grayDark} />
-                  <Text style={[styles.imageUploadText, { color: colors.grayDark }]}>
+                  <Text
+                    style={[styles.imageUploadText, { color: colors.grayDark }]}
+                  >
                     Choose image
                   </Text>
                 </>
@@ -324,7 +379,11 @@ export default function ManageBlogPost() {
             </TouchableOpacity>
           </View>
 
-          {renderFormField('contactInfo', 'Contact Information', 'Email, phone number, or other contact info')}
+          {renderFormField(
+            'contactInfo',
+            'Contact Information',
+            'Email, phone number, or other contact info'
+          )}
         </ScrollView>
 
         <View style={styles.footer}>
@@ -448,4 +507,4 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginTop: 12,
   },
-}); 
+});

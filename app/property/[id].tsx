@@ -40,6 +40,7 @@ import {
   Trash,
   User,
 } from 'lucide-react-native';
+import { useAuth } from '@/context/AuthContext';
 
 interface PropertyImage {
   src: string;
@@ -438,7 +439,7 @@ const transformPropertyData = (data: PropertyData): Property => {
         },
         {
           icon: 'layers',
-          label: data.propertyOnFloor ? `${data.propertyOnFloor} / ${data.totalFloors || 'N/A'} floors` : 'N/A',
+          label:  data.propertyOnFloor !== undefined && data.totalFloors !== undefined ? `${data.propertyOnFloor} / ${data.totalFloors || 'N/A'} floors` : 'N/A',
         },
         {
           icon: 'tag',
@@ -454,7 +455,7 @@ const transformPropertyData = (data: PropertyData): Property => {
         { label: 'Bathrooms', value: data.about?.bathrooms || 'N/A' },
         { label: 'Balconies', value: data.about?.balconies || 'N/A' },
         { label: 'Total no. of Floor', value: data.totalFloors || 'N/A' },
-        { label: 'Property on Floor', value: data.propertyOnFloor || 'N/A' },
+        { label: 'Property on Floor', value: data.propertyOnFloor !== undefined? data.propertyOnFloor :'N/A' },
         { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
         {
           label: 'Available From',
@@ -468,7 +469,7 @@ const transformPropertyData = (data: PropertyData): Property => {
         { label: 'Water Source', value: data.waterSource || 'N/A' },
         { label: 'Width of facing road', value: data.roadWidth || 'N/A' },
         { label: 'Type of flooring', value: data.flooring || 'N/A' },
-        { label: 'Property ID', value: data._id },
+        // { label: 'Property ID', value: data._id },
       ];
       areaDetails = [
         {
@@ -539,7 +540,7 @@ const transformPropertyData = (data: PropertyData): Property => {
           data.pricing?.price?.amount ||
           data.pricing?.rentalDetails?.monthlyRent ||
           data.pricing?.monthlyRent ||
-          null,
+          0,
       };
       features = [
         {
@@ -569,8 +570,9 @@ const transformPropertyData = (data: PropertyData): Property => {
       areaDetails = [
         {
           label: 'Carpet Area',
-          value: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
-            ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
+          value: data?.pricing.PricePerSqft
+            ? `${data?.pricing.PricePerSqft} Sq.ft.` : 'N/A',
+            // ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
           subValue: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
             ? `${((data.propertyDetails?.carpetArea?.size || data.carpetArea?.size) * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
         },
@@ -920,6 +922,7 @@ interface OwnerModalProps {
 const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNotify }) => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
+  const { user } = useAuth();
 
   if (!visible) return null;
 
@@ -936,10 +939,10 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
           <View style={styles.ownerModalBody}>
             <View style={[styles.avatar, { backgroundColor: colors.primaryColor + '20' }]}>
               <Text style={[styles.avatarText, { color: colors.text }]}>
-                {owner.name.slice(0, 2).toUpperCase()}
+                {user?.name.slice(0, 2).toUpperCase()}
               </Text>
             </View>
-            <Text style={[styles.ownerName, { color: colors.text }]}>{owner.name}</Text>
+            <Text style={[styles.ownerName, { color: colors.text }]}>{user?.name}</Text>
             <View style={styles.starContainer}>
               {Array(5)
                 .fill(0)

@@ -20,6 +20,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Image as ImageIcon, Loader2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/ui/Button';
+import { uploadPropertyImages } from '@/lib/s3';
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
 const CATEGORIES: BlogCategory[] = [
@@ -73,6 +74,7 @@ export default function CreateBlogPost() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [assets, setAsset] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
   const [formData, setFormData] = useState({
     category: '' as BlogCategory,
@@ -100,7 +102,8 @@ export default function CreateBlogPost() {
       });
 
       if (!result.canceled && result.assets[0]) {
-        setFormData(prev => ({ ...prev, image: result.assets[0].uri }));
+        setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
+        setAsset(result.assets);
       }
     } catch (err) {
       console.error('Error uploading image:', err);
@@ -122,8 +125,11 @@ export default function CreateBlogPost() {
 
     setIsLoading(true);
     try {
+      const urls = (await uploadPropertyImages(assets))[0];
+      console.log(`image url is ${urls}`);
       await addPost({
         ...formData,
+        image: urls,
         userId: user.id,
       });
       router.push('/blog');
@@ -195,9 +201,29 @@ export default function CreateBlogPost() {
       {errors[field] && <Text style={styles.errorText}>{errors[field]}</Text>}
     </View>
   );
-
+  if (isLoading)
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <Text
+            style={{ color: colors.text, fontWeight: '700', fontSize: 30 }}
+          >Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView 
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -214,7 +240,9 @@ export default function CreateBlogPost() {
 
         <ScrollView style={styles.content}>
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Category</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Category
+            </Text>
             <View style={styles.categoryContainer}>
               {CATEGORIES.map((category) => (
                 <TouchableOpacity
@@ -244,20 +272,38 @@ export default function CreateBlogPost() {
           </View>
 
           {renderFormField('title', 'Title', 'Enter post title')}
-          {renderFormField('description', 'Description', 'Provide detailed information', true, 6)}
+          {renderFormField(
+            'description',
+            'Description',
+            'Provide detailed information',
+            true,
+            6
+          )}
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Location</Text>
-            {renderLocationField('houseNumber', 'House Number (Optional)', false)}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Location
+            </Text>
+            {renderLocationField(
+              'houseNumber',
+              'House Number (Optional)',
+              false
+            )}
             {renderLocationField('apartment', 'Apartment (Optional)', false)}
-            {renderLocationField('subLocality', 'Sub Locality (Optional)', false)}
+            {renderLocationField(
+              'subLocality',
+              'Sub Locality (Optional)',
+              false
+            )}
             {renderLocationField('locality', 'Locality', true)}
             {renderLocationField('city', 'City', true)}
             {renderLocationField('state', 'State', true)}
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>Add Image</Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Add Image
+            </Text>
             <TouchableOpacity
               style={[
                 styles.imageUpload,
@@ -266,11 +312,16 @@ export default function CreateBlogPost() {
               onPress={handleImagePick}
             >
               {formData.image ? (
-                <Image source={{ uri: formData.image }} style={styles.uploadedImage} />
+                <Image
+                  source={{ uri: formData.image }}
+                  style={styles.uploadedImage}
+                />
               ) : (
                 <>
                   <ImageIcon size={24} color={colors.grayDark} />
-                  <Text style={[styles.imageUploadText, { color: colors.grayDark }]}>
+                  <Text
+                    style={[styles.imageUploadText, { color: colors.grayDark }]}
+                  >
                     Choose image
                   </Text>
                 </>
@@ -278,7 +329,11 @@ export default function CreateBlogPost() {
             </TouchableOpacity>
           </View>
 
-          {renderFormField('contactInfo', 'Contact Information', 'Email, phone number, or other contact info')}
+          {renderFormField(
+            'contactInfo',
+            'Contact Information',
+            'Email, phone number, or other contact info'
+          )}
         </ScrollView>
 
         <View style={styles.footer}>
