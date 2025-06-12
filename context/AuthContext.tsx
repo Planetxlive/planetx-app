@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosResponse } from 'axios';
 import { Use } from 'react-native-svg';
+import { backendUrl } from '@/lib/uri';
 
 // type User = {
 //   id: string;
@@ -53,7 +54,7 @@ const AuthContext = createContext<AuthContextType>({
 // };
 
 const updateUser = async (token: string): Promise<User> => {
-  const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/get-user/`;
+  const url = `${backendUrl}/auth/get-user/`;
   const res = await axios.get(url, {
     headers: {
       Authorization: token,
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // For now, we'll just store the phone number for verification
       setPendingPhoneNumber(phoneNumber);
       // console.log(phoneNumber);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/send-otp/`;
+      const url = `${backendUrl}/auth/send-otp/`;
       // console.log(process.env.EXPO_PUBLIC_API_URL);
       // console.log(url);
       const res = await axios.post(url, {
@@ -129,7 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // For mock purposes, any OTP will work
       if (pendingPhoneNumber) {
         try {
-          const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/verify-otp/`;
+          const url = `${backendUrl}/auth/verify-otp/`;
           // console.log(process.env.EXPO_PUBLIC_API_URL);
           // console.log(url);
           const res = await axios.post(url, {
@@ -174,7 +175,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (user) {
         const token = await AsyncStorage.getItem('accessToken');
         // const updatedUser = { ...user, ...data };
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/update-user`;
+        const url = `${backendUrl}/auth/update-user`;
         console.log(url);
         const res = await axios.patch(url, data, {
           headers: {

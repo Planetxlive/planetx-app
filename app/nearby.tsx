@@ -15,7 +15,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { backendUrl } from '@/lib/uri';
 export default function NearbyScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
@@ -26,7 +26,7 @@ export default function NearbyScreen() {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/get-user/`;
+        const url = `${backendUrl}/auth/get-user/`;
         const res = await axios.get(url, {
           headers: {
             Authorization: token,

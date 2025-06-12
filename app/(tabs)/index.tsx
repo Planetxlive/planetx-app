@@ -21,7 +21,7 @@ import { Search, Bell, FileText } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { backendUrl } from '@/lib/uri';
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
@@ -37,7 +37,7 @@ export default function HomeScreen() {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        const url = `${process.env.EXPO_PUBLIC_API_URL}/auth/get-user/`;
+        const url = `${backendUrl}/auth/get-user/`;
         const res = await axios.get(url, {
           headers: {
             Authorization: token,

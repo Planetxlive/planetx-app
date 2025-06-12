@@ -17,7 +17,8 @@ import Button from '@/components/ui/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Constants from 'expo-constants';
-
+import { backendUrl } from '@/lib/uri';
+  
 export default function FeedbackScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
@@ -61,7 +62,7 @@ export default function FeedbackScreen() {
       }
 
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/centralfeedback`,
+        `${backendUrl}/centralfeedback`,
         {
           feedbackType,
           stars: rating,

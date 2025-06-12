@@ -1,3 +1,4 @@
+import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { createContext, useState, useContext, useEffect } from 'react';
@@ -203,7 +204,7 @@ export const ParkingProvider = ({
       const token = await AsyncStorage.getItem('accessToken');
 
       const res = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}/Parking/`,
+        `${backendUrl}/Parking/`,
         {
           headers: {
             Authorization: token,
@@ -236,7 +237,7 @@ export const ParkingProvider = ({
     );
     const token = await AsyncStorage.getItem('accessToken');
     const res = await axios.put(
-      `${process.env.EXPO_PUBLIC_API_URL}/Parking/update/${id}`,
+      `${backendUrl}/Parking/update/${id}`,
       spot,
       {
         headers: {
@@ -251,7 +252,7 @@ export const ParkingProvider = ({
     const token = await AsyncStorage.getItem('accessToken');
 
     const res = await axios.get(
-      `${process.env.EXPO_PUBLIC_API_URL}/Parking/delete/${id}`,
+      `${backendUrl}/Parking/delete/${id}`,
       {
         headers: {
           Authorization: token,

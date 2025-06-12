@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { backendUrl } from '@/lib/uri';
 
 export type BlogCategory = 'Roommate Wanted' | 'Property For Sale' | 'Property For Rent' | 'Community Updates' | 'Market Insights';
 
@@ -78,7 +79,7 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
     
     try {
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/blogs/create`,
+        `${backendUrl}/blogs/create`,
         post,
         {
           headers: {
@@ -98,7 +99,7 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
     
     try {
       const response = await axios.put(
-        `${process.env.EXPO_PUBLIC_API_URL}/blogs/update/${id}`,
+        `${backendUrl}/blogs/update/${id}`,
         post,
         {
           headers: {
@@ -117,7 +118,7 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
     if (!token) throw new Error('No authentication token found');
     
     try {
-      await axios.delete(`${process.env.EXPO_PUBLIC_API_URL}/blogs/delete/${id}`, {
+      await axios.delete(`${backendUrl}/blogs/delete/${id}`, {
         headers: {
           Authorization: token,
         },
@@ -143,7 +144,7 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}/blogs/get`,
+        `${backendUrl}/blogs/get`,
         {
           params: {
             page,

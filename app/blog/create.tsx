@@ -21,7 +21,8 @@ import { ArrowLeft, Image as ImageIcon, Loader2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/ui/Button';
 import { uploadPropertyImages } from '@/lib/s3';
-const BACKEND_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { backendUrl } from '@/lib/uri';
+const BACKEND_URL = backendUrl || 'http://localhost:3001';
 
 const CATEGORIES: BlogCategory[] = [
   'Roommate Wanted',

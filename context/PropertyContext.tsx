@@ -1,3 +1,4 @@
+import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { createContext, useState, useContext, useEffect } from 'react';
@@ -186,7 +187,7 @@ const createPropertyTitle = (prop: Property): string => {
 
 const fetchAvailableProperties = async (): Promise<Property[]> => {
   const token = await AsyncStorage.getItem('accessToken');
-  const url = `${process.env.EXPO_PUBLIC_API_URL}/properties/availableProperty`;
+  const url = `${backendUrl}/properties/availableProperty`;
   const res = await axios.get(url, {
     headers: {
       Authorization: token,
@@ -222,7 +223,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = await AsyncStorage.getItem('accessToken');
       if (!token) return;
 
-      const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+      const userResponse = await axios.get(`${backendUrl}/auth/get-user`, {
         headers: { Authorization: token },
       });
 
@@ -230,7 +231,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const currentUserId = userResponse.data.user._id;
       const wishlistResponse = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}/wishlist/get-wishlist/${currentUserId}`,
+        `${backendUrl}/wishlist/get-wishlist/${currentUserId}`,
         { headers: { Authorization: token } }
       );
 
@@ -325,18 +326,18 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (isInWishlist) {
         await axios.delete(
-          `${process.env.EXPO_PUBLIC_API_URL}/wishlist/remove/${propertyId}`,
+          `${backendUrl}/wishlist/remove/${propertyId}`,
           { headers: { Authorization: token } }
         );
         setFavorites(favorites.filter((id) => id !== propertyId));
       } else {
-        const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+        const userResponse = await axios.get(`${backendUrl}/auth/get-user`, {
           headers: { Authorization: token },
         });
         const userId = userResponse.data.user._id;
 
         await axios.post(
-          `${process.env.EXPO_PUBLIC_API_URL}/wishlist/add-wishlist`,
+          `${backendUrl}/wishlist/add-wishlist`,
           { userId, propertyIds: [propertyId] },
           { headers: { Authorization: token } }
         );
@@ -352,7 +353,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getUserProperties = async () => {
     const token = await AsyncStorage.getItem('accessToken');
-    const url = `${process.env.EXPO_PUBLIC_API_URL}/properties/alluser-properties`;
+    const url = `${backendUrl}/properties/alluser-properties`;
     const res = await axios.get(url, {
       headers: {
         Authorization: token,

@@ -21,7 +21,7 @@ import { formatDistanceToNow } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-
+import { backendUrl } from '@/lib/uri';
 type Notification = {
   _id: string;
   heading: string;
@@ -64,13 +64,13 @@ export default function NotificationsScreen() {
         return;
       }
 
-      const userResponse = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/get-user`, {
+      const userResponse = await axios.get(`${backendUrl}/auth/get-user`, {
         headers: { Authorization: token },
       });
       
       const userId = userResponse.data.user._id;
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_URL}/properties/notification/${userId}`,
+        `${backendUrl}/properties/notification/${userId}`,
         { headers: { Authorization: token } }
       );
 

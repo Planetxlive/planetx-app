@@ -1,3 +1,4 @@
+import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { createContext, useState, useContext, useEffect } from 'react';
@@ -322,7 +323,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchAll = async () => {
       const token = await AsyncStorage.getItem('accessToken');
 
-      const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/gym`, {
+      const res = await axios.get(`${backendUrl}/gym`, {
         headers: {
           Authorization: token,
         },
@@ -340,7 +341,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
     const token = await AsyncStorage.getItem('accessToken');
 
     const res = await axios.post(
-      `${process.env.EXPO_PUBLIC_API_URL}/gym/create`,
+      `${backendUrl}/gym/create`,
       gym,
       {
         headers: {
@@ -361,7 +362,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
     const token = await AsyncStorage.getItem('accessToken');
 
     const res = await axios.put(
-      `${process.env.EXPO_PUBLIC_API_URL}/gym/update/${id}`,
+      `${backendUrl}/gym/update/${id}`,
       gym,
       {
         headers: {
@@ -376,7 +377,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
     const token = await AsyncStorage.getItem('accessToken');
 
     const res = await axios.delete(
-      `${process.env.EXPO_PUBLIC_API_URL}/gym/delete/${id}`,
+      `${backendUrl}/gym/delete/${id}`,
       {
         headers: {
           Authorization: token,

@@ -1,43 +1,39 @@
 {
   "expo": {
-    "name": "PlanetX",
-    "slug": "PlanetX",
+    "name": "planetX-live",
+    "slug": "planetx-live",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/adaptive-icon.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.raghurajpratap28.PlanetX",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "single",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-file-system",
-      "expo-router",
-      "expo-font",
-      "expo-web-browser",
-      "expo-video"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "542f3ef8-d206-4ede-bc67-49f62decf6c8"
-      }
+      "bundleIdentifier": "com.planetx.app"
     },
     "android": {
-      "package": "com.raghurajpratap28.PlanetX"
-    }
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "bundleIdentifier": "com.planetx.app",
+      "package": "com.planetx.app"
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7b69337e-e122-433c-aaf5-846facfee047"
+      }
+    },
+    "owner": "planetx-live"
   }
 }
