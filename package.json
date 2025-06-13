@@ -50,7 +50,6 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.56.4",
     "react-native": "0.79.2",
-    "react-native-appearance": "^0.3.4",
     "react-native-config": "^1.5.5",
     "react-native-dark-mode": "^0.2.2",
     "react-native-elements": "^3.4.3",
