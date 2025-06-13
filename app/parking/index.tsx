@@ -14,6 +14,7 @@ import ParkingCard from '@/components/ParkingCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Search, SlidersHorizontal } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function ParkingScreen() {
   const colorScheme = useColorScheme();
@@ -21,54 +22,63 @@ export default function ParkingScreen() {
   const { parkingSpots } = useParking();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredSpots = parkingSpots.filter((spot) =>
-    spot.spotNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    spot.locality?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    spot.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSpots = parkingSpots.filter(
+    (spot) =>
+      spot.spotNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      spot.locality?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      spot.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Parking Spots</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: colors.grayLight }]}>
-          <Search size={20} color={colors.grayDark} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search parking spots..."
-            placeholderTextColor={colors.grayDark}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Parking Spots
+          </Text>
+          <View style={{ width: 24 }} />
         </View>
-        <TouchableOpacity
-          style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
-        >
-          <SlidersHorizontal size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
 
-      <FlatList
-        data={filteredSpots}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ParkingCard parkingSpot={item} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: colors.text }]}>
-              No parking spots found
-            </Text>
+        <View style={styles.searchContainer}>
+          <View
+            style={[styles.searchBar, { backgroundColor: colors.grayLight }]}
+          >
+            <Search size={20} color={colors.grayDark} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search parking spots..."
+              placeholderTextColor={colors.grayDark}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-        }
-      />
-    </SafeAreaView>
+          <TouchableOpacity
+            style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
+          >
+            <SlidersHorizontal size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={filteredSpots}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <ParkingCard parkingSpot={item} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>
+                No parking spots found
+              </Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

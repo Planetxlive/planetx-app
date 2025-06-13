@@ -21,6 +21,7 @@ import { ArrowLeft, Image as ImageIcon, Loader2 } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/ui/Button';
 import { uploadPropertyImages } from '@/lib/s3';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const CATEGORIES: BlogCategory[] = [
   'Roommate Wanted',
@@ -253,156 +254,165 @@ export default function ManageBlogPost() {
   }
   if (isLoading)
     return (
+      <SafeAreaProvider>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: colors.background }]}
+        >
+          <View
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+          >
+            <Text
+              style={{ color: colors.text, fontWeight: '700', fontSize: 30 }}
+            >
+              Loading...
+            </Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    );
+  return (
+    <SafeAreaProvider>
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-          }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
         >
-          <Text style={{ color: colors.text, fontWeight: '700', fontSize: 30 }}>
-            Loading...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ArrowLeft size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Edit Post
-          </Text>
-          <View style={{ width: 24 }} />
-        </View>
-
-        <ScrollView style={styles.content}>
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Category
-            </Text>
-            <View style={styles.categoryContainer}>
-              {CATEGORIES.map((category) => (
-                <TouchableOpacity
-                  key={category}
-                  style={[
-                    styles.categoryButton,
-                    formData.category === category && {
-                      backgroundColor: colors.primaryColor,
-                    },
-                  ]}
-                  onPress={() => setFormData({ ...formData, category })}
-                >
-                  <Text
-                    style={[
-                      styles.categoryButtonText,
-                      formData.category === category && { color: 'white' },
-                    ]}
-                  >
-                    {category}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            {errors.category && (
-              <Text style={styles.errorText}>{errors.category}</Text>
-            )}
-          </View>
-
-          {renderFormField('title', 'Title', 'Enter post title')}
-          {renderFormField(
-            'description',
-            'Description',
-            'Provide detailed information',
-            true,
-            6
-          )}
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Location
-            </Text>
-            {renderLocationField(
-              'houseNumber',
-              'House Number (Optional)',
-              false
-            )}
-            {renderLocationField('apartment', 'Apartment (Optional)', false)}
-            {renderLocationField(
-              'subLocality',
-              'Sub Locality (Optional)',
-              false
-            )}
-            {renderLocationField('locality', 'Locality', true)}
-            {renderLocationField('city', 'City', true)}
-            {renderLocationField('state', 'State', true)}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Add Image
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.imageUpload,
-                { backgroundColor: colors.inputBackground },
-              ]}
-              onPress={handleImagePick}
-            >
-              {formData.image ? (
-                <Image
-                  source={{ uri: formData.image }}
-                  style={styles.uploadedImage}
-                />
-              ) : (
-                <>
-                  <ImageIcon size={24} color={colors.grayDark} />
-                  <Text
-                    style={[styles.imageUploadText, { color: colors.grayDark }]}
-                  >
-                    Choose image
-                  </Text>
-                </>
-              )}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <ArrowLeft size={24} color={colors.text} />
             </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              Edit Post
+            </Text>
+            <View style={{ width: 24 }} />
           </View>
 
-          {renderFormField(
-            'contactInfo',
-            'Contact Information',
-            'Email, phone number, or other contact info'
-          )}
-        </ScrollView>
+          <ScrollView style={styles.content}>
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Category
+              </Text>
+              <View style={styles.categoryContainer}>
+                {CATEGORIES.map((category) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={[
+                      styles.categoryButton,
+                      formData.category === category && {
+                        backgroundColor: colors.primaryColor,
+                      },
+                    ]}
+                    onPress={() => setFormData({ ...formData, category })}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryButtonText,
+                        formData.category === category && { color: 'white' },
+                      ]}
+                    >
+                      {category}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {errors.category && (
+                <Text style={styles.errorText}>{errors.category}</Text>
+              )}
+            </View>
 
-        <View style={styles.footer}>
-          <Button
-            title={isLoading ? 'Updating Post...' : 'Update Post'}
-            onPress={handleUpdate}
-            loading={isLoading}
-            fullWidth
-          />
-          <Button
-            title="Delete Post"
-            onPress={handleDelete}
-            variant="primary"
-            style={[styles.deleteButton, { backgroundColor: '#EF4444' }]}
-            fullWidth
-          />
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            {renderFormField('title', 'Title', 'Enter post title')}
+            {renderFormField(
+              'description',
+              'Description',
+              'Provide detailed information',
+              true,
+              6
+            )}
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Location
+              </Text>
+              {renderLocationField(
+                'houseNumber',
+                'House Number (Optional)',
+                false
+              )}
+              {renderLocationField('apartment', 'Apartment (Optional)', false)}
+              {renderLocationField(
+                'subLocality',
+                'Sub Locality (Optional)',
+                false
+              )}
+              {renderLocationField('locality', 'Locality', true)}
+              {renderLocationField('city', 'City', true)}
+              {renderLocationField('state', 'State', true)}
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Add Image
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.imageUpload,
+                  { backgroundColor: colors.inputBackground },
+                ]}
+                onPress={handleImagePick}
+              >
+                {formData.image ? (
+                  <Image
+                    source={{ uri: formData.image }}
+                    style={styles.uploadedImage}
+                  />
+                ) : (
+                  <>
+                    <ImageIcon size={24} color={colors.grayDark} />
+                    <Text
+                      style={[
+                        styles.imageUploadText,
+                        { color: colors.grayDark },
+                      ]}
+                    >
+                      Choose image
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {renderFormField(
+              'contactInfo',
+              'Contact Information',
+              'Email, phone number, or other contact info'
+            )}
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <Button
+              title={isLoading ? 'Updating Post...' : 'Update Post'}
+              onPress={handleUpdate}
+              loading={isLoading}
+              fullWidth
+            />
+            <Button
+              title="Delete Post"
+              onPress={handleDelete}
+              variant="primary"
+              style={[styles.deleteButton, { backgroundColor: '#EF4444' }]}
+              fullWidth
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

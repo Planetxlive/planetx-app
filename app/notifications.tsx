@@ -58,7 +58,7 @@ export default function NotificationsScreen() {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('accessToken');
-      
+
       if (!token) {
         router.replace('/auth/login');
         return;
@@ -67,26 +67,34 @@ export default function NotificationsScreen() {
       const userResponse = await axios.get(`${backendUrl}/auth/get-user`, {
         headers: { Authorization: token },
       });
-      
+
       const userId = userResponse.data.user._id;
       const response = await axios.get(
         `${backendUrl}/properties/notification/${userId}`,
         { headers: { Authorization: token } }
       );
 
-
       setNotifications(response.data || []);
     } catch (error: any) {
-      if (error.response?.data?.message === "No notifications found for this user.") {
+      if (
+        error.response?.data?.message ===
+        'No notifications found for this user.'
+      ) {
         return;
       }
-      console.error("Error fetching notifications:", error);
+      console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const renderNotification = ({ item, index }: { item: Notification; index: number }) => {
+  const renderNotification = ({
+    item,
+    index,
+  }: {
+    item: Notification;
+    index: number;
+  }) => {
     const translateY = scrollY.interpolate({
       inputRange: [-1, 0, 100 * index, 100 * (index + 2)],
       outputRange: [0, 0, 0, -10],
@@ -108,23 +116,37 @@ export default function NotificationsScreen() {
           <View style={styles.notificationContent}>
             <View style={styles.notificationHeader}>
               {item.userId?.image ? (
-                <Image source={{ uri: item.userId.image }} style={styles.userImage} />
+                <Image
+                  source={{ uri: item.userId.image }}
+                  style={styles.userImage}
+                />
               ) : (
-                <View style={[styles.iconContainer, { backgroundColor: colors.primaryColor + '20' }]}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: colors.primaryColor + '20' },
+                  ]}
+                >
                   <Bell size={20} color={colors.primaryColor} />
                 </View>
               )}
               <View style={styles.titleContainer}>
-                <Text style={[styles.notificationTitle, { color: colors.text }]}>
+                <Text
+                  style={[styles.notificationTitle, { color: colors.text }]}
+                >
                   {item.heading}
                 </Text>
                 <Text style={[styles.timeText, { color: colors.grayDark }]}>
-                  {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(item.date), {
+                    addSuffix: true,
+                  })}
                 </Text>
               </View>
             </View>
-            
-            <Text style={[styles.notificationMessage, { color: colors.grayDark }]}>
+
+            <Text
+              style={[styles.notificationMessage, { color: colors.grayDark }]}
+            >
               {item.userId && (
                 <Text style={[styles.userName, { color: colors.primaryColor }]}>
                   {item.userId.name}{' '}
@@ -139,55 +161,63 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <BlurView intensity={80} style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Notifications
-        </Text>
-        <TouchableOpacity style={styles.readAllButton}>
-          <Text style={[styles.readAllText, { color: colors.primaryColor }]}>
-            Read all
+    <SafeAreaView>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <BlurView intensity={80} style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Notifications
           </Text>
-        </TouchableOpacity>
-      </BlurView>
+          <TouchableOpacity style={styles.readAllButton}>
+            <Text style={[styles.readAllText, { color: colors.primaryColor }]}>
+              Read all
+            </Text>
+          </TouchableOpacity>
+        </BlurView>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryColor} />
-        </View>
-      ) : (
-        <Animated.FlatList
-          data={notifications}
-          renderItem={renderNotification}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { 
-              useNativeDriver: true,
-              listener: (event) => {
-                // Optional: Add any additional scroll handling here
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryColor} />
+          </View>
+        ) : (
+          <Animated.FlatList
+            data={notifications}
+            renderItem={renderNotification}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              {
+                useNativeDriver: true,
+                listener: (event) => {
+                  // Optional: Add any additional scroll handling here
+                },
               }
+            )}
+            scrollEventThrottle={16}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Bell
+                  size={48}
+                  color={colors.grayDark}
+                  style={styles.emptyIcon}
+                />
+                <Text style={[styles.emptyText, { color: colors.grayDark }]}>
+                  No notifications yet
+                </Text>
+              </View>
             }
-          )}
-          scrollEventThrottle={16}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Bell size={48} color={colors.grayDark} style={styles.emptyIcon} />
-              <Text style={[styles.emptyText, { color: colors.grayDark }]}>
-                No notifications yet
-              </Text>
-            </View>
-          }
-        />
-      )}
+          />
+        )}
+      </SafeAreaView>
     </SafeAreaView>
   );
 }

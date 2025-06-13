@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function VerifyOTPScreen() {
   const colorScheme = useColorScheme() || 'light';
@@ -86,95 +87,108 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <View style={styles.container}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleGoBack}
-          >
-            <ArrowLeft size={24} color={colors.text} />
-            <Text style={[styles.backText, { color: colors.text }]}>
-              OTP verification
-            </Text>
-          </TouchableOpacity>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+              <ArrowLeft size={24} color={colors.text} />
+              <Text style={[styles.backText, { color: colors.text }]}>
+                OTP verification
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.content}>
-            <View style={styles.illustrationContainer}>
-              <View style={styles.illustration}>
-                {/* Illustration can be an SVG or Image */}
-                <View style={[styles.illustrationCircle, { backgroundColor: colors.grayLight }]}>
-                  <View style={[styles.checkmark, { backgroundColor: colors.primaryColor }]}>
-                    <Text style={styles.checkmarkText}>✓</Text>
+            <View style={styles.content}>
+              <View style={styles.illustrationContainer}>
+                <View style={styles.illustration}>
+                  {/* Illustration can be an SVG or Image */}
+                  <View
+                    style={[
+                      styles.illustrationCircle,
+                      { backgroundColor: colors.grayLight },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.checkmark,
+                        { backgroundColor: colors.primaryColor },
+                      ]}
+                    >
+                      <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
 
-            <Text style={[styles.message, { color: colors.grayDark }]}>
-              We've sent a Verification Code to
-            </Text>
-            <Text style={[styles.phoneNumber, { color: colors.text }]}>
-              {pendingPhoneNumber}
-            </Text>
+              <Text style={[styles.message, { color: colors.grayDark }]}>
+                We've sent a Verification Code to
+              </Text>
+              <Text style={[styles.phoneNumber, { color: colors.text }]}>
+                {pendingPhoneNumber}
+              </Text>
 
-            <View style={styles.otpContainer}>
-              <OTPInput
-                length={4}
-                value={otp}
-                onChange={setOtp}
-                error={error}
+              <View style={styles.otpContainer}>
+                <OTPInput
+                  length={4}
+                  value={otp}
+                  onChange={setOtp}
+                  error={error}
+                />
+              </View>
+
+              <Button
+                title="Verify OTP"
+                onPress={handleVerifyOTP}
+                loading={isLoading}
+                fullWidth
+                style={styles.button}
               />
-            </View>
 
-            <Button
-              title="Verify OTP"
-              onPress={handleVerifyOTP}
-              loading={isLoading}
-              fullWidth
-              style={styles.button}
-            />
-
-            <View style={styles.timerContainer}>
-              <Text style={[styles.timerText, { color: colors.grayDark }]}>
-                Code expired in{' '}
-                <Text style={{ color: timeLeft === 0 ? colors.errorColor : '#FF6B6B' }}>
-                  {formatTime(timeLeft)}
+              <View style={styles.timerContainer}>
+                <Text style={[styles.timerText, { color: colors.grayDark }]}>
+                  Code expired in{' '}
+                  <Text
+                    style={{
+                      color: timeLeft === 0 ? colors.errorColor : '#FF6B6B',
+                    }}
+                  >
+                    {formatTime(timeLeft)}
+                  </Text>
                 </Text>
-              </Text>
-            </View>
+              </View>
 
-            <View style={styles.resendContainer}>
-              <Text style={[styles.resendText, { color: colors.grayDark }]}>
-                Didn't receive the OTP?{' '}
-              </Text>
-              <TouchableOpacity
-                onPress={handleResendOTP}
-                disabled={timeLeft > 0 || isResending}
-              >
-                <Text
-                  style={[
-                    styles.resendLink,
-                    {
-                      color:
-                        timeLeft > 0 || isResending
-                          ? colors.grayDark
-                          : colors.primaryColor,
-                    },
-                  ]}
+              <View style={styles.resendContainer}>
+                <Text style={[styles.resendText, { color: colors.grayDark }]}>
+                  Didn't receive the OTP?{' '}
+                </Text>
+                <TouchableOpacity
+                  onPress={handleResendOTP}
+                  disabled={timeLeft > 0 || isResending}
                 >
-                  Resend OTP
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={[
+                      styles.resendLink,
+                      {
+                        color:
+                          timeLeft > 0 || isResending
+                            ? colors.grayDark
+                            : colors.primaryColor,
+                      },
+                    ]}
+                  >
+                    Resend OTP
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

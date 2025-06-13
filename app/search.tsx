@@ -9,22 +9,36 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useProperties, Property, PropertyCategory } from '@/context/PropertyContext';
+import {
+  useProperties,
+  Property,
+  PropertyCategory,
+} from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { ArrowLeft, Search as SearchIcon, X, ChevronDown } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Search as SearchIcon,
+  X,
+  ChevronDown,
+} from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function SearchScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const router = useRouter();
   const { properties } = useProperties();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedType, setSelectedType] = useState<PropertyCategory | null>(null);
-  const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<PropertyCategory | null>(
+    null
+  );
+  const [selectedListingType, setSelectedListingType] = useState<string | null>(
+    null
+  );
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
@@ -36,9 +50,9 @@ export default function SearchScreen() {
     'Shop',
     'Warehouse',
     'Shared Warehouse',
-    'EventSpace'
+    'EventSpace',
   ];
-  
+
   const listingTypes = ['For Sale', 'For Rent', 'Paying Guest', 'Rent Hourly'];
 
   // Filter properties based on search query and filters
@@ -95,191 +109,212 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
 
-        <View style={[styles.searchContainer, { backgroundColor: colors.grayLight }]}>
-          <SearchIcon size={20} color={colors.grayDark} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search properties, locations..."
-            placeholderTextColor={colors.grayDark}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
-          {searchQuery ? (
-            <TouchableOpacity onPress={handleClearSearch}>
-              <X size={20} color={colors.grayDark} />
-            </TouchableOpacity>
-          ) : null}
+          <View
+            style={[
+              styles.searchContainer,
+              { backgroundColor: colors.grayLight },
+            ]}
+          >
+            <SearchIcon size={20} color={colors.grayDark} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search properties, locations..."
+              placeholderTextColor={colors.grayDark}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+            {searchQuery ? (
+              <TouchableOpacity onPress={handleClearSearch}>
+                <X size={20} color={colors.grayDark} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              {
+                backgroundColor: showFilters
+                  ? colors.primaryColor
+                  : colors.grayLight,
+              },
+            ]}
+            onPress={toggleFilters}
+          >
+            <ChevronDown
+              size={20}
+              color={showFilters ? 'white' : colors.text}
+            />
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            {
-              backgroundColor: showFilters
-                ? colors.primaryColor
-                : colors.grayLight,
-            },
-          ]}
-          onPress={toggleFilters}
-        >
-          <ChevronDown
-            size={20}
-            color={showFilters ? 'white' : colors.text}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {showFilters && (
-        <View style={[styles.filtersContainer, { backgroundColor: colors.cardBackground }]}>
-          <View style={styles.filterSection}>
-            <Text style={[styles.filterTitle, { color: colors.text }]}>
-              Property Type
-            </Text>
-            <View style={styles.typeContainer}>
-              {propertyTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.typeButton,
-                    selectedType === type && {
-                      backgroundColor: colors.primaryColor,
-                    },
-                  ]}
-                  onPress={() =>
-                    setSelectedType(selectedType === type ? null : type)
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      selectedType === type && { color: 'white' },
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.filterSection}>
-            <Text style={[styles.filterTitle, { color: colors.text }]}>
-              Listing Type
-            </Text>
-            <View style={styles.typeContainer}>
-              {listingTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.typeButton,
-                    selectedListingType === type && {
-                      backgroundColor: colors.primaryColor,
-                    },
-                  ]}
-                  onPress={() =>
-                    setSelectedListingType(
-                      selectedListingType === type ? null : type
-                    )
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      selectedListingType === type && { color: 'white' },
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.filterSection}>
-            <Text style={[styles.filterTitle, { color: colors.text }]}>
-              Price Range
-            </Text>
-            <View style={styles.priceRangeContainer}>
-              <TextInput
-                style={[
-                  styles.priceInput,
-                  { backgroundColor: colors.grayLight, color: colors.text },
-                ]}
-                placeholder="Min Price"
-                placeholderTextColor={colors.grayDark}
-                value={minPrice}
-                onChangeText={setMinPrice}
-                keyboardType="numeric"
-              />
-              <Text style={[styles.priceSeparator, { color: colors.grayDark }]}>
-                to
+        {showFilters && (
+          <View
+            style={[
+              styles.filtersContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>
+                Property Type
               </Text>
-              <TextInput
+              <View style={styles.typeContainer}>
+                {propertyTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.typeButton,
+                      selectedType === type && {
+                        backgroundColor: colors.primaryColor,
+                      },
+                    ]}
+                    onPress={() =>
+                      setSelectedType(selectedType === type ? null : type)
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedType === type && { color: 'white' },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>
+                Listing Type
+              </Text>
+              <View style={styles.typeContainer}>
+                {listingTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.typeButton,
+                      selectedListingType === type && {
+                        backgroundColor: colors.primaryColor,
+                      },
+                    ]}
+                    onPress={() =>
+                      setSelectedListingType(
+                        selectedListingType === type ? null : type
+                      )
+                    }
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedListingType === type && { color: 'white' },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.filterSection}>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>
+                Price Range
+              </Text>
+              <View style={styles.priceRangeContainer}>
+                <TextInput
+                  style={[
+                    styles.priceInput,
+                    { backgroundColor: colors.grayLight, color: colors.text },
+                  ]}
+                  placeholder="Min Price"
+                  placeholderTextColor={colors.grayDark}
+                  value={minPrice}
+                  onChangeText={setMinPrice}
+                  keyboardType="numeric"
+                />
+                <Text
+                  style={[styles.priceSeparator, { color: colors.grayDark }]}
+                >
+                  to
+                </Text>
+                <TextInput
+                  style={[
+                    styles.priceInput,
+                    { backgroundColor: colors.grayLight, color: colors.text },
+                  ]}
+                  placeholder="Max Price"
+                  placeholderTextColor={colors.grayDark}
+                  value={maxPrice}
+                  onChangeText={setMaxPrice}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+
+            <View style={styles.filterActions}>
+              <TouchableOpacity
                 style={[
-                  styles.priceInput,
-                  { backgroundColor: colors.grayLight, color: colors.text },
+                  styles.clearButton,
+                  { borderColor: colors.primaryColor },
                 ]}
-                placeholder="Max Price"
-                placeholderTextColor={colors.grayDark}
-                value={maxPrice}
-                onChangeText={setMaxPrice}
-                keyboardType="numeric"
-              />
+                onPress={clearFilters}
+              >
+                <Text
+                  style={[
+                    styles.clearButtonText,
+                    { color: colors.primaryColor },
+                  ]}
+                >
+                  Clear All
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.applyButton,
+                  { backgroundColor: colors.primaryColor },
+                ]}
+                onPress={() => setShowFilters(false)}
+              >
+                <Text style={styles.applyButtonText}>Apply Filters</Text>
+              </TouchableOpacity>
             </View>
           </View>
+        )}
 
-          <View style={styles.filterActions}>
-            <TouchableOpacity
-              style={[
-                styles.clearButton,
-                { borderColor: colors.primaryColor },
-              ]}
-              onPress={clearFilters}
-            >
-              <Text style={[styles.clearButtonText, { color: colors.primaryColor }]}>
-                Clear All
+        <FlatList
+          data={filteredProperties}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: colors.text }]}>
+                No properties found
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.applyButton,
-                { backgroundColor: colors.primaryColor },
-              ]}
-              onPress={() => setShowFilters(false)}
-            >
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      <FlatList
-        data={filteredProperties}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: colors.text }]}>
-              No properties found
-            </Text>
-            <Text style={[styles.emptySubtext, { color: colors.grayDark }]}>
-              Try adjusting your search or filters
-            </Text>
-          </View>
-        }
-      />
-    </SafeAreaView>
+              <Text style={[styles.emptySubtext, { color: colors.grayDark }]}>
+                Try adjusting your search or filters
+              </Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

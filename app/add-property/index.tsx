@@ -19,6 +19,7 @@ import PropertyDetails from '@/components/PropertyDetails';
 import MediaUpload from '@/components/MediaUploads';
 import Amenities from '@/components/Amenities';
 import PriceDetails from '@/components/PriceDetails';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 type Step = 'basic' | 'details' | 'media' | 'amenities' | 'price';
 
@@ -107,10 +108,11 @@ export default function AddPropertyScreen() {
   );
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
-      {/* <View style={styles.header}>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        {/* <View style={styles.header}>
         <TouchableOpacity onPress={handleBack}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
@@ -160,19 +162,26 @@ export default function AddPropertyScreen() {
           fullWidth
         />
       </View> */}
-      <View style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%"
-      }}>
-        <Text style={{
-          color: colors.text,
-          fontWeight: "700",
-          fontSize: 30
-        }}>This feature is comming soon</Text>
-      </View>
-    </SafeAreaView>
+        <View
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <Text
+            style={{
+              color: colors.text,
+              fontWeight: '700',
+              fontSize: 30,
+            }}
+          >
+            This feature is comming soon
+          </Text>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

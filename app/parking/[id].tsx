@@ -31,6 +31,7 @@ import {
   DollarSign,
   Navigation,
 } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function ParkingDetailScreen() {
   const colorScheme = useColorScheme();
@@ -101,203 +102,308 @@ export default function ParkingDetailScreen() {
   };
 
   const amenitiesList = [
-    { key: 'securityGuard', label: 'Security Guard', icon: Shield, enabled: parkingSpot.amenitiesDetails.securityGuard },
-    { key: 'securityCameras', label: 'Security Cameras', icon: Camera, enabled: parkingSpot.amenitiesDetails.securityCameras },
-    { key: 'evCharging', label: 'EV Charging', icon: Zap, enabled: parkingSpot.amenitiesDetails.evCharging },
-    { key: 'valetService', label: 'Valet Service', icon: Users, enabled: parkingSpot.amenitiesDetails.valetService },
-    { key: 'coveredParking', label: 'Covered Parking', icon: Car, enabled: parkingSpot.amenitiesDetails.coveredParking },
+    {
+      key: 'securityGuard',
+      label: 'Security Guard',
+      icon: Shield,
+      enabled: parkingSpot.amenitiesDetails.securityGuard,
+    },
+    {
+      key: 'securityCameras',
+      label: 'Security Cameras',
+      icon: Camera,
+      enabled: parkingSpot.amenitiesDetails.securityCameras,
+    },
+    {
+      key: 'evCharging',
+      label: 'EV Charging',
+      icon: Zap,
+      enabled: parkingSpot.amenitiesDetails.evCharging,
+    },
+    {
+      key: 'valetService',
+      label: 'Valet Service',
+      icon: Users,
+      enabled: parkingSpot.amenitiesDetails.valetService,
+    },
+    {
+      key: 'coveredParking',
+      label: 'Covered Parking',
+      icon: Car,
+      enabled: parkingSpot.amenitiesDetails.coveredParking,
+    },
   ];
 
   const accessibilityFeatures = [
-    { key: 'wheelchairAccessible', label: 'Wheelchair Accessible', enabled: parkingSpot.accessibility.wheelchairAccessible },
-    { key: 'nearEntrance', label: 'Near Entrance', enabled: parkingSpot.accessibility.nearEntrance },
+    {
+      key: 'wheelchairAccessible',
+      label: 'Wheelchair Accessible',
+      enabled: parkingSpot.accessibility.wheelchairAccessible,
+    },
+    {
+      key: 'nearEntrance',
+      label: 'Near Entrance',
+      enabled: parkingSpot.accessibility.nearEntrance,
+    },
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={[styles.headerButton, { backgroundColor: colors.background }]}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerRightButtons}>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.background }]}
-            onPress={handleFavoriteToggle}
-          >
-            <Heart
-              size={24}
-              color={isFavorite ? colors.accentColor : colors.text}
-              fill={isFavorite ? colors.accentColor : 'transparent'}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.background }]}
-            onPress={handleShare}
-          >
-            <Share2 size={24} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <ImageCarousel images={parkingSpot.images} height={250} />
-
-        <View style={styles.contentContainer}>
-          <View style={styles.titleContainer}>
-            <View style={styles.typeAndStatus}>
-              <View style={[styles.typeTag, { backgroundColor: getTypeColor(parkingSpot.type) }]}>
-                <Text style={styles.typeText}>{parkingSpot.type} • {parkingSpot.size}</Text>
-              </View>
-              <View style={[styles.statusTag, { backgroundColor: getAvailabilityColor(parkingSpot.isAvailable) }]}>
-                <Text style={styles.statusText}>
-                  {parkingSpot.isAvailable ? 'Available' : 'Occupied'}
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>
-              Parking Spot {parkingSpot.spotNumber}
-            </Text>
-            <View style={styles.locationContainer}>
-              <MapPin size={16} color={colors.grayDark} />
-              <Text style={[styles.location, { color: colors.grayDark }]}>
-                {parkingSpot.locality}, {parkingSpot.city}, {parkingSpot.state}
-              </Text>
-            </View>
-            {parkingSpot.sublocality && (
-              <Text style={[styles.subLocation, { color: colors.grayDark }]}>
-                {parkingSpot.sublocality}
-                {parkingSpot.areaNumber && ` • ${parkingSpot.areaNumber}`}
-              </Text>
-            )}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[
+              styles.headerButton,
+              { backgroundColor: colors.background },
+            ]}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerRightButtons}>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.background },
+              ]}
+              onPress={handleFavoriteToggle}
+            >
+              <Heart
+                size={24}
+                color={isFavorite ? colors.accentColor : colors.text}
+                fill={isFavorite ? colors.accentColor : 'transparent'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.background },
+              ]}
+              onPress={handleShare}
+            >
+              <Share2 size={24} color={colors.text} />
+            </TouchableOpacity>
           </View>
+        </View>
 
-          <View style={styles.infoContainer}>
-            {parkingSpot.rating && (
-              <View style={styles.ratingContainer}>
-                <Star size={16} color="#FFD700" fill="#FFD700" />
-                <Text style={[styles.ratingText, { color: colors.text }]}>{parkingSpot.rating}</Text>
-              </View>
-            )}
-            <View style={styles.sizeContainer}>
-              <Text style={styles.sizeIcon}>{getSizeIcon(parkingSpot.size)}</Text>
-              <Text style={[styles.sizeText, { color: colors.text }]}>{parkingSpot.size} size</Text>
-            </View>
-          </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <ImageCarousel images={parkingSpot.images} height={250} />
 
-          <View style={styles.priceContainer}>
-            <Text style={[styles.price, { color: colors.primaryColor }]}>
-              {formatPrice(parkingSpot.hourlyRate)}
-            </Text>
-            <Text style={[styles.priceNote, { color: colors.grayDark }]}>
-              Hourly rate
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Amenities & Features
-            </Text>
-            <View style={styles.featuresGrid}>
-              {amenitiesList.map((amenity) => (
-                <View 
-                  key={amenity.key} 
+          <View style={styles.contentContainer}>
+            <View style={styles.titleContainer}>
+              <View style={styles.typeAndStatus}>
+                <View
                   style={[
-                    styles.featureItem, 
-                    { 
-                      backgroundColor: amenity.enabled 
-                        ? colors.successColor + '20' 
-                        : colors.grayLight,
-                      opacity: amenity.enabled ? 1 : 0.5
-                    }
+                    styles.typeTag,
+                    { backgroundColor: getTypeColor(parkingSpot.type) },
                   ]}
                 >
-                  <amenity.icon 
-                    size={16} 
-                    color={amenity.enabled ? colors.successColor : colors.grayDark} 
-                  />
-                  <Text style={[
-                    styles.featureText, 
-                    { color: amenity.enabled ? colors.text : colors.grayDark }
-                  ]}>
-                    {amenity.label}
+                  <Text style={styles.typeText}>
+                    {parkingSpot.type} • {parkingSpot.size}
                   </Text>
-                  {amenity.enabled && (
-                    <Check size={14} color={colors.successColor} style={styles.checkIcon} />
-                  )}
                 </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Accessibility
-            </Text>
-            <View style={styles.accessibilityContainer}>
-              {accessibilityFeatures.map((feature) => (
-                <View key={feature.key} style={styles.accessibilityItem}>
-                  <View style={[
-                    styles.accessibilityIcon,
-                    { backgroundColor: feature.enabled ? colors.primaryColor + '20' : colors.grayLight }
-                  ]}>
-                    <Text style={styles.accessibilityEmoji}>
-                      {feature.key === 'wheelchairAccessible' ? '♿' : '🚪'}
-                    </Text>
-                  </View>
-                  <Text style={[
-                    styles.accessibilityText,
-                    { color: feature.enabled ? colors.text : colors.grayDark }
-                  ]}>
-                    {feature.label}
+                <View
+                  style={[
+                    styles.statusTag,
+                    {
+                      backgroundColor: getAvailabilityColor(
+                        parkingSpot.isAvailable
+                      ),
+                    },
+                  ]}
+                >
+                  <Text style={styles.statusText}>
+                    {parkingSpot.isAvailable ? 'Available' : 'Occupied'}
                   </Text>
-                  {feature.enabled && (
-                    <Check size={16} color={colors.successColor} />
-                  )}
                 </View>
-              ))}
-            </View>
-          </View>
-
-          {parkingSpot.coordinates && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Location Details
+              </View>
+              <Text style={[styles.title, { color: colors.text }]}>
+                Parking Spot {parkingSpot.spotNumber}
               </Text>
-              <View style={styles.coordinatesContainer}>
-                <Navigation size={16} color={colors.primaryColor} />
-                <Text style={[styles.coordinatesText, { color: colors.text }]}>
-                  {parkingSpot.coordinates.latitude.toFixed(6)}, {parkingSpot.coordinates.longitude.toFixed(6)}
+              <View style={styles.locationContainer}>
+                <MapPin size={16} color={colors.grayDark} />
+                <Text style={[styles.location, { color: colors.grayDark }]}>
+                  {parkingSpot.locality}, {parkingSpot.city},{' '}
+                  {parkingSpot.state}
+                </Text>
+              </View>
+              {parkingSpot.sublocality && (
+                <Text style={[styles.subLocation, { color: colors.grayDark }]}>
+                  {parkingSpot.sublocality}
+                  {parkingSpot.areaNumber && ` • ${parkingSpot.areaNumber}`}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.infoContainer}>
+              {parkingSpot.rating && (
+                <View style={styles.ratingContainer}>
+                  <Star size={16} color="#FFD700" fill="#FFD700" />
+                  <Text style={[styles.ratingText, { color: colors.text }]}>
+                    {parkingSpot.rating}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.sizeContainer}>
+                <Text style={styles.sizeIcon}>
+                  {getSizeIcon(parkingSpot.size)}
+                </Text>
+                <Text style={[styles.sizeText, { color: colors.text }]}>
+                  {parkingSpot.size} size
                 </Text>
               </View>
             </View>
-          )}
-        </View>
-      </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.cardBackground }]}>
-        <TouchableOpacity
-          style={[styles.contactButton, { backgroundColor: '#25D366' }]}
-          onPress={() => {/* Handle WhatsApp */}}
+            <View style={styles.priceContainer}>
+              <Text style={[styles.price, { color: colors.primaryColor }]}>
+                {formatPrice(parkingSpot.hourlyRate)}
+              </Text>
+              <Text style={[styles.priceNote, { color: colors.grayDark }]}>
+                Hourly rate
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Amenities & Features
+              </Text>
+              <View style={styles.featuresGrid}>
+                {amenitiesList.map((amenity) => (
+                  <View
+                    key={amenity.key}
+                    style={[
+                      styles.featureItem,
+                      {
+                        backgroundColor: amenity.enabled
+                          ? colors.successColor + '20'
+                          : colors.grayLight,
+                        opacity: amenity.enabled ? 1 : 0.5,
+                      },
+                    ]}
+                  >
+                    <amenity.icon
+                      size={16}
+                      color={
+                        amenity.enabled ? colors.successColor : colors.grayDark
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.featureText,
+                        {
+                          color: amenity.enabled
+                            ? colors.text
+                            : colors.grayDark,
+                        },
+                      ]}
+                    >
+                      {amenity.label}
+                    </Text>
+                    {amenity.enabled && (
+                      <Check
+                        size={14}
+                        color={colors.successColor}
+                        style={styles.checkIcon}
+                      />
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Accessibility
+              </Text>
+              <View style={styles.accessibilityContainer}>
+                {accessibilityFeatures.map((feature) => (
+                  <View key={feature.key} style={styles.accessibilityItem}>
+                    <View
+                      style={[
+                        styles.accessibilityIcon,
+                        {
+                          backgroundColor: feature.enabled
+                            ? colors.primaryColor + '20'
+                            : colors.grayLight,
+                        },
+                      ]}
+                    >
+                      <Text style={styles.accessibilityEmoji}>
+                        {feature.key === 'wheelchairAccessible' ? '♿' : '🚪'}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.accessibilityText,
+                        {
+                          color: feature.enabled
+                            ? colors.text
+                            : colors.grayDark,
+                        },
+                      ]}
+                    >
+                      {feature.label}
+                    </Text>
+                    {feature.enabled && (
+                      <Check size={16} color={colors.successColor} />
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {parkingSpot.coordinates && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Location Details
+                </Text>
+                <View style={styles.coordinatesContainer}>
+                  <Navigation size={16} color={colors.primaryColor} />
+                  <Text
+                    style={[styles.coordinatesText, { color: colors.text }]}
+                  >
+                    {parkingSpot.coordinates.latitude.toFixed(6)},{' '}
+                    {parkingSpot.coordinates.longitude.toFixed(6)}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <View
+          style={[styles.footer, { backgroundColor: colors.cardBackground }]}
         >
-          <MessageSquare size={20} color="white" />
-          <Text style={styles.contactButtonText}>WhatsApp</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.contactButton, { backgroundColor: colors.primaryColor }]}
-          onPress={() => {/* Handle Call */}}
-        >
-          <Phone size={20} color="white" />
-          <Text style={styles.contactButtonText}>Book Now</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity
+            style={[styles.contactButton, { backgroundColor: '#25D366' }]}
+            onPress={() => {
+              /* Handle WhatsApp */
+            }}
+          >
+            <MessageSquare size={20} color="white" />
+            <Text style={styles.contactButtonText}>WhatsApp</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.contactButton,
+              { backgroundColor: colors.primaryColor },
+            ]}
+            onPress={() => {
+              /* Handle Call */
+            }}
+          >
+            <Phone size={20} color="white" />
+            <Text style={styles.contactButtonText}>Book Now</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

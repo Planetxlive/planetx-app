@@ -15,11 +15,17 @@ import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Search, SlidersHorizontal } from 'lucide-react-native';
 import FilterModal, { FilterOptions } from '@/components/FilterModal';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function AllPropertiesScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
-  const { properties, getPropertiesByCategory, getPropertiesByPostingType, getPropertiesByPriceRange } = useProperties();
+  const {
+    properties,
+    getPropertiesByCategory,
+    getPropertiesByPostingType,
+    getPropertiesByPriceRange,
+  } = useProperties();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({
@@ -41,32 +47,42 @@ export default function AllPropertiesScreen() {
       filtered = filtered.filter(
         (property) =>
           property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          property.location.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          property.location.city.toLowerCase().includes(searchQuery.toLowerCase())
+          property.location.state
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          property.location.city
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
       );
     }
 
     // Apply category filter
     if (activeFilters.categories.length > 0) {
-      filtered = filtered.filter(property => 
+      filtered = filtered.filter((property) =>
         activeFilters.categories.includes(property.category)
       );
     }
 
     // Apply property type filter
     if (activeFilters.propertyTypes.length > 0) {
-      filtered = filtered.filter(property => 
-        activeFilters.propertyTypes.includes(property.propertyType as 'For Sale' | 'For Rent')
+      filtered = filtered.filter((property) =>
+        activeFilters.propertyTypes.includes(
+          property.propertyType as 'For Sale' | 'For Rent'
+        )
       );
     }
 
     // Apply price range filter
     if (activeFilters.minPrice || activeFilters.maxPrice) {
-      const minPrice = activeFilters.minPrice ? parseInt(activeFilters.minPrice) : 0;
-      const maxPrice = activeFilters.maxPrice ? parseInt(activeFilters.maxPrice) : Number.MAX_SAFE_INTEGER;
+      const minPrice = activeFilters.minPrice
+        ? parseInt(activeFilters.minPrice)
+        : 0;
+      const maxPrice = activeFilters.maxPrice
+        ? parseInt(activeFilters.maxPrice)
+        : Number.MAX_SAFE_INTEGER;
       filtered = filtered.filter(
-        property => 
-          property.pricing.expectedPrice >= minPrice && 
+        (property) =>
+          property.pricing.expectedPrice >= minPrice &&
           property.pricing.expectedPrice <= maxPrice
       );
     }
@@ -77,54 +93,62 @@ export default function AllPropertiesScreen() {
   const filteredProperties = getFilteredProperties();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>All Properties</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: colors.grayLight }]}>
-          <Search size={20} color={colors.grayDark} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search properties..."
-            placeholderTextColor={colors.grayDark}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            All Properties
+          </Text>
+          <View style={{ width: 24 }} />
         </View>
-        <TouchableOpacity
-          style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
-          onPress={() => setShowFilters(true)}
-        >
-          <SlidersHorizontal size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
 
-      <FlatList
-        data={filteredProperties}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <PropertyCard property={item} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: colors.text }]}>
-              No properties found
-            </Text>
+        <View style={styles.searchContainer}>
+          <View
+            style={[styles.searchBar, { backgroundColor: colors.grayLight }]}
+          >
+            <Search size={20} color={colors.grayDark} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search properties..."
+              placeholderTextColor={colors.grayDark}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-        }
-      />
+          <TouchableOpacity
+            style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
+            onPress={() => setShowFilters(true)}
+          >
+            <SlidersHorizontal size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
 
-      <FilterModal
-        visible={showFilters}
-        onClose={() => setShowFilters(false)}
-        onApply={applyFilters}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={filteredProperties}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <PropertyCard property={item} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>
+                No properties found
+              </Text>
+            </View>
+          }
+        />
+
+        <FilterModal
+          visible={showFilters}
+          onClose={() => setShowFilters(false)}
+          onApply={applyFilters}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

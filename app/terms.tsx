@@ -1,6 +1,14 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Appearance, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Appearance,
+  SafeAreaView,
+} from 'react-native';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 // Import Privacy component if available
 // import Privacy from './Privacy';
 
@@ -83,161 +91,232 @@ const TermsAndConditions = () => {
   });
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text style={dynamicStyles.title}>Terms & Conditions</Text>
-        <Text style={dynamicStyles.lastUpdated}>Last Updated: January 1, 2025</Text>
-        
-        <View style={dynamicStyles.cardContainer}>
-          {/* 01. Use of Services */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>01. Use of Services</Text>
-            <Text style={dynamicStyles.cardSubtitle}>By using our services, you agree to the following:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>You can use our app regardless of your age.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>You agree to provide accurate and complete information when creating an account.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>You are responsible for maintaining the confidentiality of your account credentials.</Text>
-            </View>
-          </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={dynamicStyles.container}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Text style={dynamicStyles.title}>Terms & Conditions</Text>
+          <Text style={dynamicStyles.lastUpdated}>
+            Last Updated: January 1, 2025
+          </Text>
 
-          {/* 02. User-Generated Content */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>02. User-Generated Content</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Your content contributions are subject to:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                By uploading images, videos, or other content, you grant PlanetX a non-exclusive, worldwide, royalty-free license to use, modify, and distribute such content for marketing, promotional, and business purposes.
+          <View style={dynamicStyles.cardContainer}>
+            {/* 01. Use of Services */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>01. Use of Services</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                By using our services, you agree to the following:
               </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                You must have the necessary rights to upload content and ensure it does not violate any laws or third-party rights.
-              </Text>
-            </View>
-          </View>
-
-          {/* 03. Marketing and Promotions */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>03. Marketing and Promotions</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We may use your information for marketing purposes as follows:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                By using our services, you consent to receive promotional emails, messages, and advertisements related to our services and offerings.
-              </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                You may opt out of marketing communications at any time through account settings or by contacting us.
-              </Text>
-            </View>
-          </View>
-
-          {/* 04. Prohibited Activities */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>04. Prohibited Activities</Text>
-            <Text style={dynamicStyles.cardSubtitle}>The following activities are not permitted:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                Misuse of our platform, including fraudulent activities, spamming, and violating intellectual property rights, is strictly prohibited.
-              </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                Any unlawful use of our platform may result in termination of your account.
-              </Text>
-            </View>
-          </View>
-
-          {/* 05. Payments and Transactions */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>05. Payments and Transactions</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Financial transactions on our platform are governed by:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                Transactions on PlanetX must comply with applicable financial and legal regulations.
-              </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                Refund policies, if applicable, will be detailed separately in our Refund Policy.
-              </Text>
-            </View>
-          </View>
-
-          {/* 06. Compliance with Laws */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>06. Compliance with Laws</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Our platform and users must adhere to:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                PlanetX adheres to applicable laws, including data protection regulations (GDPR, CCPA, etc.), App Store, and Play Store policies.
-              </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                Users must comply with all relevant laws while using the platform.
-              </Text>
-            </View>
-          </View>
-
-          {/* 07. Termination of Services */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>07. Termination of Services</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We may terminate services under the following conditions:</Text>
-            <Text style={dynamicStyles.itemText}>
-              We reserve the right to suspend or terminate accounts that violate our terms or engage in prohibited activities.
-            </Text>
-          </View>
-
-          {/* 08. Liability and Disclaimers */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>08. Liability and Disclaimers</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Our liability is limited as follows:</Text>
-            <Text style={dynamicStyles.itemText}>
-              We do not guarantee uninterrupted service and are not responsible for any losses due to service interruptions or security breaches.
-            </Text>
-          </View>
-
-          {/* 09. Changes to Terms */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>09. Changes to Terms</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Updates to our terms are handled as follows:</Text>
-            <Text style={dynamicStyles.itemText}>
-              We may update these terms periodically, and continued use of PlanetX constitutes acceptance of the revised terms.
-            </Text>
-          </View>
-
-          {/* 10. Contact Us */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>10. Contact Us</Text>
-            <Text style={dynamicStyles.cardSubtitle}>For any questions or concerns, contact us at:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Email:</Text>
-                <Text style={dynamicStyles.itemText}>contact@planetx-live.com</Text>
-              </View>
-              <View style={dynamicStyles.divider} />
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Customer Support:</Text>
-                <Text style={dynamicStyles.itemText}>+91 98735 81566</Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  You can use our app regardless of your age.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  You agree to provide accurate and complete information when
+                  creating an account.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  You are responsible for maintaining the confidentiality of
+                  your account credentials.
+                </Text>
               </View>
             </View>
+
+            {/* 02. User-Generated Content */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                02. User-Generated Content
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Your content contributions are subject to:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  By uploading images, videos, or other content, you grant
+                  PlanetX a non-exclusive, worldwide, royalty-free license to
+                  use, modify, and distribute such content for marketing,
+                  promotional, and business purposes.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  You must have the necessary rights to upload content and
+                  ensure it does not violate any laws or third-party rights.
+                </Text>
+              </View>
+            </View>
+
+            {/* 03. Marketing and Promotions */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                03. Marketing and Promotions
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We may use your information for marketing purposes as follows:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  By using our services, you consent to receive promotional
+                  emails, messages, and advertisements related to our services
+                  and offerings.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  You may opt out of marketing communications at any time
+                  through account settings or by contacting us.
+                </Text>
+              </View>
+            </View>
+
+            {/* 04. Prohibited Activities */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                04. Prohibited Activities
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                The following activities are not permitted:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Misuse of our platform, including fraudulent activities,
+                  spamming, and violating intellectual property rights, is
+                  strictly prohibited.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Any unlawful use of our platform may result in termination of
+                  your account.
+                </Text>
+              </View>
+            </View>
+
+            {/* 05. Payments and Transactions */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                05. Payments and Transactions
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Financial transactions on our platform are governed by:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Transactions on PlanetX must comply with applicable financial
+                  and legal regulations.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Refund policies, if applicable, will be detailed separately in
+                  our Refund Policy.
+                </Text>
+              </View>
+            </View>
+
+            {/* 06. Compliance with Laws */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                06. Compliance with Laws
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Our platform and users must adhere to:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  PlanetX adheres to applicable laws, including data protection
+                  regulations (GDPR, CCPA, etc.), App Store, and Play Store
+                  policies.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Users must comply with all relevant laws while using the
+                  platform.
+                </Text>
+              </View>
+            </View>
+
+            {/* 07. Termination of Services */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                07. Termination of Services
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We may terminate services under the following conditions:
+              </Text>
+              <Text style={dynamicStyles.itemText}>
+                We reserve the right to suspend or terminate accounts that
+                violate our terms or engage in prohibited activities.
+              </Text>
+            </View>
+
+            {/* 08. Liability and Disclaimers */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                08. Liability and Disclaimers
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Our liability is limited as follows:
+              </Text>
+              <Text style={dynamicStyles.itemText}>
+                We do not guarantee uninterrupted service and are not
+                responsible for any losses due to service interruptions or
+                security breaches.
+              </Text>
+            </View>
+
+            {/* 09. Changes to Terms */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>09. Changes to Terms</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Updates to our terms are handled as follows:
+              </Text>
+              <Text style={dynamicStyles.itemText}>
+                We may update these terms periodically, and continued use of
+                PlanetX constitutes acceptance of the revised terms.
+              </Text>
+            </View>
+
+            {/* 10. Contact Us */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>10. Contact Us</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                For any questions or concerns, contact us at:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>Email:</Text>
+                  <Text style={dynamicStyles.itemText}>
+                    contact@planetx-live.com
+                  </Text>
+                </View>
+                <View style={dynamicStyles.divider} />
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>Customer Support:</Text>
+                  <Text style={dynamicStyles.itemText}>+91 98735 81566</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* 11. Privacy */}
+            {/* Uncomment and import Privacy component if available */}
+            {/* <Privacy /> */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>11. Privacy</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Our data handling practices are detailed in:
+              </Text>
+              <Text style={dynamicStyles.itemText}>
+                Please refer to our Privacy Policy for details on how we handle
+                your data.
+              </Text>
+            </View>
           </View>
 
-          {/* 11. Privacy */}
-          {/* Uncomment and import Privacy component if available */}
-          {/* <Privacy /> */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>11. Privacy</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Our data handling practices are detailed in:</Text>
-            <Text style={dynamicStyles.itemText}>
-              Please refer to our Privacy Policy for details on how we handle your data.
-            </Text>
-          </View>
-        </View>
-
-        <Text style={dynamicStyles.footerText}>
-          By accessing or using PlanetX, you agree to be bound by these Terms and Conditions.
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={dynamicStyles.footerText}>
+            By accessing or using PlanetX, you agree to be bound by these Terms
+            and Conditions.
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

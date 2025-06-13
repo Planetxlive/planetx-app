@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, CreditCard as Edit } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function ProfileDetailsScreen() {
   const colorScheme = useColorScheme();
@@ -21,47 +22,77 @@ export default function ProfileDetailsScreen() {
 
   const renderInfoItem = (label: string, value: string) => (
     <View style={styles.infoItem}>
-      <Text style={[styles.infoLabel, { color: colors.grayDark }]}>{label}</Text>
+      <Text style={[styles.infoLabel, { color: colors.grayDark }]}>
+        {label}
+      </Text>
       <Text style={[styles.infoValue, { color: colors.text }]}>{value}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Profile Details</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView style={styles.content}>
-        <View style={styles.profileSection}>
-          <View style={[styles.profileImage, { backgroundColor: colors.primaryColor, justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={[styles.initialsText, { color: colors.background }]}>
-              {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.editButton, { backgroundColor: colors.primaryColor }]}
-            onPress={() => router.push('/edit-profile')}
-          >
-            <Edit size={20} color="white" />
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Profile Details
+          </Text>
+          <View style={{ width: 24 }} />
         </View>
 
-        <View style={styles.infoSection}>
-          {renderInfoItem('Name', user?.name || 'Not set')}
-          {renderInfoItem('Role', 'Property Owner')}
-          {renderInfoItem('Email ID', user?.email || 'Not set')}
-          {renderInfoItem('Primary Number', user?.mobile || 'Not set')}
-          {renderInfoItem('WhatsApp Number', user?.whatsappMobile || 'Not set')}
-          {renderInfoItem('State', user?.state || 'Not set')}
-          {renderInfoItem('City', user?.city || 'Not set')}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView style={styles.content}>
+          <View style={styles.profileSection}>
+            <View
+              style={[
+                styles.profileImage,
+                {
+                  backgroundColor: colors.primaryColor,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                },
+              ]}
+            >
+              <Text style={[styles.initialsText, { color: colors.background }]}>
+                {user?.name
+                  ? user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .substring(0, 2)
+                  : 'U'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.editButton,
+                { backgroundColor: colors.primaryColor },
+              ]}
+              onPress={() => router.push('/edit-profile')}
+            >
+              <Edit size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.infoSection}>
+            {renderInfoItem('Name', user?.name || 'Not set')}
+            {renderInfoItem('Role', 'Property Owner')}
+            {renderInfoItem('Email ID', user?.email || 'Not set')}
+            {renderInfoItem('Primary Number', user?.mobile || 'Not set')}
+            {renderInfoItem(
+              'WhatsApp Number',
+              user?.whatsappMobile || 'Not set'
+            )}
+            {renderInfoItem('State', user?.state || 'Not set')}
+            {renderInfoItem('City', user?.city || 'Not set')}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

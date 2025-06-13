@@ -16,6 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { Plus, MapPin, Calendar, Edit2, Trash2 } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function MyBlogScreen() {
   const colorScheme = useColorScheme();
@@ -60,23 +61,31 @@ export default function MyBlogScreen() {
 
   const renderPost = ({ item }: { item: BlogPost }) => (
     <TouchableOpacity onPress={() => router.push(`/blog/${item._id}`)}>
-      <View style={[styles.postCard, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[styles.postCard, { backgroundColor: colors.cardBackground }]}
+      >
         {item.image && (
           <Image source={{ uri: item.image }} style={styles.postImage} />
         )}
-        
+
         <View style={styles.categoryTag}>
           <Text style={styles.categoryText}>{item.category}</Text>
         </View>
 
         <View style={styles.postContent}>
-          <Text style={[styles.postTitle, { color: colors.text }]} numberOfLines={2}>
+          <Text
+            style={[styles.postTitle, { color: colors.text }]}
+            numberOfLines={2}
+          >
             {item.title}
           </Text>
 
           <View style={styles.locationContainer}>
             <MapPin size={16} color={colors.grayDark} />
-            <Text style={[styles.locationText, { color: colors.grayDark }]} numberOfLines={1}>
+            <Text
+              style={[styles.locationText, { color: colors.grayDark }]}
+              numberOfLines={1}
+            >
               {item.location?.locality}, {item.location?.city}
             </Text>
           </View>
@@ -98,7 +107,10 @@ export default function MyBlogScreen() {
 
             <View style={styles.actionButtons}>
               <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: colors.primaryColor }]}
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: colors.primaryColor },
+                ]}
                 onPress={() => router.push(`/blog/manage?id=${item._id}`)}
               >
                 <Edit2 size={16} color="white" />
@@ -117,40 +129,54 @@ export default function MyBlogScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>My Posts</Text>
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: colors.primaryColor }]}
-          onPress={() => router.push('/blog/create')}
-        >
-          <Plus size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            My Posts
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.createButton,
+              { backgroundColor: colors.primaryColor },
+            ]}
+            onPress={() => router.push('/blog/create')}
+          >
+            <Plus size={24} color="white" />
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={myPosts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: colors.grayDark }]}>
-              You haven't created any posts yet
-            </Text>
-            <TouchableOpacity
-              style={[styles.createFirstButton, { backgroundColor: colors.primaryColor }]}
-              onPress={() => router.push('/blog/create')}
-            >
-              <Text style={styles.createFirstButtonText}>Create Your First Post</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={myPosts}
+          renderItem={renderPost}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: colors.grayDark }]}>
+                You haven't created any posts yet
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.createFirstButton,
+                  { backgroundColor: colors.primaryColor },
+                ]}
+                onPress={() => router.push('/blog/create')}
+              >
+                <Text style={styles.createFirstButtonText}>
+                  Create Your First Post
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

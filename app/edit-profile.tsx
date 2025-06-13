@@ -16,6 +16,7 @@ import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Camera } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function EditProfileScreen() {
   const colorScheme = useColorScheme();
@@ -57,82 +58,107 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Edit Profile
-        </Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View style={styles.profileImageContainer}>
-          <View style={[styles.profileImage, { backgroundColor: colors.primaryColor, justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={[styles.initialsText, { color: colors.background }]}>
-              {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.cameraButton, { backgroundColor: colors.primaryColor }]}
-            onPress={handleImagePick}
-          >
-            <Camera size={20} color="white" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Edit Profile
+          </Text>
+          <View style={{ width: 24 }} />
         </View>
 
-        <View style={styles.form}>
-          <Input
-            label="Name"
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-            placeholder="Enter your name"
-          />
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.profileImageContainer}>
+            <View
+              style={[
+                styles.profileImage,
+                {
+                  backgroundColor: colors.primaryColor,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                },
+              ]}
+            >
+              <Text style={[styles.initialsText, { color: colors.background }]}>
+                {user?.name
+                  ? user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .substring(0, 2)
+                  : 'U'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.cameraButton,
+                { backgroundColor: colors.primaryColor },
+              ]}
+              onPress={handleImagePick}
+            >
+              <Camera size={20} color="white" />
+            </TouchableOpacity>
+          </View>
 
-          <Input
-            label="Email"
-            value={formData.email}
-            onChangeText={(text) => setFormData({ ...formData, email: text })}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-          />
+          <View style={styles.form}>
+            <Input
+              label="Name"
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              placeholder="Enter your name"
+            />
 
-          <Input
-            label="WhatsApp Number"
-            value={formData.whatsappMobile}
-            onChangeText={(text) => setFormData({ ...formData, whatsappMobile: text })}
-            placeholder="Enter your WhatsApp number"
-            keyboardType="phone-pad"
-          />
+            <Input
+              label="Email"
+              value={formData.email}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+            />
 
-          <Input
-            label="State"
-            value={formData.state}
-            onChangeText={(text) => setFormData({ ...formData, state: text })}
-            placeholder="Enter your state"
-          />
+            <Input
+              label="WhatsApp Number"
+              value={formData.whatsappMobile}
+              onChangeText={(text) =>
+                setFormData({ ...formData, whatsappMobile: text })
+              }
+              placeholder="Enter your WhatsApp number"
+              keyboardType="phone-pad"
+            />
 
-          <Input
-            label="City"
-            value={formData.city}
-            onChangeText={(text) => setFormData({ ...formData, city: text })}
-            placeholder="Enter your city"
-          />
-        </View>
+            <Input
+              label="State"
+              value={formData.state}
+              onChangeText={(text) => setFormData({ ...formData, state: text })}
+              placeholder="Enter your state"
+            />
 
-        <Button
-          title="Save Changes"
-          onPress={handleSave}
-          loading={isLoading}
-          style={styles.saveButton}
-        />
-      </ScrollView>
-    </SafeAreaView>
+            <Input
+              label="City"
+              value={formData.city}
+              onChangeText={(text) => setFormData({ ...formData, city: text })}
+              placeholder="Enter your city"
+            />
+          </View>
+
+          <Button
+            title="Save Changes"
+            onPress={handleSave}
+            loading={isLoading}
+            style={styles.saveButton}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

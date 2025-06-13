@@ -14,6 +14,7 @@ import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Plus } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function MyPropertyScreen() {
   const colorScheme = useColorScheme();
@@ -32,47 +33,49 @@ export default function MyPropertyScreen() {
   });
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          My Properties
-        </Text>
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colors.primaryColor }]}
-          onPress={() => router.push('/add-property')}
-        >
-          <Plus size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            My Properties
+          </Text>
+          <TouchableOpacity
+            style={[styles.addButton, { backgroundColor: colors.primaryColor }]}
+            onPress={() => router.push('/add-property')}
+          >
+            <Plus size={24} color="white" />
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={userProperties}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <PropertyCard property={item} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: colors.text }]}>
-              You haven't listed any properties yet
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.addPropertyButton,
-                { backgroundColor: colors.primaryColor },
-              ]}
-              onPress={() => router.push('/add-property')}
-            >
-              <Text style={styles.addPropertyButtonText}>Add Property</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
-    </SafeAreaView>
+        <FlatList
+          data={userProperties}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <PropertyCard property={item} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>
+                You haven't listed any properties yet
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addPropertyButton,
+                  { backgroundColor: colors.primaryColor },
+                ]}
+                onPress={() => router.push('/add-property')}
+              >
+                <Text style={styles.addPropertyButtonText}>Add Property</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

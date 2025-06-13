@@ -14,6 +14,7 @@ import { useBlog } from '@/context/BlogContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, MapPin, Calendar, Phone, Mail } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function BlogPostDetail() {
   const colorScheme = useColorScheme();
@@ -28,7 +29,9 @@ export default function BlogPostDetail() {
   }
 
   const handleContact = (type: 'phone' | 'email') => {
-    const contact = post.contactInfo.split(',')[type === 'phone' ? 1 : 0].trim();
+    const contact = post.contactInfo
+      .split(',')
+      [type === 'phone' ? 1 : 0].trim();
     if (type === 'phone') {
       Linking.openURL(`tel:${contact}`);
     } else {
@@ -37,86 +40,102 @@ export default function BlogPostDetail() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Post Details
-        </Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView style={styles.content}>
-        {post.image && (
-          <Image source={{ uri: post.image }} style={styles.image} />
-        )}
-
-        <View style={styles.categoryTag}>
-          <Text style={styles.categoryText}>{post.category}</Text>
-        </View>
-
-        <View style={styles.postContent}>
-          <Text style={[styles.title, { color: colors.text }]}>{post.title}</Text>
-
-          <View style={styles.metaContainer}>
-            <View style={styles.metaItem}>
-              <Calendar size={16} color={colors.grayDark} />
-              <Text style={[styles.metaText, { color: colors.grayDark }]}>
-                {new Date(post.createdAt).toLocaleDateString()}
-              </Text>
-            </View>
-            <View style={styles.metaItem}>
-              <MapPin size={16} color={colors.grayDark} />
-              <Text style={[styles.metaText, { color: colors.grayDark }]}>
-                {post.location?.locality}, {post.location?.city}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={[styles.description, { color: colors.text }]}>
-            {post.description}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Post Details
           </Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-          <View style={styles.locationDetails}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Location Details
-            </Text>
-            {post.location?.houseNumber && (
-              <Text style={[styles.locationText, { color: colors.text }]}>
-                House Number: {post.location?.houseNumber}
-              </Text>
-            )}
-            {post.location?.apartment && (
-              <Text style={[styles.locationText, { color: colors.text }]}>
-                Apartment: {post.location?.apartment}
-              </Text>
-            )}
-            <Text style={[styles.locationText, { color: colors.text }]}>
-              Locality: {post.location?.locality}
-            </Text>
-            <Text style={[styles.locationText, { color: colors.text }]}>
-              City: {post.location?.city}
-            </Text>
-            <Text style={[styles.locationText, { color: colors.text }]}>
-              State: {post.location?.state}
-            </Text>
+        <ScrollView style={styles.content}>
+          {post.image && (
+            <Image source={{ uri: post.image }} style={styles.image} />
+          )}
+
+          <View style={styles.categoryTag}>
+            <Text style={styles.categoryText}>{post.category}</Text>
           </View>
 
-          <View style={[styles.contactSection, { backgroundColor: colors.cardBackground }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Contact Information
+          <View style={styles.postContent}>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {post.title}
             </Text>
-            <View style={[styles.contactInfoContent, { backgroundColor: colors.background }]}>
-              <Text style={[styles.contactInfoText, { color: colors.text }]}>
-                {post.contactInfo}
+
+            <View style={styles.metaContainer}>
+              <View style={styles.metaItem}>
+                <Calendar size={16} color={colors.grayDark} />
+                <Text style={[styles.metaText, { color: colors.grayDark }]}>
+                  {new Date(post.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+              <View style={styles.metaItem}>
+                <MapPin size={16} color={colors.grayDark} />
+                <Text style={[styles.metaText, { color: colors.grayDark }]}>
+                  {post.location?.locality}, {post.location?.city}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={[styles.description, { color: colors.text }]}>
+              {post.description}
+            </Text>
+
+            <View style={styles.locationDetails}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Location Details
+              </Text>
+              {post.location?.houseNumber && (
+                <Text style={[styles.locationText, { color: colors.text }]}>
+                  House Number: {post.location?.houseNumber}
+                </Text>
+              )}
+              {post.location?.apartment && (
+                <Text style={[styles.locationText, { color: colors.text }]}>
+                  Apartment: {post.location?.apartment}
+                </Text>
+              )}
+              <Text style={[styles.locationText, { color: colors.text }]}>
+                Locality: {post.location?.locality}
+              </Text>
+              <Text style={[styles.locationText, { color: colors.text }]}>
+                City: {post.location?.city}
+              </Text>
+              <Text style={[styles.locationText, { color: colors.text }]}>
+                State: {post.location?.state}
               </Text>
             </View>
+
+            <View
+              style={[
+                styles.contactSection,
+                { backgroundColor: colors.cardBackground },
+              ]}
+            >
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Contact Information
+              </Text>
+              <View
+                style={[
+                  styles.contactInfoContent,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <Text style={[styles.contactInfoText, { color: colors.text }]}>
+                  {post.contactInfo}
+                </Text>
+              </View>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

@@ -14,6 +14,7 @@ import GymCard from '@/components/GymCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Search, SlidersHorizontal } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function GymScreen() {
   const colorScheme = useColorScheme();
@@ -21,54 +22,63 @@ export default function GymScreen() {
   const { gyms } = useGym();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredGyms = gyms.filter((gym) =>
-    gym.gymName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    gym.locality?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    gym.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredGyms = gyms.filter(
+    (gym) =>
+      gym.gymName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      gym.locality?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      gym.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Gyms & Fitness</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: colors.grayLight }]}>
-          <Search size={20} color={colors.grayDark} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search gyms..."
-            placeholderTextColor={colors.grayDark}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Gyms & Fitness
+          </Text>
+          <View style={{ width: 24 }} />
         </View>
-        <TouchableOpacity
-          style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
-        >
-          <SlidersHorizontal size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
 
-      <FlatList
-        data={filteredGyms}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <GymCard gym={item} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: colors.text }]}>
-              No gyms found
-            </Text>
+        <View style={styles.searchContainer}>
+          <View
+            style={[styles.searchBar, { backgroundColor: colors.grayLight }]}
+          >
+            <Search size={20} color={colors.grayDark} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text }]}
+              placeholder="Search gyms..."
+              placeholderTextColor={colors.grayDark}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-        }
-      />
-    </SafeAreaView>
+          <TouchableOpacity
+            style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
+          >
+            <SlidersHorizontal size={20} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={filteredGyms}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <GymCard gym={item} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>
+                No gyms found
+              </Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 const styles = StyleSheet.create({

@@ -12,6 +12,7 @@ import { useProperties, Property } from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function WishlistScreen() {
   const colorScheme = useColorScheme() || 'light';
@@ -30,45 +31,56 @@ export default function WishlistScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyStateContainer}>
       <Image
-        source={{ uri: 'https://images.pexels.com/photos/7176026/pexels-photo-7176026.jpeg' }}
+        source={{
+          uri: 'https://images.pexels.com/photos/7176026/pexels-photo-7176026.jpeg',
+        }}
         style={styles.emptyStateImage}
       />
       <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
         No favorites yet
       </Text>
       <Text style={[styles.emptyStateText, { color: colors.grayDark }]}>
-        You haven't added any properties to your wishlist. Browse properties and tap the heart icon to add them here.
+        You haven't added any properties to your wishlist. Browse properties and
+        tap the heart icon to add them here.
       </Text>
     </View>
   );
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primaryColor} />
-          <Text style={[styles.loadingText, { color: colors.text }]}>
-            Loading your wishlist...
-          </Text>
-        </View>
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: colors.background }]}
+        >
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primaryColor} />
+            <Text style={[styles.loadingText, { color: colors.text }]}>
+              Loading your wishlist...
+            </Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Wishlist</Text>
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>Wishlist</Text>
+        </View>
 
-      <FlatList
-        data={favoriteProperties}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={renderEmptyState}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={favoriteProperties}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={renderEmptyState}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

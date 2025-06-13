@@ -16,11 +16,14 @@ import { ArrowLeft } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { backendUrl } from '@/lib/uri';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 export default function NearbyScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { getPropertiesByCity } = useProperties();
-  const [residentialProperties, setResidentialProperties] = useState<Property[]>([]);
+  const [residentialProperties, setResidentialProperties] = useState<
+    Property[]
+  >([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,9 +39,8 @@ export default function NearbyScreen() {
         const location = res.data.user.city;
         console.log(location);
         console.log(res);
-        
-        
-        setResidentialProperties(getPropertiesByCity(location));
+
+        setResidentialProperties(getPropertiesByCity(location) ?? []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setResidentialProperties([]);
@@ -49,31 +51,35 @@ export default function NearbyScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Nearby Properties
-        </Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Nearby Properties
+          </Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-      <FlatList
-        data={residentialProperties}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <PropertyCard property={item} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyStateText, { color: colors.text }]}>
-              No nearby properties found
-            </Text>
-          </View>
-        }
-      />
-    </SafeAreaView>
+        <FlatList
+          data={residentialProperties}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => <PropertyCard property={item} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>
+                No nearby properties found
+              </Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16,
-    
+
     fontFamily: 'Inter-Medium',
   },
 });

@@ -18,7 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { backendUrl } from '@/lib/uri';
-  
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 export default function FeedbackScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
@@ -96,90 +97,107 @@ export default function FeedbackScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Share Feedback</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Share Feedback
+          </Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-      <ScrollView style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          How would you rate your experience?
-        </Text>
+        <ScrollView style={styles.content}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            How would you rate your experience?
+          </Text>
 
-        <View style={styles.feedbackTypeContainer}>
-          <Text style={[styles.label, { color: colors.text }]}>Feedback Type</Text>
-          <View style={styles.feedbackTypeButtons}>
-            {['Website Experience', 'Service Quality', 'Other'].map((type) => (
+          <View style={styles.feedbackTypeContainer}>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Feedback Type
+            </Text>
+            <View style={styles.feedbackTypeButtons}>
+              {['Website Experience', 'Service Quality', 'Other'].map(
+                (type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.feedbackTypeButton,
+                      feedbackType === type && styles.feedbackTypeButtonActive,
+                      { borderColor: colors.tabIconDefault },
+                    ]}
+                    onPress={() => setFeedbackType(type)}
+                  >
+                    <Text
+                      style={[
+                        styles.feedbackTypeText,
+                        {
+                          color:
+                            feedbackType === type
+                              ? colors.primaryColor
+                              : colors.text,
+                        },
+                      ]}
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
+            </View>
+          </View>
+
+          <View style={styles.ratingContainer}>
+            {[1, 2, 3, 4, 5].map((value) => (
               <TouchableOpacity
-                key={type}
-                style={[
-                  styles.feedbackTypeButton,
-                  feedbackType === type && styles.feedbackTypeButtonActive,
-                  { borderColor: colors.tabIconDefault }
-                ]}
-                onPress={() => setFeedbackType(type)}
+                key={value}
+                onPress={() => setRating(value)}
+                style={styles.starButton}
               >
-                <Text style={[
-                  styles.feedbackTypeText,
-                  { color: feedbackType === type ? colors.primaryColor : colors.text }
-                ]}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Text>
+                <Star
+                  size={32}
+                  color="#FFD700"
+                  fill={value <= rating ? '#FFD700' : 'transparent'}
+                />
               </TouchableOpacity>
             ))}
           </View>
+
+          <Text style={[styles.label, { color: colors.text }]}>
+            Tell us about your experience
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.inputBackground,
+                color: colors.text,
+              },
+            ]}
+            placeholder="Write your feedback here..."
+            placeholderTextColor={colors.grayDark}
+            multiline
+            numberOfLines={6}
+            value={feedback}
+            onChangeText={setFeedback}
+          />
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Button
+            title="Submit Feedback"
+            onPress={handleSubmit}
+            loading={isLoading}
+            disabled={rating === 0 || !feedback.trim() || !feedbackType}
+            fullWidth
+          />
         </View>
-
-        <View style={styles.ratingContainer}>
-          {[1, 2, 3, 4, 5].map((value) => (
-            <TouchableOpacity
-              key={value}
-              onPress={() => setRating(value)}
-              style={styles.starButton}
-            >
-              <Star
-                size={32}
-                color="#FFD700"
-                fill={value <= rating ? '#FFD700' : 'transparent'}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <Text style={[styles.label, { color: colors.text }]}>
-          Tell us about your experience
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: colors.inputBackground,
-              color: colors.text,
-            },
-          ]}
-          placeholder="Write your feedback here..."
-          placeholderTextColor={colors.grayDark}
-          multiline
-          numberOfLines={6}
-          value={feedback}
-          onChangeText={setFeedback}
-        />
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <Button
-          title="Submit Feedback"
-          onPress={handleSubmit}
-          loading={isLoading}
-          disabled={rating === 0 || !feedback.trim() || !feedbackType}
-          fullWidth
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

@@ -12,9 +12,30 @@ import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { User, Chrome as Home, Heart, Globe, Bell, MessageSquare, Share, FileText, Book, LogOut, ChevronRight, CreditCard as Edit, BookOpen } from 'lucide-react-native';
+import {
+  User,
+  Chrome as Home,
+  Heart,
+  Globe,
+  Bell,
+  MessageSquare,
+  Share,
+  FileText,
+  Book,
+  LogOut,
+  ChevronRight,
+  CreditCard as Edit,
+  BookOpen,
+} from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-const MenuItem = ({ icon: Icon, title, onPress, color = 'black', isLogout = false }:any) => {
+const MenuItem = ({
+  icon: Icon,
+  title,
+  onPress,
+  color = 'black',
+  isLogout = false,
+}: any) => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
@@ -97,55 +118,82 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView>
-        <View style={styles.header}>
-          <View style={styles.profileSection}>
-            <View style={[styles.profileImage, { backgroundColor: colors.primaryColor, justifyContent: 'center', alignItems: 'center' }]}>
-              <Text style={[styles.initialsText, { color: colors.background }]}>
-                {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'}
-              </Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={[styles.name, { color: colors.text }]}>
-                {user?.name || 'Hello, User'}
-              </Text>
-              <Text style={[styles.lastLogin, { color: colors.grayDark }]}>
-                Last Login: Nov 21, 2024
-              </Text>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => router.push('/edit-profile')}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <ScrollView>
+          <View style={styles.header}>
+            <View style={styles.profileSection}>
+              <View
+                style={[
+                  styles.profileImage,
+                  {
+                    backgroundColor: colors.primaryColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  },
+                ]}
               >
-                <Text style={[styles.editButtonText, { color: colors.primaryColor }]}>
-                  Edit Profile
+                <Text
+                  style={[styles.initialsText, { color: colors.background }]}
+                >
+                  {user?.name
+                    ? user.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .substring(0, 2)
+                    : 'U'}
                 </Text>
-                <Edit size={16} color={colors.primaryColor} />
-              </TouchableOpacity>
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={[styles.name, { color: colors.text }]}>
+                  {user?.name || 'Hello, User'}
+                </Text>
+                <Text style={[styles.lastLogin, { color: colors.grayDark }]}>
+                  Last Login: Nov 21, 2024
+                </Text>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => router.push('/edit-profile')}
+                >
+                  <Text
+                    style={[
+                      styles.editButtonText,
+                      { color: colors.primaryColor },
+                    ]}
+                  >
+                    Edit Profile
+                  </Text>
+                  <Edit size={16} color={colors.primaryColor} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.menuContainer}>
-          {menuItems.map((item, index) => (
+          <View style={styles.menuContainer}>
+            {menuItems.map((item, index) => (
+              <MenuItem
+                key={index}
+                icon={item.icon}
+                title={item.title}
+                onPress={item.onPress}
+                color={colors.text}
+              />
+            ))}
             <MenuItem
-              key={index}
-              icon={item.icon}
-              title={item.title}
-              onPress={item.onPress}
-              color={colors.text}
+              icon={LogOut}
+              title="Logout"
+              onPress={signOut}
+              color={colors.errorColor}
+              isLogout
             />
-          ))}
-          <MenuItem
-            icon={LogOut}
-            title="Logout"
-            onPress={signOut}
-            color={colors.errorColor}
-            isLogout
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

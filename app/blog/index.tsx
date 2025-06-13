@@ -16,20 +16,23 @@ import { useBlog, BlogCategory, BlogPost } from '@/context/BlogContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { Plus, MapPin, Calendar, ArrowLeft } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function BlogScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { posts, loadMorePosts, hasMorePosts, isLoading } = useBlog();
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<BlogCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<BlogCategory | null>(
+    null
+  );
 
   const categories: BlogCategory[] = [
     'Roommate Wanted',
     'Property For Sale',
     'Property For Rent',
     'Community Updates',
-    'Market Insights'
+    'Market Insights',
   ];
 
   const filteredPosts = selectedCategory
@@ -50,19 +53,25 @@ export default function BlogScreen() {
       {item.image && (
         <Image source={{ uri: item.image }} style={styles.postImage} />
       )}
-      
+
       <View style={styles.categoryTag}>
         <Text style={styles.categoryText}>{item.category}</Text>
       </View>
 
       <View style={styles.postContent}>
-        <Text style={[styles.postTitle, { color: colors.text }]} numberOfLines={2}>
+        <Text
+          style={[styles.postTitle, { color: colors.text }]}
+          numberOfLines={2}
+        >
           {item.title}
         </Text>
 
         <View style={styles.locationContainer}>
           <MapPin size={16} color={colors.grayDark} />
-          <Text style={[styles.locationText, { color: colors.grayDark }]} numberOfLines={1}>
+          <Text
+            style={[styles.locationText, { color: colors.grayDark }]}
+            numberOfLines={1}
+          >
             {item.location?.locality}, {item.location?.city}
           </Text>
         </View>
@@ -87,94 +96,103 @@ export default function BlogScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <ArrowLeft size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Blog</Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: colors.primaryColor }]}
-          onPress={() => router.push('/blog/create')}
-        >
-          <Plus size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.categories}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContent}
-        >
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+            >
+              <ArrowLeft size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              Blog
+            </Text>
+          </View>
           <TouchableOpacity
             style={[
-              styles.categoryButton,
-              !selectedCategory && { backgroundColor: colors.primaryColor },
+              styles.createButton,
+              { backgroundColor: colors.primaryColor },
             ]}
-            onPress={() => setSelectedCategory(null)}
+            onPress={() => router.push('/blog/create')}
           >
-            <Text
-              style={[
-                styles.categoryButtonText,
-                !selectedCategory && { color: 'white' },
-              ]}
-            >
-              All
-            </Text>
+            <Plus size={24} color="white" />
           </TouchableOpacity>
-          {categories.map((category) => (
+        </View>
+
+        <View style={styles.categories}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesContent}
+          >
             <TouchableOpacity
-              key={category}
               style={[
                 styles.categoryButton,
-                selectedCategory === category && {
-                  backgroundColor: colors.primaryColor,
-                },
+                !selectedCategory && { backgroundColor: colors.primaryColor },
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() => setSelectedCategory(null)}
             >
               <Text
                 style={[
                   styles.categoryButtonText,
-                  selectedCategory === category && { color: 'white' },
+                  !selectedCategory && { color: 'white' },
                 ]}
               >
-                {category}
+                All
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category && {
+                    backgroundColor: colors.primaryColor,
+                  },
+                ]}
+                onPress={() => setSelectedCategory(category)}
+              >
+                <Text
+                  style={[
+                    styles.categoryButtonText,
+                    selectedCategory === category && { color: 'white' },
+                  ]}
+                >
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      <FlatList
-        data={filteredPosts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
-        onEndReached={() => {
-          if (hasMorePosts && !isLoading) {
-            loadMorePosts();
+        <FlatList
+          data={filteredPosts}
+          renderItem={renderPost}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContent}
+          onEndReached={() => {
+            if (hasMorePosts && !isLoading) {
+              loadMorePosts();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-        }}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListFooterComponent={() =>
-          isLoading ? (
-            <View style={styles.loader}>
-              <ActivityIndicator color={colors.primaryColor} />
-            </View>
-          ) : null
-        }
-      />
-    </SafeAreaView>
+          ListFooterComponent={() =>
+            isLoading ? (
+              <View style={styles.loader}>
+                <ActivityIndicator color={colors.primaryColor} />
+              </View>
+            ) : null
+          }
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

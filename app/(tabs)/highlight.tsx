@@ -19,18 +19,19 @@ import { useProperties } from '@/context/PropertyContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
-import { 
-  Play, 
-  MapPin, 
-  Heart, 
+import {
+  Play,
+  MapPin,
+  Heart,
   ArrowRight,
   User,
   MoreVertical,
   Home,
-  Building2
+  Building2,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 83 : 60; // Approximate tab bar height
@@ -91,26 +92,31 @@ export default function HighlightScreen() {
   React.useEffect(() => {
     const loadVideos = async () => {
       const videoData = await getAllVideos();
-      setVideos(videoData.map((property, index) => ({
-        id: property.id,
-        videoUrl: property.video,
-        title: property.title,
-        description: `Amazing ${property.propertyType.toLowerCase()} in ${property.location.city}`,
-        location: `${property.location.locality}, ${property.location.city}`,
-        price: property.pricing.expectedPrice,
-        priceUnit: property.propertyType === 'For Rent' ? 'perMonth' : 'total',
-        user: {
-          name: `User ${index + 1}`,
-          avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
-          verified: Math.random() > 0.5,
-        },
-        stats: {
-          likes: Math.floor(Math.random() * 1000) + 50,
-          comments: Math.floor(Math.random() * 100) + 10,
-          shares: Math.floor(Math.random() * 50) + 5,
-        },
-        timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
-      })));
+      setVideos(
+        (videoData ?? []).map((property, index) => ({
+          id: property.id,
+          videoUrl: property.video,
+          title: property.title,
+          description: `Amazing ${property.propertyType.toLowerCase()} in ${
+            property.location.city
+          }`,
+          location: `${property.location.locality}, ${property.location.city}`,
+          price: property.pricing.expectedPrice,
+          priceUnit:
+            property.propertyType === 'For Rent' ? 'perMonth' : 'total',
+          user: {
+            name: `User ${index + 1}`,
+            avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
+            verified: Math.random() > 0.5,
+          },
+          stats: {
+            likes: Math.floor(Math.random() * 1000) + 50,
+            comments: Math.floor(Math.random() * 100) + 10,
+            shares: Math.floor(Math.random() * 50) + 5,
+          },
+          timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
+        }))
+      );
     };
     loadVideos();
   }, []);
@@ -144,49 +150,59 @@ export default function HighlightScreen() {
     }
   };
 
-  const onViewableItemsChanged = useRef(async ({ viewableItems }: { 
-    viewableItems: ViewToken[]; 
-    changed: ViewToken[];
-  }) => {
-    if (viewableItems.length > 0) {
-      const newIndex = viewableItems[0].index ?? 0;
-      setCurrentVideoIndex(newIndex);
-      
-      // Pause all videos
-      Object.values(videoRefs.current).forEach(async (ref) => {
-        if (ref) {
-          try {
-            await ref.pauseAsync();
-          } catch (error) {
-            console.error('Error pausing video:', error);
-          }
-        }
-      });
+  const onViewableItemsChanged = useRef(
+    async ({
+      viewableItems,
+    }: {
+      viewableItems: ViewToken[];
+      changed: ViewToken[];
+    }) => {
+      if (viewableItems.length > 0) {
+        const newIndex = viewableItems[0].index ?? 0;
+        setCurrentVideoIndex(newIndex);
 
-      // Play the current video
-      const currentVideoRef = videoRefs.current[videos[newIndex]?.id];
-      if (currentVideoRef) {
-        try {
-          await currentVideoRef.playAsync();
-          setIsPlaying(true);
-        } catch (error) {
-          console.error('Error playing video:', error);
-          Alert.alert('Error', 'Failed to play video. Please try again.');
+        // Pause all videos
+        Object.values(videoRefs.current).forEach(async (ref) => {
+          if (ref) {
+            try {
+              await ref.pauseAsync();
+            } catch (error) {
+              console.error('Error pausing video:', error);
+            }
+          }
+        });
+
+        // Play the current video
+        const currentVideoRef = videoRefs.current[videos[newIndex]?.id];
+        if (currentVideoRef) {
+          try {
+            await currentVideoRef.playAsync();
+            setIsPlaying(true);
+          } catch (error) {
+            console.error('Error playing video:', error);
+            Alert.alert('Error', 'Failed to play video. Please try again.');
+          }
         }
       }
     }
-  }).current;
+  ).current;
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50,
   };
 
-  const renderVideoItem = ({ item, index }: { item: VideoItem; index: number }) => {
+  const renderVideoItem = ({
+    item,
+    index,
+  }: {
+    item: VideoItem;
+    index: number;
+  }) => {
     const isInWishlist = favorites.includes(item.id);
 
     return (
       <View style={styles.videoContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.videoPlayer}
           onPress={() => handlePlayPause(item.id)}
           activeOpacity={1}
@@ -209,7 +225,7 @@ export default function HighlightScreen() {
               Alert.alert('Error', 'Failed to load video. Please try again.');
             }}
           />
-          
+
           {!isPlaying && (
             <View style={styles.playOverlay}>
               <BlurView intensity={20} style={styles.playButtonBlur}>
@@ -248,7 +264,7 @@ export default function HighlightScreen() {
                 <Text style={styles.timestamp}>{item.timestamp}</Text>
               </View>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.moreButton}>
               <BlurView intensity={20} style={styles.moreButtonBlur}>
                 <MoreVertical size={20} color="white" />
@@ -268,38 +284,46 @@ export default function HighlightScreen() {
 
             <Text style={styles.propertyTitle}>{item.title}</Text>
             <Text style={styles.propertyDescription}>{item.description}</Text>
-            
+
             <View style={styles.locationContainer}>
               <MapPin size={14} color="white" />
               <Text style={styles.locationText}>{item.location}</Text>
             </View>
 
             <Text style={styles.priceText}>
-              {item?.priceUnit === 'perMonth' 
-                ? `₹${item?.price?.toLocaleString()}/ Month` 
+              {item?.priceUnit === 'perMonth'
+                ? `₹${item?.price?.toLocaleString()}/ Month`
                 : `₹${item?.price?.toLocaleString()}`}
             </Text>
           </View>
         </View>
 
         <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity 
-            style={[styles.actionButton, isInWishlist && styles.actionButtonActive]}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              isInWishlist && styles.actionButtonActive,
+            ]}
             onPress={() => handleWishlist(item.id)}
           >
             <BlurView intensity={20} style={styles.actionButtonBlur}>
-              <Heart 
-                size={28} 
-                color={isInWishlist ? "#FF3040" : "white"} 
-                fill={isInWishlist ? "#FF3040" : "transparent"}
+              <Heart
+                size={28}
+                color={isInWishlist ? '#FF3040' : 'white'}
+                fill={isInWishlist ? '#FF3040' : 'transparent'}
               />
-              <Text style={[styles.actionText, isInWishlist && styles.actionTextActive]}>
+              <Text
+                style={[
+                  styles.actionText,
+                  isInWishlist && styles.actionTextActive,
+                ]}
+              >
                 {isInWishlist ? 'Saved' : 'Save'}
               </Text>
             </BlurView>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.viewPropertyButton}
             onPress={() => handleViewProperty(item.id)}
           >
@@ -314,28 +338,30 @@ export default function HighlightScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="black" />
-      
-      <FlatList
-        ref={flatListRef}
-        data={videos}
-        keyExtractor={(item) => item.id}
-        renderItem={renderVideoItem}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        snapToInterval={CONTENT_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        getItemLayout={(data, index) => ({
-          length: CONTENT_HEIGHT,
-          offset: CONTENT_HEIGHT * index,
-          index,
-        })}
-      />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="black" />
+
+        <FlatList
+          ref={flatListRef}
+          data={videos}
+          keyExtractor={(item) => item.id}
+          renderItem={renderVideoItem}
+          pagingEnabled
+          showsVerticalScrollIndicator={false}
+          snapToInterval={CONTENT_HEIGHT}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          getItemLayout={(data, index) => ({
+            length: CONTENT_HEIGHT,
+            offset: CONTENT_HEIGHT * index,
+            index,
+          })}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

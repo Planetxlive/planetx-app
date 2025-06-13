@@ -30,6 +30,7 @@ import {
   Shield,
   Zap,
 } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function GymDetailScreen() {
   const colorScheme = useColorScheme();
@@ -87,237 +88,350 @@ export default function GymDetailScreen() {
     return status === 'Available' ? colors.successColor : colors.errorColor;
   };
 
-  const imageUrls = gym.images.map(img => img.url);
+  const imageUrls = gym.images.map((img) => img.url);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={[styles.headerButton, { backgroundColor: colors.background }]}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerRightButtons}>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.background }]}
-            onPress={handleFavoriteToggle}
-          >
-            <Heart
-              size={24}
-              color={isFavorite ? colors.accentColor : colors.text}
-              fill={isFavorite ? colors.accentColor : 'transparent'}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.background }]}
-            onPress={handleShare}
-          >
-            <Share2 size={24} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <ImageCarousel images={imageUrls} height={250} />
-
-        <View style={styles.contentContainer}>
-          <View style={styles.titleContainer}>
-            <View style={styles.typeAndStatus}>
-              <View style={[styles.typeTag, { backgroundColor: getGymTypeColor(gym.gymType) }]}>
-                <Text style={styles.typeText}>{gym.gymType} Gym</Text>
-              </View>
-              <View style={[styles.statusTag, { backgroundColor: getAvailabilityColor(gym.availableStatus) }]}>
-                <Text style={styles.statusText}>{gym.availableStatus}</Text>
-              </View>
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {gym.gymName}
-            </Text>
-            <View style={styles.locationContainer}>
-              <MapPin size={16} color={colors.grayDark} />
-              <Text style={[styles.location, { color: colors.grayDark }]}>
-                {gym.locality && `${gym.locality}, `}{gym.city}, {gym.state}
-              </Text>
-            </View>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[
+              styles.headerButton,
+              { backgroundColor: colors.background },
+            ]}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerRightButtons}>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.background },
+              ]}
+              onPress={handleFavoriteToggle}
+            >
+              <Heart
+                size={24}
+                color={isFavorite ? colors.accentColor : colors.text}
+                fill={isFavorite ? colors.accentColor : 'transparent'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.background },
+              ]}
+              onPress={handleShare}
+            >
+              <Share2 size={24} color={colors.text} />
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.infoContainer}>
-            {gym.rating && (
-              <View style={styles.ratingContainer}>
-                <Star size={16} color="#FFD700" fill="#FFD700" />
-                <Text style={[styles.ratingText, { color: colors.text }]}>{gym.rating}</Text>
-              </View>
-            )}
-            {gym.bookingDetails.operationHours && (
-              <View style={styles.timingContainer}>
-                <Clock size={16} color={colors.grayDark} />
-                <Text style={[styles.timingText, { color: colors.grayDark }]}>
-                  {gym.bookingDetails.operationHours}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.quickInfoContainer}>
-            <View style={styles.quickInfoItem}>
-              <Users size={20} color={colors.primaryColor} />
-              <Text style={[styles.quickInfoLabel, { color: colors.grayDark }]}>Capacity</Text>
-              <Text style={[styles.quickInfoValue, { color: colors.text }]}>{gym.capacity}</Text>
-            </View>
-            <View style={styles.quickInfoItem}>
-              <Award size={20} color={colors.primaryColor} />
-              <Text style={[styles.quickInfoLabel, { color: colors.grayDark }]}>Equipment</Text>
-              <Text style={[styles.quickInfoValue, { color: colors.text }]}>{gym.equipmentType}</Text>
-            </View>
-            {gym.ageOfGym && (
-              <View style={styles.quickInfoItem}>
-                <Calendar size={20} color={colors.primaryColor} />
-                <Text style={[styles.quickInfoLabel, { color: colors.grayDark }]}>Age</Text>
-                <Text style={[styles.quickInfoValue, { color: colors.text }]}>{gym.ageOfGym} years</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.priceContainer}>
-            <Text style={[styles.price, { color: colors.primaryColor }]}>
-              {formatPrice(gym.pricing)}
-            </Text>
-            {gym.pricing.discount && gym.pricing.discount > 0 && (
-              <View style={styles.discountContainer}>
-                <Text style={[styles.originalPrice, { color: colors.grayDark }]}>
-                  ₹{gym.pricing.baseMembershipPrice}
-                </Text>
-                <Text style={[styles.discount, { color: colors.successColor }]}>
-                  {gym.pricing.discount}% OFF
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={[styles.description, { color: colors.text }]}>
-            {gym.gymDescription}
-          </Text>
-
-          {gym.amenitites.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Amenities
-              </Text>
-              <View style={styles.featuresGrid}>
-                {gym.amenitites.map((amenity, index) => (
-                  <View key={index} style={[styles.featureItem, { backgroundColor: colors.grayLight }]}>
-                    <Check size={16} color={colors.successColor} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>{amenity}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {gym.gymEquipment.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Gym Equipment
-              </Text>
-              <View style={styles.featuresGrid}>
-                {gym.gymEquipment.map((equipment, index) => (
-                  <View key={index} style={[styles.featureItem, { backgroundColor: colors.primaryColor + '20' }]}>
-                    <Zap size={16} color={colors.primaryColor} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>{equipment}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {gym.facilities.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Facilities
-              </Text>
-              <View style={styles.featuresGrid}>
-                {gym.facilities.map((facility, index) => (
-                  <View key={index} style={[styles.featureItem, { backgroundColor: colors.secondaryColor + '20' }]}>
-                    <Check size={16} color={colors.secondaryColor} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>{facility}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {gym.trainerServices.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Trainer Services
-              </Text>
-              <View style={styles.featuresGrid}>
-                {gym.trainerServices.map((service, index) => (
-                  <View key={index} style={[styles.featureItem, { backgroundColor: colors.accentColor + '20' }]}>
-                    <Award size={16} color={colors.accentColor} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>{service}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {gym.rules.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Gym Rules
-              </Text>
-              <View style={styles.rulesContainer}>
-                {gym.rules.map((rule, index) => (
-                  <View key={index} style={styles.ruleItem}>
-                    <Shield size={14} color={colors.warningColor} />
-                    <Text style={[styles.ruleText, { color: colors.text }]}>{rule}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
-
-          {gym.additionalFeatures.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Additional Features
-              </Text>
-              <View style={styles.featuresGrid}>
-                {gym.additionalFeatures.map((feature, index) => (
-                  <View key={index} style={[styles.featureItem, { backgroundColor: colors.grayLight }]}>
-                    <Check size={16} color={colors.successColor} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>{feature}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
         </View>
-      </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.cardBackground }]}>
-        <TouchableOpacity
-          style={[styles.contactButton, { backgroundColor: '#25D366' }]}
-          onPress={() => {/* Handle WhatsApp */}}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
         >
-          <MessageSquare size={20} color="white" />
-          <Text style={styles.contactButtonText}>WhatsApp</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.contactButton, { backgroundColor: colors.primaryColor }]}
-          onPress={() => {/* Handle Call */}}
+          <ImageCarousel images={imageUrls} height={250} />
+
+          <View style={styles.contentContainer}>
+            <View style={styles.titleContainer}>
+              <View style={styles.typeAndStatus}>
+                <View
+                  style={[
+                    styles.typeTag,
+                    { backgroundColor: getGymTypeColor(gym.gymType) },
+                  ]}
+                >
+                  <Text style={styles.typeText}>{gym.gymType} Gym</Text>
+                </View>
+                <View
+                  style={[
+                    styles.statusTag,
+                    {
+                      backgroundColor: getAvailabilityColor(
+                        gym.availableStatus
+                      ),
+                    },
+                  ]}
+                >
+                  <Text style={styles.statusText}>{gym.availableStatus}</Text>
+                </View>
+              </View>
+              <Text style={[styles.title, { color: colors.text }]}>
+                {gym.gymName}
+              </Text>
+              <View style={styles.locationContainer}>
+                <MapPin size={16} color={colors.grayDark} />
+                <Text style={[styles.location, { color: colors.grayDark }]}>
+                  {gym.locality && `${gym.locality}, `}
+                  {gym.city}, {gym.state}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.infoContainer}>
+              {gym.rating && (
+                <View style={styles.ratingContainer}>
+                  <Star size={16} color="#FFD700" fill="#FFD700" />
+                  <Text style={[styles.ratingText, { color: colors.text }]}>
+                    {gym.rating}
+                  </Text>
+                </View>
+              )}
+              {gym.bookingDetails.operationHours && (
+                <View style={styles.timingContainer}>
+                  <Clock size={16} color={colors.grayDark} />
+                  <Text style={[styles.timingText, { color: colors.grayDark }]}>
+                    {gym.bookingDetails.operationHours}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.quickInfoContainer}>
+              <View style={styles.quickInfoItem}>
+                <Users size={20} color={colors.primaryColor} />
+                <Text
+                  style={[styles.quickInfoLabel, { color: colors.grayDark }]}
+                >
+                  Capacity
+                </Text>
+                <Text style={[styles.quickInfoValue, { color: colors.text }]}>
+                  {gym.capacity}
+                </Text>
+              </View>
+              <View style={styles.quickInfoItem}>
+                <Award size={20} color={colors.primaryColor} />
+                <Text
+                  style={[styles.quickInfoLabel, { color: colors.grayDark }]}
+                >
+                  Equipment
+                </Text>
+                <Text style={[styles.quickInfoValue, { color: colors.text }]}>
+                  {gym.equipmentType}
+                </Text>
+              </View>
+              {gym.ageOfGym && (
+                <View style={styles.quickInfoItem}>
+                  <Calendar size={20} color={colors.primaryColor} />
+                  <Text
+                    style={[styles.quickInfoLabel, { color: colors.grayDark }]}
+                  >
+                    Age
+                  </Text>
+                  <Text style={[styles.quickInfoValue, { color: colors.text }]}>
+                    {gym.ageOfGym} years
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.priceContainer}>
+              <Text style={[styles.price, { color: colors.primaryColor }]}>
+                {formatPrice(gym.pricing)}
+              </Text>
+              {gym.pricing.discount && gym.pricing.discount > 0 && (
+                <View style={styles.discountContainer}>
+                  <Text
+                    style={[styles.originalPrice, { color: colors.grayDark }]}
+                  >
+                    ₹{gym.pricing.baseMembershipPrice}
+                  </Text>
+                  <Text
+                    style={[styles.discount, { color: colors.successColor }]}
+                  >
+                    {gym.pricing.discount}% OFF
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={[styles.description, { color: colors.text }]}>
+              {gym.gymDescription}
+            </Text>
+
+            {gym.amenitites.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Amenities
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {gym.amenitites.map((amenity, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.featureItem,
+                        { backgroundColor: colors.grayLight },
+                      ]}
+                    >
+                      <Check size={16} color={colors.successColor} />
+                      <Text
+                        style={[styles.featureText, { color: colors.text }]}
+                      >
+                        {amenity}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {gym.gymEquipment.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Gym Equipment
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {gym.gymEquipment.map((equipment, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.featureItem,
+                        { backgroundColor: colors.primaryColor + '20' },
+                      ]}
+                    >
+                      <Zap size={16} color={colors.primaryColor} />
+                      <Text
+                        style={[styles.featureText, { color: colors.text }]}
+                      >
+                        {equipment}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {gym.facilities.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Facilities
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {gym.facilities.map((facility, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.featureItem,
+                        { backgroundColor: colors.secondaryColor + '20' },
+                      ]}
+                    >
+                      <Check size={16} color={colors.secondaryColor} />
+                      <Text
+                        style={[styles.featureText, { color: colors.text }]}
+                      >
+                        {facility}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {gym.trainerServices.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Trainer Services
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {gym.trainerServices.map((service, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.featureItem,
+                        { backgroundColor: colors.accentColor + '20' },
+                      ]}
+                    >
+                      <Award size={16} color={colors.accentColor} />
+                      <Text
+                        style={[styles.featureText, { color: colors.text }]}
+                      >
+                        {service}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {gym.rules.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Gym Rules
+                </Text>
+                <View style={styles.rulesContainer}>
+                  {gym.rules.map((rule, index) => (
+                    <View key={index} style={styles.ruleItem}>
+                      <Shield size={14} color={colors.warningColor} />
+                      <Text style={[styles.ruleText, { color: colors.text }]}>
+                        {rule}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {gym.additionalFeatures.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Additional Features
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {gym.additionalFeatures.map((feature, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.featureItem,
+                        { backgroundColor: colors.grayLight },
+                      ]}
+                    >
+                      <Check size={16} color={colors.successColor} />
+                      <Text
+                        style={[styles.featureText, { color: colors.text }]}
+                      >
+                        {feature}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <View
+          style={[styles.footer, { backgroundColor: colors.cardBackground }]}
         >
-          <Phone size={20} color="white" />
-          <Text style={styles.contactButtonText}>Join Now</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity
+            style={[styles.contactButton, { backgroundColor: '#25D366' }]}
+            onPress={() => {
+              /* Handle WhatsApp */
+            }}
+          >
+            <MessageSquare size={20} color="white" />
+            <Text style={styles.contactButtonText}>WhatsApp</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.contactButton,
+              { backgroundColor: colors.primaryColor },
+            ]}
+            onPress={() => {
+              /* Handle Call */
+            }}
+          >
+            <Phone size={20} color="white" />
+            <Text style={styles.contactButtonText}>Join Now</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

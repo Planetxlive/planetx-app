@@ -18,11 +18,18 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { PropertyCategory, useProperties, Property as ContextProperty } from '@/context/PropertyContext';
+import {
+  PropertyCategory,
+  useProperties,
+  Property as ContextProperty,
+} from '@/context/PropertyContext';
 import ImageCarousel from '@/components/ImageCarousel';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import {
   ArrowLeft,
   Heart,
@@ -207,7 +214,7 @@ const transformPropertyData = (data: PropertyData): Property => {
     powerBackup: 'Power Backup',
     parking: 'Parking',
     clubHouse: 'Club House',
-    childrensPlayArea: 'Children\'s Play Area',
+    childrensPlayArea: "Children's Play Area",
     sportsFacilities: 'Sports Facilities',
     joggingWalkingTracks: 'Jogging & Walking Tracks',
     swimmingPool: 'Swimming Pool',
@@ -309,7 +316,7 @@ const transformPropertyData = (data: PropertyData): Property => {
     gymFitnessCentre: 'Gym & Fitness Centre',
     shoppingCenter: 'Shopping Center',
     clubHouse: 'Club House',
-    childrensPlayArea: 'Children\'s Play Area',
+    childrensPlayArea: "Children's Play Area",
     sportsFacilities: 'Sports Facilities',
     joggingWalkingTracks: 'Jogging & Walking Tracks',
     gardenParks: 'Garden & Parks',
@@ -377,25 +384,32 @@ const transformPropertyData = (data: PropertyData): Property => {
     return acc;
   }, [] as PropertyFeature[]);
 
-  const furnishing = Object.entries(furnishingObj).reduce((acc, [key, value]) => {
-    if ((typeof value === 'number' && value > 0) || (typeof value === 'boolean' && value)) {
-      acc.push({
-        icon: 'fan',
-        label: `${typeof value === 'number' ? value : 1} ${furnishingMap[key] || key}`,
-      });
-    }
-    return acc;
-  }, [] as PropertyFeature[]);
-
-  const societyFeatures = Object.entries(data.societyBuildingFeatures || {}).reduce(
+  const furnishing = Object.entries(furnishingObj).reduce(
     (acc, [key, value]) => {
-      if (value && societyFeaturesMap[key]) {
-        acc.push({ icon: 'swimming-pool', label: societyFeaturesMap[key] });
+      if (
+        (typeof value === 'number' && value > 0) ||
+        (typeof value === 'boolean' && value)
+      ) {
+        acc.push({
+          icon: 'fan',
+          label: `${typeof value === 'number' ? value : 1} ${
+            furnishingMap[key] || key
+          }`,
+        });
       }
       return acc;
     },
     [] as PropertyFeature[]
   );
+
+  const societyFeatures = Object.entries(
+    data.societyBuildingFeatures || {}
+  ).reduce((acc, [key, value]) => {
+    if (value && societyFeaturesMap[key]) {
+      acc.push({ icon: 'swimming-pool', label: societyFeaturesMap[key] });
+    }
+    return acc;
+  }, [] as PropertyFeature[]);
 
   const otherFeatures = Object.entries(data.otherFeatures || {}).reduce(
     (acc, [key, value]) => {
@@ -431,23 +445,36 @@ const transformPropertyData = (data: PropertyData): Property => {
       features = [
         {
           icon: 'layout',
-          label: data.about ? `${data.about.bedrooms || 0} BHK & ${data.about.bathrooms || 0} Baths` : 'N/A',
+          label: data.about
+            ? `${data.about.bedrooms || 0} BHK & ${
+                data.about.bathrooms || 0
+              } Baths`
+            : 'N/A',
         },
         {
           icon: 'square',
-          label: data.propertyArea?.carpetArea ? `${data.propertyArea.carpetArea} sq.ft.` : 'N/A',
+          label: data.propertyArea?.carpetArea
+            ? `${data.propertyArea.carpetArea} sq.ft.`
+            : 'N/A',
         },
         {
           icon: 'layers',
-          label:  data.propertyOnFloor !== undefined && data.totalFloors !== undefined ? `${data.propertyOnFloor} / ${data.totalFloors || 'N/A'} floors` : 'N/A',
+          label:
+            data.propertyOnFloor !== undefined && data.totalFloors !== undefined
+              ? `${data.propertyOnFloor} / ${data.totalFloors || 'N/A'} floors`
+              : 'N/A',
         },
         {
           icon: 'tag',
-          label: pricing.PricePerSqft ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / sq.ft.` : 'N/A',
+          label: pricing.PricePerSqft
+            ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / sq.ft.`
+            : 'N/A',
         },
         {
           icon: 'home',
-          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+          label: data.ageOfProperty
+            ? `${data.ageOfProperty} Year Old`
+            : 'New Property',
         },
       ];
       propertyDetails = [
@@ -455,17 +482,32 @@ const transformPropertyData = (data: PropertyData): Property => {
         { label: 'Bathrooms', value: data.about?.bathrooms || 'N/A' },
         { label: 'Balconies', value: data.about?.balconies || 'N/A' },
         { label: 'Total no. of Floor', value: data.totalFloors || 'N/A' },
-        { label: 'Property on Floor', value: data.propertyOnFloor !== undefined? data.propertyOnFloor :'N/A' },
-        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        {
+          label: 'Property on Floor',
+          value:
+            data.propertyOnFloor !== undefined ? data.propertyOnFloor : 'N/A',
+        },
+        {
+          label: 'Availability Status',
+          value: data.availabilityStatus || 'N/A',
+        },
         {
           label: 'Available From',
-          value: data.availableFrom ? new Date(data.availableFrom).toLocaleDateString() : 'N/A',
+          value: data.availableFrom
+            ? new Date(data.availableFrom).toLocaleDateString()
+            : 'N/A',
         },
-        { label: 'Age of Property', value: data.ageOfProperty ? `${data.ageOfProperty} years` : 'N/A' },
+        {
+          label: 'Age of Property',
+          value: data.ageOfProperty ? `${data.ageOfProperty} years` : 'N/A',
+        },
         { label: 'Furnishing Status', value: data.furnishingStatus || 'N/A' },
         { label: 'Facing', value: data.facing || 'N/A' },
         { label: 'Power backup', value: data.powerBackup || 'N/A' },
-        { label: 'Wheelchair Friendly', value: data.otherFeatures?.wheelchairFriendly ? 'Yes' : 'No' },
+        {
+          label: 'Wheelchair Friendly',
+          value: data.otherFeatures?.wheelchairFriendly ? 'Yes' : 'No',
+        },
         { label: 'Water Source', value: data.waterSource || 'N/A' },
         { label: 'Width of facing road', value: data.roadWidth || 'N/A' },
         { label: 'Type of flooring', value: data.flooring || 'N/A' },
@@ -474,58 +516,95 @@ const transformPropertyData = (data: PropertyData): Property => {
       areaDetails = [
         {
           label: 'Carpet Area',
-          value: data.propertyArea?.carpetArea ? `${data.propertyArea.carpetArea} Sq.ft.` : 'N/A',
+          value: data.propertyArea?.carpetArea
+            ? `${data.propertyArea.carpetArea} Sq.ft.`
+            : 'N/A',
           subValue: data.propertyArea?.carpetArea
-            ? `${(data.propertyArea.carpetArea * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${(data.propertyArea.carpetArea * 0.092903).toFixed(2)} Sq.m.`
+            : 'N/A',
         },
         {
           label: 'Built-up Area',
           value: data.propertyArea?.carpetArea
-            ? `${(data.propertyArea.carpetArea * 1.1).toFixed(0)} Sq.ft.` : 'N/A',
+            ? `${(data.propertyArea.carpetArea * 1.1).toFixed(0)} Sq.ft.`
+            : 'N/A',
           subValue: data.propertyArea?.carpetArea
-            ? `${(data.propertyArea.carpetArea * 1.1 * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${(data.propertyArea.carpetArea * 1.1 * 0.092903).toFixed(
+                2
+              )} Sq.m.`
+            : 'N/A',
         },
         {
           label: 'Super Built-up Area',
           value: data.propertyArea?.carpetArea
-            ? `${(data.propertyArea.carpetArea * 1.2).toFixed(0)} Sq.ft.` : 'N/A',
+            ? `${(data.propertyArea.carpetArea * 1.2).toFixed(0)} Sq.ft.`
+            : 'N/A',
           subValue: data.propertyArea?.carpetArea
-            ? `${(data.propertyArea.carpetArea * 1.2 * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${(data.propertyArea.carpetArea * 1.2 * 0.092903).toFixed(
+                2
+              )} Sq.m.`
+            : 'N/A',
         },
       ];
       break;
 
     case 'Hotel':
       pricing = {
-        expectedPrice: data.pricing?.basePricePerNight ?? data.pricing?.finalPrice ?? undefined,
+        expectedPrice:
+          data.pricing?.basePricePerNight ??
+          data.pricing?.finalPrice ??
+          undefined,
       };
       features = [
         {
           icon: 'layout',
-          label: data.propertyDetails?.totalRooms ? `${data.propertyDetails.totalRooms} Rooms` : 'N/A',
+          label: data.propertyDetails?.totalRooms
+            ? `${data.propertyDetails.totalRooms} Rooms`
+            : 'N/A',
         },
         {
           icon: 'star',
-          label: data.propertyDetails?.starRating ? `${data.propertyDetails.starRating} Star` : 'N/A',
+          label: data.propertyDetails?.starRating
+            ? `${data.propertyDetails.starRating} Star`
+            : 'N/A',
         },
         {
           icon: 'home',
-          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+          label: data.ageOfProperty
+            ? `${data.ageOfProperty} Year Old`
+            : 'New Property',
         },
       ];
       propertyDetails = [
-        { label: 'Property Name', value: data.propertyDetails?.propertyName || 'N/A' },
-        { label: 'Total Rooms', value: data.propertyDetails?.totalRooms || 'N/A' },
-        { label: 'Star Rating', value: data.propertyDetails?.starRating || 'N/A' },
-        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        {
+          label: 'Property Name',
+          value: data.propertyDetails?.propertyName || 'N/A',
+        },
+        {
+          label: 'Total Rooms',
+          value: data.propertyDetails?.totalRooms || 'N/A',
+        },
+        {
+          label: 'Star Rating',
+          value: data.propertyDetails?.starRating || 'N/A',
+        },
+        {
+          label: 'Availability Status',
+          value: data.availabilityStatus || 'N/A',
+        },
         { label: 'Property ID', value: data._id },
       ];
       areaDetails = [
         {
           label: 'Total Area',
-          value: data.propertyDetails?.totalArea?.size ? `${data.propertyDetails.totalArea.size} Sq.ft.` : 'N/A',
+          value: data.propertyDetails?.totalArea?.size
+            ? `${data.propertyDetails.totalArea.size} Sq.ft.`
+            : 'N/A',
           subValue: data.propertyDetails?.totalArea?.size
-            ? `${(data.propertyDetails.totalArea.size * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${(data.propertyDetails.totalArea.size * 0.092903).toFixed(
+                2
+              )} Sq.m.`
+            : 'N/A',
         },
       ];
       break;
@@ -545,71 +624,116 @@ const transformPropertyData = (data: PropertyData): Property => {
       features = [
         {
           icon: 'layout',
-          label: data.propertyDetails?.propertyName || data.subCategory || category,
+          label:
+            data.propertyDetails?.propertyName || data.subCategory || category,
         },
         {
           icon: 'square',
-          label: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
-            ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} sq.ft.` : 'N/A',
+          label:
+            data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+              ? `${
+                  data.propertyDetails?.carpetArea?.size ||
+                  data.carpetArea?.size
+                } sq.ft.`
+              : 'N/A',
         },
         {
           icon: 'layers',
           label: data.propertyDetails?.floorDetails
-            ? `${data.propertyDetails.floorDetails.officeOnFloor || 'N/A'} / ${data.propertyDetails.floorDetails.totalFloors || 'N/A'} floors`
+            ? `${data.propertyDetails.floorDetails.officeOnFloor || 'N/A'} / ${
+                data.propertyDetails.floorDetails.totalFloors || 'N/A'
+              } floors`
             : 'N/A',
         },
       ];
       propertyDetails = [
-        { label: 'Type', value: data.propertyDetails?.officeType || data.subCategory || category },
-        { label: 'Total Floors', value: data.propertyDetails?.floorDetails?.totalFloors || 'N/A' },
-        { label: 'Property on Floor', value: data.propertyDetails?.floorDetails?.officeOnFloor || 'N/A' },
-        { label: 'Furnished Status', value: data.propertyDetails?.furnishedStatus || data.furnishingStatus || 'N/A' },
-        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        {
+          label: 'Type',
+          value:
+            data.propertyDetails?.officeType || data.subCategory || category,
+        },
+        {
+          label: 'Total Floors',
+          value: data.propertyDetails?.floorDetails?.totalFloors || 'N/A',
+        },
+        {
+          label: 'Property on Floor',
+          value: data.propertyDetails?.floorDetails?.officeOnFloor || 'N/A',
+        },
+        {
+          label: 'Furnished Status',
+          value:
+            data.propertyDetails?.furnishedStatus ||
+            data.furnishingStatus ||
+            'N/A',
+        },
+        {
+          label: 'Availability Status',
+          value: data.availabilityStatus || 'N/A',
+        },
         { label: 'Property ID', value: data._id },
       ];
       areaDetails = [
         {
           label: 'Carpet Area',
           value: data?.pricing.PricePerSqft
-            ? `${data?.pricing.PricePerSqft} Sq.ft.` : 'N/A',
-            // ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
-          subValue: data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
-            ? `${((data.propertyDetails?.carpetArea?.size || data.carpetArea?.size) * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${data?.pricing.PricePerSqft} Sq.ft.`
+            : 'N/A',
+          // ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
+          subValue:
+            data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+              ? `${(
+                  (data.propertyDetails?.carpetArea?.size ||
+                    data.carpetArea?.size) * 0.092903
+                ).toFixed(2)} Sq.m.`
+              : 'N/A',
         },
       ];
       break;
 
     default:
       pricing = {
-        expectedPrice: Array.isArray(data.pricing) ? data.pricing[0] : data.pricing?.expectedPrice || null,
+        expectedPrice: Array.isArray(data.pricing)
+          ? data.pricing[0]
+          : data.pricing?.expectedPrice || null,
       };
       features = [
         {
           icon: 'home',
-          label: data.ageOfProperty ? `${data.ageOfProperty} Year Old` : 'New Property',
+          label: data.ageOfProperty
+            ? `${data.ageOfProperty} Year Old`
+            : 'New Property',
         },
       ];
       propertyDetails = [
         { label: 'Category', value: category },
-        { label: 'Availability Status', value: data.availabilityStatus || 'N/A' },
+        {
+          label: 'Availability Status',
+          value: data.availabilityStatus || 'N/A',
+        },
         { label: 'Property ID', value: data._id },
       ];
       areaDetails = [
         {
           label: 'Total Area',
-          value: data.carpetArea?.size ? `${data.carpetArea.size} Sq.ft.` : 'N/A',
+          value: data.carpetArea?.size
+            ? `${data.carpetArea.size} Sq.ft.`
+            : 'N/A',
           subValue: data.carpetArea?.size
-            ? `${(data.carpetArea.size * 0.092903).toFixed(2)} Sq.m.` : 'N/A',
+            ? `${(data.carpetArea.size * 0.092903).toFixed(2)} Sq.m.`
+            : 'N/A',
         },
       ];
   }
 
   const calculateRatingDistribution = (reviews: Array<{ stars?: number }>) => {
     const total = reviews.length;
-    if (total === 0) return { excellent: 0, good: 0, average: 0, belowAverage: 0, poor: 0 };
+    if (total === 0)
+      return { excellent: 0, good: 0, average: 0, belowAverage: 0, poor: 0 };
 
     const getCount = (min: number, max: number) =>
-      reviews.filter((r) => (r.stars ?? 0) >= min && (r.stars ?? 0) < max).length;
+      reviews.filter((r) => (r.stars ?? 0) >= min && (r.stars ?? 0) < max)
+        .length;
 
     return {
       excellent: Math.round((getCount(4.5, Infinity) / total) * 100),
@@ -645,7 +769,12 @@ const transformPropertyData = (data: PropertyData): Property => {
     name: data.user?.name || 'Unknown Owner',
     image: '/placeholder.svg?height=80&width=80',
     rating: data.reviews?.length
-      ? Number((data.reviews.reduce((sum, r) => sum + (r.stars ?? 0), 0) / data.reviews.length).toFixed(1))
+      ? Number(
+          (
+            data.reviews.reduce((sum, r) => sum + (r.stars ?? 0), 0) /
+            data.reviews.length
+          ).toFixed(1)
+        )
       : 0,
     reviews: data.reviews?.length || 0,
     phone: data.user?.mobile || '+91 00000 00000',
@@ -673,17 +802,24 @@ const transformPropertyData = (data: PropertyData): Property => {
       : data.pricing?.monthlyRent
       ? `₹${data.pricing.monthlyRent.toLocaleString('en-IN')}/mo`
       : 'Price N/A',
-    pricePerSqft: data.pricing?.PricePerSqft ? `₹${data.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft` : 'N/A',
+    pricePerSqft: data.pricing?.PricePerSqft
+      ? `₹${data.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft`
+      : 'N/A',
     isNegotiable: true,
-    tags: [category, data.availabilityStatus || 'N/A', data.furnishingStatus || 'Unfurnished'].filter(Boolean),
+    tags: [
+      category,
+      data.availabilityStatus || 'N/A',
+      data.furnishingStatus || 'Unfurnished',
+    ].filter(Boolean),
     features,
     owner,
     description: data.description || 'No description available.',
-    images: data.images?.map((img, index) => ({
-      src: img.url || '/placeholder.svg?height=400&width=600',
-      alt: img.name || `Image ${index + 1}`,
-      label: img.name || `Image ${index + 1}`,
-    })) || [],
+    images:
+      data.images?.map((img, index) => ({
+        src: img.url || '/placeholder.svg?height=400&width=600',
+        alt: img.name || `Image ${index + 1}`,
+        label: img.name || `Image ${index + 1}`,
+      })) || [],
     amenities,
     otherFeatures,
     societyFeatures,
@@ -765,9 +901,14 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
 
   return (
     <Modal visible={true} animationType="fade" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
+      <View
+        style={[styles.modalContainer, { backgroundColor: colors.overlay }]}
+      >
         <TouchableOpacity
-          style={[styles.modalCloseButton, { backgroundColor: colors.cardBackground }]}
+          style={[
+            styles.modalCloseButton,
+            { backgroundColor: colors.cardBackground },
+          ]}
           onPress={onClose}
           activeOpacity={0.7}
         >
@@ -789,7 +930,11 @@ interface ShareModalProps {
   onShare: (platform: string) => void;
 }
 
-const ShareModal: React.FC<ShareModalProps> = ({ visible, onClose, onShare }) => {
+const ShareModal: React.FC<ShareModalProps> = ({
+  visible,
+  onClose,
+  onShare,
+}) => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
 
@@ -797,34 +942,64 @@ const ShareModal: React.FC<ShareModalProps> = ({ visible, onClose, onShare }) =>
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
-        <View style={[styles.shareModalContent, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[styles.modalContainer, { backgroundColor: colors.overlay }]}
+      >
+        <View
+          style={[
+            styles.shareModalContent,
+            { backgroundColor: colors.cardBackground },
+          ]}
+        >
           <View style={styles.shareModalHeader}>
-            <Text style={[styles.shareModalTitle, { color: colors.text }]}>Share Property</Text>
+            <Text style={[styles.shareModalTitle, { color: colors.text }]}>
+              Share Property
+            </Text>
             <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
               <X size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.successColor + '20' }]}
+            style={[
+              styles.shareButton,
+              { backgroundColor: colors.successColor + '20' },
+            ]}
             onPress={() => onShare('whatsapp')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.shareButtonText, { color: colors.successColor }]}>WhatsApp</Text>
+            <Text
+              style={[styles.shareButtonText, { color: colors.successColor }]}
+            >
+              WhatsApp
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.primaryColor + '20' }]}
+            style={[
+              styles.shareButton,
+              { backgroundColor: colors.primaryColor + '20' },
+            ]}
             onPress={() => onShare('facebook')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.shareButtonText, { color: colors.primaryColor }]}>Facebook</Text>
+            <Text
+              style={[styles.shareButtonText, { color: colors.primaryColor }]}
+            >
+              Facebook
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareButton, { backgroundColor: colors.accentColor + '20' }]}
+            style={[
+              styles.shareButton,
+              { backgroundColor: colors.accentColor + '20' },
+            ]}
             onPress={() => onShare('twitter')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.shareButtonText, { color: colors.accentColor }]}>Twitter</Text>
+            <Text
+              style={[styles.shareButtonText, { color: colors.accentColor }]}
+            >
+              Twitter
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -858,23 +1033,38 @@ const NotifyModal: React.FC<NotifyModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
-        <View style={[styles.notifyModalContent, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[styles.modalContainer, { backgroundColor: colors.overlay }]}
+      >
+        <View
+          style={[
+            styles.notifyModalContent,
+            { backgroundColor: colors.cardBackground },
+          ]}
+        >
           <View style={styles.notifyModalHeader}>
-            <Text style={[styles.notifyModalTitle, { color: colors.text }]}>Notify Owner</Text>
+            <Text style={[styles.notifyModalTitle, { color: colors.text }]}>
+              Notify Owner
+            </Text>
             <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
               <X size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
           <TextInput
-            style={[styles.input, { borderColor: colors.divider, color: colors.text }]}
+            style={[
+              styles.input,
+              { borderColor: colors.divider, color: colors.text },
+            ]}
             placeholder="Notification Title"
             value={notificationTitle}
             onChangeText={setNotificationTitle}
             placeholderTextColor={colors.grayDark}
           />
           <TextInput
-            style={[styles.input, { borderColor: colors.divider, color: colors.text, height: 100 }]}
+            style={[
+              styles.input,
+              { borderColor: colors.divider, color: colors.text, height: 100 },
+            ]}
             placeholder="Notification Message"
             value={notificationText}
             onChangeText={setNotificationText}
@@ -890,20 +1080,29 @@ const NotifyModal: React.FC<NotifyModalProps> = ({
               }}
               activeOpacity={0.7}
             >
-              <Text style={[styles.notifyButtonText, { color: colors.text }]}>Clear</Text>
+              <Text style={[styles.notifyButtonText, { color: colors.text }]}>
+                Clear
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.notifyButton,
                 {
-                  backgroundColor: notificationTitle && notificationText ? colors.primaryColor : colors.grayLight,
+                  backgroundColor:
+                    notificationTitle && notificationText
+                      ? colors.primaryColor
+                      : colors.grayLight,
                 },
               ]}
               onPress={onSubmit}
               disabled={!notificationTitle || !notificationText}
               activeOpacity={0.7}
             >
-              <Text style={[styles.notifyButtonText, { color: colors.background }]}>Send Notification</Text>
+              <Text
+                style={[styles.notifyButtonText, { color: colors.background }]}
+              >
+                Send Notification
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -919,7 +1118,12 @@ interface OwnerModalProps {
   onNotify: () => void;
 }
 
-const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNotify }) => {
+const OwnerModal: React.FC<OwnerModalProps> = ({
+  visible,
+  onClose,
+  owner,
+  onNotify,
+}) => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { user } = useAuth();
@@ -928,21 +1132,37 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={[styles.modalContainer, { backgroundColor: colors.overlay }]}>
-        <View style={[styles.ownerModalContent, { backgroundColor: colors.cardBackground }]}>
+      <View
+        style={[styles.modalContainer, { backgroundColor: colors.overlay }]}
+      >
+        <View
+          style={[
+            styles.ownerModalContent,
+            { backgroundColor: colors.cardBackground },
+          ]}
+        >
           <View style={styles.ownerModalHeader}>
-            <Text style={[styles.ownerModalTitle, { color: colors.text }]}>Property Owner</Text>
+            <Text style={[styles.ownerModalTitle, { color: colors.text }]}>
+              Property Owner
+            </Text>
             <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
               <X size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
           <View style={styles.ownerModalBody}>
-            <View style={[styles.avatar, { backgroundColor: colors.primaryColor + '20' }]}>
+            <View
+              style={[
+                styles.avatar,
+                { backgroundColor: colors.primaryColor + '20' },
+              ]}
+            >
               <Text style={[styles.avatarText, { color: colors.text }]}>
                 {user?.name.slice(0, 2).toUpperCase()}
               </Text>
             </View>
-            <Text style={[styles.ownerName, { color: colors.text }]}>{user?.name}</Text>
+            <Text style={[styles.ownerName, { color: colors.text }]}>
+              {user?.name}
+            </Text>
             <View style={styles.starContainer}>
               {Array(5)
                 .fill(0)
@@ -950,8 +1170,16 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
                   <Star
                     key={i}
                     size={16}
-                    color={i < Math.floor(owner.rating) ? colors.warningColor : colors.grayLight}
-                    fill={i < Math.floor(owner.rating) ? colors.warningColor : 'transparent'}
+                    color={
+                      i < Math.floor(owner.rating)
+                        ? colors.warningColor
+                        : colors.grayLight
+                    }
+                    fill={
+                      i < Math.floor(owner.rating)
+                        ? colors.warningColor
+                        : 'transparent'
+                    }
                   />
                 ))}
               <Text style={[styles.ownerRating, { color: colors.text }]}>
@@ -960,25 +1188,42 @@ const OwnerModal: React.FC<OwnerModalProps> = ({ visible, onClose, owner, onNoti
             </View>
             <View style={styles.ownerActions}>
               <TouchableOpacity
-                style={[styles.ownerActionButton, { backgroundColor: colors.successColor }]}
-                onPress={() => {/* Handle WhatsApp */}}
+                style={[
+                  styles.ownerActionButton,
+                  { backgroundColor: colors.successColor },
+                ]}
+                onPress={() => {
+                  /* Handle WhatsApp */
+                }}
                 activeOpacity={0.7}
               >
-                <Text style={styles.ownerActionButtonText}>Message on WhatsApp</Text>
+                <Text style={styles.ownerActionButtonText}>
+                  Message on WhatsApp
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.ownerActionButton, { backgroundColor: colors.primaryColor }]}
-                onPress={() => {/* Handle Call */}}
+                style={[
+                  styles.ownerActionButton,
+                  { backgroundColor: colors.primaryColor },
+                ]}
+                onPress={() => {
+                  /* Handle Call */
+                }}
                 activeOpacity={0.7}
               >
                 <Text style={styles.ownerActionButtonText}>Call Owner</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.ownerActionButton, { borderColor: colors.divider }]}
+                style={[
+                  styles.ownerActionButton,
+                  { borderColor: colors.divider },
+                ]}
                 onPress={onNotify}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.ownerActionButtonText, { color: colors.text }]}>
+                <Text
+                  style={[styles.ownerActionButtonText, { color: colors.text }]}
+                >
                   Notify
                 </Text>
               </TouchableOpacity>
@@ -1005,7 +1250,9 @@ export default function PropertyDetailScreen() {
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationText, setNotificationText] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<PropertyImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<PropertyImage | null>(
+    null
+  );
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -1046,13 +1293,19 @@ export default function PropertyDetailScreen() {
     let url;
     switch (platform) {
       case 'whatsapp':
-        url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+        url = `https://wa.me/?text=${encodeURIComponent(
+          shareText + ' ' + shareUrl
+        )}`;
         break;
       case 'facebook':
-        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          shareUrl
+        )}`;
         break;
       case 'twitter':
-        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          shareText
+        )}&url=${encodeURIComponent(shareUrl)}`;
         break;
       default:
         return;
@@ -1071,7 +1324,10 @@ export default function PropertyDetailScreen() {
 
   const handleSubmitNotification = () => {
     if (!notificationTitle.trim() || !notificationText.trim()) {
-      Alert.alert('Error', 'Please provide both a title and notification text.');
+      Alert.alert(
+        'Error',
+        'Please provide both a title and notification text.'
+      );
       return;
     }
 
@@ -1101,7 +1357,11 @@ export default function PropertyDetailScreen() {
     Alert.alert('Success', 'Review submitted successfully!');
   };
 
-  const handleEditReview = (reviewId: string, currentStars: number, currentText: string) => {
+  const handleEditReview = (
+    reviewId: string,
+    currentStars: number,
+    currentText: string
+  ) => {
     Alert.prompt(
       'Edit Review',
       'Edit your review:',
@@ -1118,7 +1378,10 @@ export default function PropertyDetailScreen() {
               prompt('Edit your rating (1-5):', currentStars.toString()) || '0'
             );
             if (!newText || isNaN(newStars) || newStars < 1 || newStars > 5) {
-              Alert.alert('Error', 'Invalid input. Please provide a valid review and rating (1-5).');
+              Alert.alert(
+                'Error',
+                'Invalid input. Please provide a valid review and rating (1-5).'
+              );
               return;
             }
             setReviews(
@@ -1176,7 +1439,9 @@ export default function PropertyDetailScreen() {
         <Star
           key={i}
           size={16}
-          color={i < Math.floor(rating) ? colors.warningColor : colors.grayLight}
+          color={
+            i < Math.floor(rating) ? colors.warningColor : colors.grayLight
+          }
           fill={i < Math.floor(rating) ? colors.warningColor : 'transparent'}
         />
       ));
@@ -1188,30 +1453,48 @@ export default function PropertyDetailScreen() {
     switch (activeTab) {
       case 'about':
         return (
-          <View style={[styles.tabContent, { backgroundColor: colors.cardBackground }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Description</Text>
+          <View
+            style={[
+              styles.tabContent,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Description
+            </Text>
             <Text style={[styles.description, { color: colors.grayDark }]}>
               {property.description}
             </Text>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Places Nearby</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Places Nearby
+            </Text>
             <View style={styles.tagContainer}>
               {property.nearbyPlaces.map((place, index) => (
                 <View
                   key={index}
-                  style={[styles.tag, { backgroundColor: colors.primaryColor + '20' }]}
+                  style={[
+                    styles.tag,
+                    { backgroundColor: colors.primaryColor + '20' },
+                  ]}
                 >
                   <MapPin size={14} color={colors.primaryColor} />
-                  <Text style={[styles.tagText, { color: colors.primaryColor }]}>
+                  <Text
+                    style={[styles.tagText, { color: colors.primaryColor }]}
+                  >
                     {place.label}
                   </Text>
                 </View>
               ))}
             </View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Property Details</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Property Details
+            </Text>
             <View style={styles.detailGrid}>
               {property.propertyDetails.map((detail, index) => (
                 <View key={index} style={styles.detailItem}>
-                  <Text style={[styles.detailLabel, { color: colors.grayDark }]}>
+                  <Text
+                    style={[styles.detailLabel, { color: colors.grayDark }]}
+                  >
                     {detail.label}
                   </Text>
                   <Text style={[styles.detailValue, { color: colors.text }]}>
@@ -1220,12 +1503,17 @@ export default function PropertyDetailScreen() {
                 </View>
               ))}
             </View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Area of Property</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Area of Property
+            </Text>
             <View style={styles.areaContainer}>
               {property.areaDetails.map((area, index) => (
                 <View
                   key={index}
-                  style={[styles.areaItem, { backgroundColor: colors.primaryColor + '20' }]}
+                  style={[
+                    styles.areaItem,
+                    { backgroundColor: colors.primaryColor + '20' },
+                  ]}
                 >
                   <Text style={[styles.areaLabel, { color: colors.grayDark }]}>
                     {area.label}
@@ -1234,18 +1522,24 @@ export default function PropertyDetailScreen() {
                     <Text style={[styles.areaValue, { color: colors.text }]}>
                       {area.value}
                     </Text>
-                    <Text style={[styles.areaSubValue, { color: colors.grayDark }]}>
+                    <Text
+                      style={[styles.areaSubValue, { color: colors.grayDark }]}
+                    >
                       {area.subValue}
                     </Text>
                   </View>
                 </View>
               ))}
             </View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Parking</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Parking
+            </Text>
             <View style={styles.detailGrid}>
               {property.parking.map((item, index) => (
                 <View key={index} style={styles.detailItem}>
-                  <Text style={[styles.detailLabel, { color: colors.grayDark }]}>
+                  <Text
+                    style={[styles.detailLabel, { color: colors.grayDark }]}
+                  >
                     {item.label}
                   </Text>
                   <Text style={[styles.detailValue, { color: colors.text }]}>
@@ -1258,13 +1552,23 @@ export default function PropertyDetailScreen() {
         );
       case 'amenities':
         return (
-          <View style={[styles.tabContent, { backgroundColor: colors.cardBackground }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Amenities</Text>
+          <View
+            style={[
+              styles.tabContent,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Amenities
+            </Text>
             <View style={styles.grid}>
               {property.amenities.map((amenity, index) => (
                 <View
                   key={index}
-                  style={[styles.gridItem, { backgroundColor: colors.primaryColor + '20' }]}
+                  style={[
+                    styles.gridItem,
+                    { backgroundColor: colors.primaryColor + '20' },
+                  ]}
                 >
                   <MapPin size={20} color={colors.primaryColor} />
                   <Text style={[styles.gridItemText, { color: colors.text }]}>
@@ -1277,8 +1581,15 @@ export default function PropertyDetailScreen() {
         );
       case 'furnishing':
         return (
-          <View style={[styles.tabContent, { backgroundColor: colors.cardBackground }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Furnishing Details</Text>
+          <View
+            style={[
+              styles.tabContent,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Furnishing Details
+            </Text>
             <View style={styles.grid}>
               {property.furnishing.length === 0 ? (
                 <Text style={[styles.description, { color: colors.grayDark }]}>
@@ -1288,7 +1599,10 @@ export default function PropertyDetailScreen() {
                 property.furnishing.map((item, index) => (
                   <View
                     key={index}
-                    style={[styles.gridItem, { backgroundColor: colors.primaryColor + '20' }]}
+                    style={[
+                      styles.gridItem,
+                      { backgroundColor: colors.primaryColor + '20' },
+                    ]}
                   >
                     <MapPin size={20} color={colors.warningColor} />
                     <Text style={[styles.gridItemText, { color: colors.text }]}>
@@ -1302,7 +1616,12 @@ export default function PropertyDetailScreen() {
         );
       case 'gallery':
         return (
-          <View style={[styles.tabContent, { backgroundColor: colors.cardBackground }]}>
+          <View
+            style={[
+              styles.tabContent,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
             <FlatList
               data={property.images}
               renderItem={({ item, index }) => (
@@ -1316,7 +1635,12 @@ export default function PropertyDetailScreen() {
                     style={styles.galleryImage}
                     resizeMode="cover"
                   />
-                  <View style={[styles.galleryLabelContainer, { backgroundColor: colors.overlay }]}>
+                  <View
+                    style={[
+                      styles.galleryLabelContainer,
+                      { backgroundColor: colors.overlay },
+                    ]}
+                  >
                     {/* <Text style={[styles.galleryLabel, { color: colors.text }]}>
                       {item.label}
                     </Text> */}
@@ -1331,9 +1655,21 @@ export default function PropertyDetailScreen() {
         );
       case 'reviews':
         return (
-          <View style={[styles.tabContent, { backgroundColor: colors.cardBackground }]}>
-            <View style={[styles.reviewCard, { backgroundColor: colors.cardBackground }]}>
-              <Text style={[styles.reviewRating, { color: colors.primaryColor }]}>
+          <View
+            style={[
+              styles.tabContent,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <View
+              style={[
+                styles.reviewCard,
+                { backgroundColor: colors.cardBackground },
+              ]}
+            >
+              <Text
+                style={[styles.reviewRating, { color: colors.primaryColor }]}
+              >
                 {property.owner.rating}
               </Text>
               <View style={styles.starContainer}>
@@ -1343,8 +1679,15 @@ export default function PropertyDetailScreen() {
                 Based on {property.owner.reviews} reviews
               </Text>
             </View>
-            <View style={[styles.reviewCard, { backgroundColor: colors.cardBackground }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Write a Review</Text>
+            <View
+              style={[
+                styles.reviewCard,
+                { backgroundColor: colors.cardBackground },
+              ]}
+            >
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Write a Review
+              </Text>
               <View style={styles.starContainer}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <TouchableOpacity
@@ -1354,14 +1697,23 @@ export default function PropertyDetailScreen() {
                   >
                     <Star
                       size={24}
-                      color={star <= userRating ? colors.warningColor : colors.grayLight}
-                      fill={star <= userRating ? colors.warningColor : 'transparent'}
+                      color={
+                        star <= userRating
+                          ? colors.warningColor
+                          : colors.grayLight
+                      }
+                      fill={
+                        star <= userRating ? colors.warningColor : 'transparent'
+                      }
                     />
                   </TouchableOpacity>
                 ))}
               </View>
               <TextInput
-                style={[styles.reviewInput, { borderColor: colors.divider, color: colors.text }]}
+                style={[
+                  styles.reviewInput,
+                  { borderColor: colors.divider, color: colors.text },
+                ]}
                 placeholder="Share your experience with this property..."
                 value={reviewText}
                 onChangeText={setReviewText}
@@ -1372,7 +1724,10 @@ export default function PropertyDetailScreen() {
                 style={[
                   styles.submitButton,
                   {
-                    backgroundColor: userRating && reviewText ? colors.primaryColor : colors.grayLight,
+                    backgroundColor:
+                      userRating && reviewText
+                        ? colors.primaryColor
+                        : colors.grayLight,
                   },
                 ]}
                 onPress={handleSubmitReview}
@@ -1380,12 +1735,19 @@ export default function PropertyDetailScreen() {
                 activeOpacity={0.7}
               >
                 <Send size={16} color={colors.background} />
-                <Text style={[styles.submitButtonText, { color: colors.background }]}>
+                <Text
+                  style={[
+                    styles.submitButtonText,
+                    { color: colors.background },
+                  ]}
+                >
                   Submit Review
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Reviews</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Recent Reviews
+            </Text>
             {reviews.length === 0 ? (
               <Text style={[styles.description, { color: colors.grayDark }]}>
                 No reviews yet.
@@ -1394,39 +1756,76 @@ export default function PropertyDetailScreen() {
               <FlatList
                 data={reviews}
                 renderItem={({ item }) => (
-                  <View style={[styles.reviewItem, { backgroundColor: colors.cardBackground }]}>
+                  <View
+                    style={[
+                      styles.reviewItem,
+                      { backgroundColor: colors.cardBackground },
+                    ]}
+                  >
                     <View style={styles.reviewHeader}>
-                      <View style={[styles.avatar, { backgroundColor: colors.primaryColor + '20' }]}>
-                        <Text style={[styles.avatarText, { color: colors.text }]}>
-                          {(item.user?.name || 'Anonymous').slice(0, 2).toUpperCase()}
+                      <View
+                        style={[
+                          styles.avatar,
+                          { backgroundColor: colors.primaryColor + '20' },
+                        ]}
+                      >
+                        <Text
+                          style={[styles.avatarText, { color: colors.text }]}
+                        >
+                          {(item.user?.name || 'Anonymous')
+                            .slice(0, 2)
+                            .toUpperCase()}
                         </Text>
                       </View>
                       <View>
-                        <Text style={[styles.reviewerName, { color: colors.text }]}>
+                        <Text
+                          style={[styles.reviewerName, { color: colors.text }]}
+                        >
                           {item.user?.name || 'Anonymous'}
                         </Text>
                         <View style={styles.starContainer}>
                           {renderStars(item.stars)}
-                          <Text style={[styles.reviewStars, { color: colors.text }]}>
+                          <Text
+                            style={[styles.reviewStars, { color: colors.text }]}
+                          >
                             {item.stars}
                           </Text>
                         </View>
                       </View>
-                      <Text style={[styles.reviewDate, { backgroundColor: colors.primaryColor + '20', color: colors.grayDark }]}>
+                      <Text
+                        style={[
+                          styles.reviewDate,
+                          {
+                            backgroundColor: colors.primaryColor + '20',
+                            color: colors.grayDark,
+                          },
+                        ]}
+                      >
                         {new Date(item.createdAt).toLocaleDateString()}
                       </Text>
                     </View>
-                    <Text style={[styles.reviewText, { color: colors.grayDark }]}>
+                    <Text
+                      style={[styles.reviewText, { color: colors.grayDark }]}
+                    >
                       {item.text}
                     </Text>
                     <View style={styles.reviewActions}>
                       <TouchableOpacity
                         style={styles.actionButton}
-                        onPress={() => handleEditReview(item._id, item.stars, item.text)}
+                        onPress={() =>
+                          handleEditReview(item._id, item.stars, item.text)
+                        }
                         activeOpacity={0.7}
                       >
                         <Edit size={16} color={colors.primaryColor} />
-                        <Text style={[styles.actionText, { color: colors.primaryColor }]}>Edit</Text>
+                        <Text
+                          style={[
+                            styles.actionText,
+                            { color: colors.primaryColor },
+                          ]}
+                        >
+                          Edit
+                        </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.actionButton}
@@ -1434,7 +1833,14 @@ export default function PropertyDetailScreen() {
                         activeOpacity={0.7}
                       >
                         <Trash size={16} color={colors.errorColor} />
-                        <Text style={[styles.actionText, { color: colors.errorColor }]}>Delete</Text>
+                        <Text
+                          style={[
+                            styles.actionText,
+                            { color: colors.errorColor },
+                          ]}
+                        >
+                          Delete
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -1451,8 +1857,12 @@ export default function PropertyDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primaryColor} />
         </View>
@@ -1462,61 +1872,97 @@ export default function PropertyDetailScreen() {
 
   if (error || !property) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-        <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-        <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, { color: colors.errorColor }]}>
-            {error || 'Property not found.'}
-          </Text>
-        </View>
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: colors.background }]}
+        >
+          <StatusBar
+            barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          />
+          <View style={styles.errorContainer}>
+            <Text style={[styles.errorText, { color: colors.errorColor }]}>
+              {error || 'Property not found.'}
+            </Text>
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-      
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity
-          style={[styles.headerButton, { backgroundColor: colors.cardBackground }]}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <View style={styles.headerRightButtons}>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.cardBackground }]}
-            onPress={handleFavoriteToggle}
-            activeOpacity={0.7}
-          >
-            <Heart
-              size={24}
-              color={favorites.includes(id as string) ? colors.errorColor : colors.text}
-              fill={favorites.includes(id as string) ? colors.errorColor : 'transparent'}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.headerButton, { backgroundColor: colors.cardBackground }]}
-            onPress={() => setShowShareOptions(true)}
-            activeOpacity={0.7}
-          >
-            <Share2 size={24} color={colors.primaryColor} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 120 }]}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View style={[styles.carouselContainer, { backgroundColor: colors.cardBackground }]}>
-          <ImageCarousel
-            images={property.images.map((img) => img.src)}
-            height={400}
-          />
-          {/* <TouchableOpacity
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        />
+
+        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+          <TouchableOpacity
+            style={[
+              styles.headerButton,
+              { backgroundColor: colors.cardBackground },
+            ]}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <ArrowLeft size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.headerRightButtons}>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.cardBackground },
+              ]}
+              onPress={handleFavoriteToggle}
+              activeOpacity={0.7}
+            >
+              <Heart
+                size={24}
+                color={
+                  favorites.includes(id as string)
+                    ? colors.errorColor
+                    : colors.text
+                }
+                fill={
+                  favorites.includes(id as string)
+                    ? colors.errorColor
+                    : 'transparent'
+                }
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.cardBackground },
+              ]}
+              onPress={() => setShowShareOptions(true)}
+              activeOpacity={0.7}
+            >
+              <Share2 size={24} color={colors.primaryColor} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + 120 },
+          ]}
+        >
+          <View
+            style={[
+              styles.carouselContainer,
+              { backgroundColor: colors.cardBackground },
+            ]}
+          >
+            <ImageCarousel
+              images={property.images.map((img) => img.src)}
+              height={400}
+            />
+            {/* <TouchableOpacity
             style={[styles.carouselButton, styles.leftButton, { backgroundColor: colors.cardBackground }]}
             onPress={prevImage}
             activeOpacity={0.7}
@@ -1530,13 +1976,13 @@ export default function PropertyDetailScreen() {
           >
             <ArrowLeft size={24} color={colors.text} style={{ transform: [{ rotate: '180deg' }] }} />
           </TouchableOpacity> */}
-          {/* <View style={[styles.imageLabel, { backgroundColor: colors.cardBackground }]}>
+            {/* <View style={[styles.imageLabel, { backgroundColor: colors.cardBackground }]}>
             <Text style={[styles.imageLabelText, { color: colors.text }]}>
               {property.images[currentImageIndex].label}
             </Text>
           </View> */}
-        </View>
-        {/* <View style={[styles.thumbnailContainer, { backgroundColor: colors.cardBackground }]}>
+          </View>
+          {/* <View style={[styles.thumbnailContainer, { backgroundColor: colors.cardBackground }]}>
           <FlatList
             data={property.images}
             renderItem={({ item, index }) => (
@@ -1557,118 +2003,151 @@ export default function PropertyDetailScreen() {
           />
         </View> */}
 
-        <View style={styles.contentContainer}>
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: colors.text }]}>{property.title}</Text>
-            <View style={styles.locationContainer}>
-              <MapPin size={16} color={colors.primaryColor} />
-              <Text style={[styles.location, { color: colors.grayDark }]}>
-                {property.location}
+          <View style={styles.contentContainer}>
+            <View style={styles.titleContainer}>
+              <Text style={[styles.title, { color: colors.text }]}>
+                {property.title}
               </Text>
-            </View>
-            <View style={styles.priceContainer}>
-              <Text style={[styles.price, { color: colors.primaryColor }]}>
-                {property.price}
-              </Text>
-              <Text style={[styles.pricePerSqft, { color: colors.grayDark }]}>
-                {property.pricePerSqft}
-              </Text>
-              {property.isNegotiable && (
-                <View style={[styles.negotiableTag, { backgroundColor: colors.successColor + '20' }]}>
-                  <Text style={[styles.negotiableText, { color: colors.successColor }]}>
-                    Negotiable
-                  </Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.tagContainer}>
-              {property.tags.map((tag, index) => (
-                <View
-                  key={index}
-                  style={[styles.tag, { backgroundColor: colors.primaryColor + '20' }]}
-                >
-                  <Text style={[styles.tagText, { color: colors.primaryColor }]}>{tag}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.featuresContainer}>
-            {property.features.map((feature, index) => (
-              <View
-                key={index}
-                style={[styles.featureItem, { backgroundColor: colors.cardBackground }]}
-              >
-                <View style={[styles.featureIcon, { backgroundColor: colors.primaryColor }]}>
-                  <FeatureIcon type={feature.icon} />
-                </View>
-                <Text style={[styles.featureText, { color: colors.text }]}>
-                  {feature.label}
+              <View style={styles.locationContainer}>
+                <MapPin size={16} color={colors.primaryColor} />
+                <Text style={[styles.location, { color: colors.grayDark }]}>
+                  {property.location}
                 </Text>
               </View>
-            ))}
-          </View>
+              <View style={styles.priceContainer}>
+                <Text style={[styles.price, { color: colors.primaryColor }]}>
+                  {property.price}
+                </Text>
+                <Text style={[styles.pricePerSqft, { color: colors.grayDark }]}>
+                  {property.pricePerSqft}
+                </Text>
+                {property.isNegotiable && (
+                  <View
+                    style={[
+                      styles.negotiableTag,
+                      { backgroundColor: colors.successColor + '20' },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.negotiableText,
+                        { color: colors.successColor },
+                      ]}
+                    >
+                      Negotiable
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.tagContainer}>
+                {property.tags.map((tag, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.tag,
+                      { backgroundColor: colors.primaryColor + '20' },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.tagText, { color: colors.primaryColor }]}
+                    >
+                      {tag}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
 
-          <View style={styles.tabsContainer}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.tabsScrollContent}
-            >
-              {['about', 'amenities', 'furnishing', 'gallery', 'reviews'].map((tab) => (
-                <TabButton
-                  key={tab}
-                  title={tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  isActive={activeTab === tab}
-                  onPress={() => setActiveTab(tab)}
-                />
+            <View style={styles.featuresContainer}>
+              {property.features.map((feature, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.featureItem,
+                    { backgroundColor: colors.cardBackground },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.featureIcon,
+                      { backgroundColor: colors.primaryColor },
+                    ]}
+                  >
+                    <FeatureIcon type={feature.icon} />
+                  </View>
+                  <Text style={[styles.featureText, { color: colors.text }]}>
+                    {feature.label}
+                  </Text>
+                </View>
               ))}
-            </ScrollView>
+            </View>
+
+            <View style={styles.tabsContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.tabsScrollContent}
+              >
+                {['about', 'amenities', 'furnishing', 'gallery', 'reviews'].map(
+                  (tab) => (
+                    <TabButton
+                      key={tab}
+                      title={tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      isActive={activeTab === tab}
+                      onPress={() => setActiveTab(tab)}
+                    />
+                  )
+                )}
+              </ScrollView>
+            </View>
+
+            {renderTabContent()}
           </View>
+        </ScrollView>
 
-          {renderTabContent()}
-        </View>
-      </ScrollView>
+        <TouchableOpacity
+          style={[
+            styles.ownerButton,
+            {
+              backgroundColor: colors.primaryColor,
+              bottom: insets.bottom + 24,
+            },
+          ]}
+          onPress={() => setShowOwnerModal(true)}
+          activeOpacity={0.7}
+        >
+          <User size={24} color={colors.background} />
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[
-          styles.ownerButton,
-          { backgroundColor: colors.primaryColor, bottom: insets.bottom + 24 }
-        ]}
-        onPress={() => setShowOwnerModal(true)}
-        activeOpacity={0.7}
-      >
-        <User size={24} color={colors.background} />
-      </TouchableOpacity>
-
-      <ImageModal
-        image={selectedImage}
-        onClose={() => setSelectedImage(null)}
-      />
-      <ShareModal
-        visible={showShareOptions}
-        onClose={() => setShowShareOptions(false)}
-        onShare={handleShare}
-      />
-      <NotifyModal
-        visible={showNotify}
-        onClose={() => setShowNotify(false)}
-        notificationTitle={notificationTitle}
-        setNotificationTitle={setNotificationTitle}
-        notificationText={notificationText}
-        setNotificationText={setNotificationText}
-        onSubmit={handleSubmitNotification}
-      />
-      <OwnerModal
-        visible={showOwnerModal}
-        onClose={() => setShowOwnerModal(false)}
-        owner={property?.owner}
-        onNotify={() => {
-          setShowOwnerModal(false);
-          setShowNotify(true);
-        }}
-      />
-    </SafeAreaView>
+        <ImageModal
+          image={selectedImage}
+          onClose={() => setSelectedImage(null)}
+        />
+        <ShareModal
+          visible={showShareOptions}
+          onClose={() => setShowShareOptions(false)}
+          onShare={handleShare}
+        />
+        <NotifyModal
+          visible={showNotify}
+          onClose={() => setShowNotify(false)}
+          notificationTitle={notificationTitle}
+          setNotificationTitle={setNotificationTitle}
+          notificationText={notificationText}
+          setNotificationText={setNotificationText}
+          onSubmit={handleSubmitNotification}
+        />
+        <OwnerModal
+          visible={showOwnerModal}
+          onClose={() => setShowOwnerModal(false)}
+          owner={property?.owner}
+          onNotify={() => {
+            setShowOwnerModal(false);
+            setShowNotify(true);
+          }}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

@@ -1,6 +1,14 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Appearance, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Appearance,
+  SafeAreaView,
+} from 'react-native';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const PrivacyPolicy = () => {
   const colorScheme = useColorScheme();
@@ -81,133 +89,217 @@ const PrivacyPolicy = () => {
   });
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text style={dynamicStyles.title}>Privacy Policy</Text>
-        <Text style={dynamicStyles.lastUpdated}>Last Updated: January 1, 2025</Text>
-        
-        <View style={dynamicStyles.cardContainer}>
-          {/* 1. Information We Collect */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>01. Information We Collect</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We may collect the following types of information:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Personal Information:</Text>
-                <Text style={dynamicStyles.itemText}>Name, email, phone number, payment details.</Text>
-              </View>
-              <View style={dynamicStyles.divider} />
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Usage Data:</Text>
-                <Text style={dynamicStyles.itemText}>Interaction with the app, device information, IP address.</Text>
-              </View>
-              <View style={dynamicStyles.divider} />
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>User-Generated Content:</Text>
-                <Text style={dynamicStyles.itemText}>Images, videos, and other uploaded content.</Text>
-              </View>
-            </View>
-          </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={dynamicStyles.container}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Text style={dynamicStyles.title}>Privacy Policy</Text>
+          <Text style={dynamicStyles.lastUpdated}>
+            Last Updated: January 1, 2025
+          </Text>
 
-          {/* 2. How We Use Your Information */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>02. How We Use Your Information</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We use your information to:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>Provide and improve our services.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Personalize user experience and offer targeted promotions.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Communicate with users regarding updates, offers, and important notices.</Text>
-            </View>
-          </View>
-
-          {/* 3. Marketing and Promotions */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>03. Marketing and Promotions</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We may use your data for marketing purposes, including:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>Promotional videos and images.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Sending promotional emails and messages, which you can opt out of at any time.</Text>
-            </View>
-          </View>
-
-          {/* 4. Data Sharing and Disclosure */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>04. Data Sharing and Disclosure</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Your data is handled as follows:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>We do not sell user data to third parties.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Data may be shared with trusted partners for service improvements, compliance, and marketing.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Legal disclosures may be made in compliance with government or law enforcement requests.</Text>
-            </View>
-          </View>
-
-          {/* 5. Data Security */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>05. Data Security</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We prioritize the security of your data:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>We implement security measures to protect user data from unauthorized access and breaches.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Users are responsible for safeguarding their account credentials.</Text>
-            </View>
-          </View>
-
-          {/* 6. User Rights */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>06. User Rights</Text>
-            <Text style={dynamicStyles.cardSubtitle}>You have the following rights regarding your data:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>Access, update, or delete your personal information.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Request data deletion by contacting our support team.</Text>
-            </View>
-          </View>
-
-          {/* 7. Children's Privacy */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>07. Children’s Privacy</Text>
-            <Text style={dynamicStyles.cardSubtitle}>Our policy regarding children:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>PlanetX is available for users of all age groups.</Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>Parents or guardians should supervise minors when using our services.</Text>
-            </View>
-          </View>
-
-          {/* 8. Changes to the Privacy Policy */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>08. Changes to the Privacy Policy</Text>
-            <Text style={dynamicStyles.cardSubtitle}>We may update our Privacy Policy periodically. Users will be notified of major changes.</Text>
-          </View>
-
-          {/* 9. Contact Us */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>09. Contact Us</Text>
-            <Text style={dynamicStyles.cardSubtitle}>For any questions regarding this Privacy Policy or our privacy practices, please contact us at:</Text>
-            <View style={dynamicStyles.cardContent}>
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Email:</Text>
-                <Text style={dynamicStyles.itemText}>contact@planetx-live.com</Text>
-              </View>
-              <View style={dynamicStyles.divider} />
-              <View style={dynamicStyles.item}>
-                <Text style={dynamicStyles.itemTitle}>Customer Support:</Text>
-                <Text style={dynamicStyles.itemText}>+91 98735 81566</Text>
+          <View style={dynamicStyles.cardContainer}>
+            {/* 1. Information We Collect */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                01. Information We Collect
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We may collect the following types of information:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>
+                    Personal Information:
+                  </Text>
+                  <Text style={dynamicStyles.itemText}>
+                    Name, email, phone number, payment details.
+                  </Text>
+                </View>
+                <View style={dynamicStyles.divider} />
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>Usage Data:</Text>
+                  <Text style={dynamicStyles.itemText}>
+                    Interaction with the app, device information, IP address.
+                  </Text>
+                </View>
+                <View style={dynamicStyles.divider} />
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>
+                    User-Generated Content:
+                  </Text>
+                  <Text style={dynamicStyles.itemText}>
+                    Images, videos, and other uploaded content.
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        </View>
 
-        <Text style={dynamicStyles.footerText}>
-          By using PlanetX, you acknowledge that you have read and agree to these Terms and Conditions and Privacy Policy.
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
+            {/* 2. How We Use Your Information */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                02. How We Use Your Information
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We use your information to:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Provide and improve our services.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Personalize user experience and offer targeted promotions.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Communicate with users regarding updates, offers, and
+                  important notices.
+                </Text>
+              </View>
+            </View>
+
+            {/* 3. Marketing and Promotions */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                03. Marketing and Promotions
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We may use your data for marketing purposes, including:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Promotional videos and images.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Sending promotional emails and messages, which you can opt out
+                  of at any time.
+                </Text>
+              </View>
+            </View>
+
+            {/* 4. Data Sharing and Disclosure */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                04. Data Sharing and Disclosure
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Your data is handled as follows:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  We do not sell user data to third parties.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Data may be shared with trusted partners for service
+                  improvements, compliance, and marketing.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Legal disclosures may be made in compliance with government or
+                  law enforcement requests.
+                </Text>
+              </View>
+            </View>
+
+            {/* 5. Data Security */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>05. Data Security</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We prioritize the security of your data:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  We implement security measures to protect user data from
+                  unauthorized access and breaches.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Users are responsible for safeguarding their account
+                  credentials.
+                </Text>
+              </View>
+            </View>
+
+            {/* 6. User Rights */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>06. User Rights</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                You have the following rights regarding your data:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Access, update, or delete your personal information.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Request data deletion by contacting our support team.
+                </Text>
+              </View>
+            </View>
+
+            {/* 7. Children's Privacy */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                07. Children’s Privacy
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Our policy regarding children:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  PlanetX is available for users of all age groups.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Parents or guardians should supervise minors when using our
+                  services.
+                </Text>
+              </View>
+            </View>
+
+            {/* 8. Changes to the Privacy Policy */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>
+                08. Changes to the Privacy Policy
+              </Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                We may update our Privacy Policy periodically. Users will be
+                notified of major changes.
+              </Text>
+            </View>
+
+            {/* 9. Contact Us */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>09. Contact Us</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                For any questions regarding this Privacy Policy or our privacy
+                practices, please contact us at:
+              </Text>
+              <View style={dynamicStyles.cardContent}>
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>Email:</Text>
+                  <Text style={dynamicStyles.itemText}>
+                    contact@planetx-live.com
+                  </Text>
+                </View>
+                <View style={dynamicStyles.divider} />
+                <View style={dynamicStyles.item}>
+                  <Text style={dynamicStyles.itemTitle}>Customer Support:</Text>
+                  <Text style={dynamicStyles.itemText}>+91 98735 81566</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <Text style={dynamicStyles.footerText}>
+            By using PlanetX, you acknowledge that you have read and agree to
+            these Terms and Conditions and Privacy Policy.
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

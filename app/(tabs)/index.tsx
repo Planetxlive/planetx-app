@@ -7,7 +7,11 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { useProperties, Property } from '@/context/PropertyContext';
 import { useGym, Gym } from '@/context/GymContext';
 import { useParking, ParkingSpot } from '@/context/ParkingContext';
@@ -30,8 +34,12 @@ export default function HomeScreen() {
   const { gyms } = useGym();
   const { parkingSpots } = useParking();
   const [location, setLocation] = useState('Noida');
-  const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
-  const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>('All');
+  const [selectedListingType, setSelectedListingType] = useState<string | null>(
+    null
+  );
+  const [selectedPropertyType, setSelectedPropertyType] = useState<
+    string | null
+  >('All');
   const insets = useSafeAreaInsets();
   useEffect(() => {
     const fetchData = async () => {
@@ -46,9 +54,6 @@ export default function HomeScreen() {
         const city = await res.data.user.city;
         await setLocation(city);
         console.log(location);
-        
-
-        
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -57,31 +62,27 @@ export default function HomeScreen() {
     fetchData();
   }, []);
 
-
-  
-
   const listingTypes = ['Buy', 'Rent', 'Paying Guest', 'Rent Hourly'];
   const propertyTypes = [
-        "Residential",
-        "Pg",
-        "Hotel",
-        "Office",
-        "Shop",
-        "Warehouse",
-        "Shared Warehouse",
-        "EventSpace",
+    'Residential',
+    'Pg',
+    'Hotel',
+    'Office',
+    'Shop',
+    'Warehouse',
+    'Shared Warehouse',
+    'EventSpace',
   ];
 
   const featuredProperties = properties.slice(0, 2);
-  const residentialProperties = properties.filter((p: Property) => 
-    p.category === "Residential"
-  ).slice(0, 3);
-  const nearbyProperties = properties.filter((p: Property) => 
-    p.location.city === location
-  ).slice(0, 3);
+  const residentialProperties = properties
+    .filter((p: Property) => p.category === 'Residential')
+    .slice(0, 3);
+  const nearbyProperties = properties
+    .filter((p: Property) => p.location.city === location)
+    .slice(0, 3);
   const featuredGyms = gyms.slice(0, 3);
   const featuredParking = parkingSpots.slice(0, 3);
-  
 
   const handleSearch = () => {
     router.push('/search');
@@ -99,18 +100,20 @@ export default function HomeScreen() {
     router.push('/blog');
   };
 
-  const renderPropertySection = ({ 
-    title, 
-    data, 
-    onViewAll 
-  }: { 
-    title: string; 
-    data: Property[]; 
-    onViewAll: () => void 
+  const renderPropertySection = ({
+    title,
+    data,
+    onViewAll,
+  }: {
+    title: string;
+    data: Property[];
+    onViewAll: () => void;
   }) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {title}
+        </Text>
         <TouchableOpacity onPress={onViewAll}>
           <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
             View all
@@ -129,7 +132,7 @@ export default function HomeScreen() {
               <PropertyCard property={item} horizontal />
             </View>
           )}
-          keyExtractor={item => item._id.toString()}
+          keyExtractor={(item) => item._id.toString()}
           contentContainerStyle={styles.horizontalList}
         />
       ) : (
@@ -142,18 +145,20 @@ export default function HomeScreen() {
     </View>
   );
 
-  const renderGymSection = ({ 
-    title, 
-    data, 
-    onViewAll 
-  }: { 
-    title: string; 
-    data: Gym[]; 
-    onViewAll: () => void 
+  const renderGymSection = ({
+    title,
+    data,
+    onViewAll,
+  }: {
+    title: string;
+    data: Gym[];
+    onViewAll: () => void;
   }) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {title}
+        </Text>
         <TouchableOpacity onPress={onViewAll}>
           <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
             View all
@@ -172,7 +177,7 @@ export default function HomeScreen() {
               <GymCard gym={item} horizontal />
             </View>
           )}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.horizontalList}
         />
       ) : (
@@ -185,18 +190,20 @@ export default function HomeScreen() {
     </View>
   );
 
-  const renderParkingSection = ({ 
-    title, 
-    data, 
-    onViewAll 
-  }: { 
-    title: string; 
-    data: ParkingSpot[]; 
-    onViewAll: () => void 
+  const renderParkingSection = ({
+    title,
+    data,
+    onViewAll,
+  }: {
+    title: string;
+    data: ParkingSpot[];
+    onViewAll: () => void;
   }) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {title}
+        </Text>
         <TouchableOpacity onPress={onViewAll}>
           <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
             View all
@@ -215,7 +222,7 @@ export default function HomeScreen() {
               <ParkingCard parkingSpot={item} horizontal />
             </View>
           )}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.horizontalList}
         />
       ) : (
@@ -229,56 +236,67 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right']}>
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <View style={styles.locationContainer}>
-          <Text style={[styles.locationLabel, { color: colors.grayDark }]}>Location</Text>
-          <LocationSelector
-            location={location}
-            onLocationChange={setLocation}
-          />
-        </View>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
-            onPress={handleViewAllProperties}
-          >
-            <Text style={[styles.iconButtonText, { color: colors.text }]}>All</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
-            onPress={handleSearch}
-          >
-            <Search size={18} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
-            onPress={handleBlog}
-          >
-            <FileText size={18} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
-            onPress={handleNotifications}
-          >
-            <Bell size={18} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 48 }]}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={['left', 'right']}
       >
-            <View style={styles.banner}>
-              <View style={styles.bannerContent}>
-                <Text style={styles.bannerTitle}>Find your</Text>
-                <Text style={styles.bannerTitle}>Project</Text>
-                <Text style={styles.bannerTitle}>with PLANET X</Text>
-              </View>
-            </View>
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <View style={styles.locationContainer}>
+            <Text style={[styles.locationLabel, { color: colors.grayDark }]}>
+              Location
+            </Text>
+            <LocationSelector
+              location={location}
+              onLocationChange={setLocation}
+            />
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+              onPress={handleViewAllProperties}
+            >
+              <Text style={[styles.iconButtonText, { color: colors.text }]}>
+                All
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+              onPress={handleSearch}
+            >
+              <Search size={18} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+              onPress={handleBlog}
+            >
+              <FileText size={18} color={colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.iconButton, { backgroundColor: colors.grayLight }]}
+              onPress={handleNotifications}
+            >
+              <Bell size={18} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-            {/* <View style={styles.listingTypesContainer}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + 48 },
+          ]}
+        >
+          <View style={styles.banner}>
+            <View style={styles.bannerContent}>
+              <Text style={styles.bannerTitle}>Find your</Text>
+              <Text style={styles.bannerTitle}>Project</Text>
+              <Text style={styles.bannerTitle}>with PLANET X</Text>
+            </View>
+          </View>
+
+          {/* <View style={styles.listingTypesContainer}>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -312,102 +330,121 @@ export default function HomeScreen() {
               </ScrollView>
             </View> */}
 
-        {/* {renderPropertySection({
+          {/* {renderPropertySection({
           title: 'Featured Properties',
           data: featuredProperties,
           onViewAll: () => router.push('/featured'),
         })} */}
 
-            {/* Recommended Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Recommended</Text>
-                <TouchableOpacity onPress={handleViewAllProperties}>
-                  <Text style={[styles.viewAllText, { color: colors.primaryColor }]}>
-                    View all
+          {/* Recommended Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Recommended
+              </Text>
+              <TouchableOpacity onPress={handleViewAllProperties}>
+                <Text
+                  style={[styles.viewAllText, { color: colors.primaryColor }]}
+                >
+                  View all
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.listingTypesContent} // Reuse existing style
+            >
+              {['All', ...propertyTypes].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.listingTypeButton, // Reuse existing style
+                    selectedPropertyType === type
+                      ? { backgroundColor: colors.grayLight }
+                      : {
+                          backgroundColor: 'transparent',
+                          borderColor: colors.grayLight,
+                          borderWidth: 1,
+                        },
+                  ]}
+                  onPress={() => setSelectedPropertyType(type)}
+                >
+                  <Text
+                    style={[
+                      styles.listingTypeText, // Reuse existing style
+                      { color: colors.text },
+                    ]}
+                  >
+                    {type}
                   </Text>
                 </TouchableOpacity>
-              </View>
-              <ScrollView
+              ))}
+            </ScrollView>
+            {properties
+              .filter(
+                (p: Property) =>
+                  selectedPropertyType === 'All' ||
+                  p.category === selectedPropertyType
+              )
+              .slice(0, 3).length > 0 ? (
+              <FlatList
+                data={properties
+                  .filter(
+                    (p: Property) =>
+                      selectedPropertyType === 'All' ||
+                      p.category === selectedPropertyType
+                  )
+                  .slice(0, 3)}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.listingTypesContent} // Reuse existing style
-              >
-                {['All', ...propertyTypes].map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={[
-                      styles.listingTypeButton, // Reuse existing style
-                      selectedPropertyType === type
-                        ? { backgroundColor: colors.grayLight }
-                        : { backgroundColor: 'transparent', borderColor: colors.grayLight, borderWidth: 1 },
-                    ]}
-                    onPress={() => setSelectedPropertyType(type)}
-                  >
-                    <Text
-                      style={[
-                        styles.listingTypeText, // Reuse existing style
-                        { color: colors.text },
-                      ]}
-                    >
-                      {type}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-              {properties.filter((p: Property) => 
-                 selectedPropertyType === 'All' || p.category === selectedPropertyType
-              ).slice(0, 3).length > 0 ? (
-                <FlatList
-                  data={properties.filter((p: Property) => 
-                    selectedPropertyType === 'All' || p.category === selectedPropertyType
-                  ).slice(0, 3)}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  snapToInterval={280 + 8} // Card width + marginRight
-                  decelerationRate="fast"
-                  renderItem={({ item }) => (
-                    <View style={styles.horizontalCard}> // Reuse existing style
-                      <PropertyCard property={item} horizontal />
-                    </View>
-                  )}
-                  keyExtractor={item => item._id.toString()}
-                  contentContainerStyle={styles.horizontalList} // Reuse existing style
-                />
-              ) : (
-                <View style={styles.noPropertiesContainer}>
-                  <Text style={[styles.noPropertiesText, { color: colors.text }]}>
-                    No {selectedPropertyType} Properties found
-                  </Text>
-                </View>
-              )}
-            </View>
+                snapToInterval={280 + 8} // Card width + marginRight
+                decelerationRate="fast"
+                renderItem={({ item }) => (
+                  <View style={styles.horizontalCard}>
+                    {' '}
+                    // Reuse existing style
+                    <PropertyCard property={item} horizontal />
+                  </View>
+                )}
+                keyExtractor={(item) => item._id.toString()}
+                contentContainerStyle={styles.horizontalList} // Reuse existing style
+              />
+            ) : (
+              <View style={styles.noPropertiesContainer}>
+                <Text style={[styles.noPropertiesText, { color: colors.text }]}>
+                  No {selectedPropertyType} Properties found
+                </Text>
+              </View>
+            )}
+          </View>
 
-            {renderPropertySection({
-              title: 'Residential Properties',
-              data: residentialProperties,
-              onViewAll: () => router.push('/residential'),
-            })}
+          {renderPropertySection({
+            title: 'Residential Properties',
+            data: residentialProperties,
+            onViewAll: () => router.push('/residential'),
+          })}
 
-            {renderPropertySection({
-              title: 'Nearby Properties',
-              data: nearbyProperties,
-              onViewAll: () => router.push('/nearby'),
-            })}
+          {renderPropertySection({
+            title: 'Nearby Properties',
+            data: nearbyProperties,
+            onViewAll: () => router.push('/nearby'),
+          })}
 
-            {renderGymSection({
-              title: 'Featured Gyms',
-              data: featuredGyms,
-              onViewAll: () => router.push('/gym'),
-            })}
+          {renderGymSection({
+            title: 'Featured Gyms',
+            data: featuredGyms,
+            onViewAll: () => router.push('/gym'),
+          })}
 
-            {renderParkingSection({
-              title: 'Featured Parking Spots',
-              data: featuredParking,
-              onViewAll: () => router.push('/parking'),
-            })}
-      </ScrollView>
-    </SafeAreaView>
+          {renderParkingSection({
+            title: 'Featured Parking Spots',
+            data: featuredParking,
+            onViewAll: () => router.push('/parking'),
+          })}
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

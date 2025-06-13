@@ -19,6 +19,7 @@ import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Camera, Upload, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function AddPropertyScreen() {
   const colorScheme = useColorScheme() || 'light';
@@ -39,27 +40,32 @@ export default function AddPropertyScreen() {
   const [features, setFeatures] = useState<string[]>([]);
   const [featureInput, setFeatureInput] = useState('');
   const [selectedType, setSelectedType] = useState<PropertyType | null>(null);
-  const [selectedListingType, setSelectedListingType] = useState<string | null>(null);
+  const [selectedListingType, setSelectedListingType] = useState<string | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const propertyTypes: PropertyType[] = [
-        "Residential",
-        "Pg",
-        "Hotel",
-        "Office",
-        "Shop",
-        "Warehouse",
-        "Shared Warehouse",
-        "EventSpace",
+    'Residential',
+    'Pg',
+    'Hotel',
+    'Office',
+    'Shop',
+    'Warehouse',
+    'Shared Warehouse',
+    'EventSpace',
   ];
 
   const listingTypes = ['Buy', 'Rent', 'Paying Guest', 'Rent Hourly'];
 
   const handleAddImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photo library to add images.');
+      Alert.alert(
+        'Permission needed',
+        'Please allow access to your photo library to add images.'
+      );
       return;
     }
 
@@ -95,13 +101,23 @@ export default function AddPropertyScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!title || !price || !selectedType || !selectedListingType || !address || !city) {
+    if (
+      !title ||
+      !price ||
+      !selectedType ||
+      !selectedListingType ||
+      !address ||
+      !city
+    ) {
       Alert.alert('Missing information', 'Please fill all required fields.');
       return;
     }
 
     if (!user) {
-      Alert.alert('Authentication required', 'Please login to create a property listing.');
+      Alert.alert(
+        'Authentication required',
+        'Please login to create a property listing.'
+      );
       return;
     }
 
@@ -109,18 +125,24 @@ export default function AddPropertyScreen() {
 
     try {
       // Using placeholder images if none are selected
-      const propertyImages = images.length > 0 
-        ? images 
-        : ['https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg'];
+      const propertyImages =
+        images.length > 0
+          ? images
+          : [
+              'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg',
+            ];
 
       await addProperty({
         title,
         description,
         type: selectedType,
         price: parseFloat(price),
-        priceUnit: selectedListingType === 'Rent' || selectedListingType === 'Rent Hourly' || selectedListingType === 'Paying Guest' 
-          ? 'perMonth' 
-          : 'total',
+        priceUnit:
+          selectedListingType === 'Rent' ||
+          selectedListingType === 'Rent Hourly' ||
+          selectedListingType === 'Paying Guest'
+            ? 'perMonth'
+            : 'total',
         area: parseFloat(area),
         areaUnit: 'sqft',
         bedrooms: bedrooms ? parseInt(bedrooms, 10) : undefined,
@@ -140,27 +162,25 @@ export default function AddPropertyScreen() {
         owner: {
           id: user.id,
           name: user.name || 'Owner',
-          image: user.profileImage || 'https://randomuser.me/api/portraits/men/1.jpg',
+          image:
+            user.profileImage ||
+            'https://randomuser.me/api/portraits/men/1.jpg',
           phone: user.phoneNumber,
           rating: 0,
-          reviews: 0
+          reviews: 0,
         },
         parking: {
           covered: 0,
-          open: 0
-        }
+          open: 0,
+        },
       });
 
-      Alert.alert(
-        'Success',
-        'Your property has been listed successfully!',
-        [
-          {
-            text: 'View Listings',
-            onPress: () => router.replace('/(tabs)'),
-          },
-        ]
-      );
+      Alert.alert('Success', 'Your property has been listed successfully!', [
+        {
+          text: 'View Listings',
+          onPress: () => router.replace('/(tabs)'),
+        },
+      ]);
 
       // Reset form
       setTitle('');
@@ -185,269 +205,273 @@ export default function AddPropertyScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <ArrowLeft size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Add Property
-          </Text>
-          <View style={styles.placeholder} />
-        </View>
-
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         >
-          <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Property Details
-            </Text>
-
-            <Input
-              label="Title"
-              placeholder="e.g., Spacious 3BHK Apartment"
-              value={title}
-              onChangeText={setTitle}
-            />
-
-            <Text style={[styles.label, { color: colors.text }]}>
-              Property Type
-            </Text>
-            <View style={styles.typeContainer}>
-              {propertyTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.typeButton,
-                    selectedType === type && {
-                      backgroundColor: colors.primaryColor,
-                    },
-                  ]}
-                  onPress={() => setSelectedType(type)}
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      selectedType === type && { color: 'white' },
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={[styles.label, { color: colors.text }]}>
-              Listing Type
-            </Text>
-            <View style={styles.typeContainer}>
-              {listingTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.typeButton,
-                    selectedListingType === type && {
-                      backgroundColor: colors.primaryColor,
-                    },
-                  ]}
-                  onPress={() => setSelectedListingType(type)}
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      selectedListingType === type && { color: 'white' },
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Input
-              label="Description"
-              placeholder="Describe your property..."
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={4}
-            />
-
-            <View style={styles.rowInputs}>
-              <Input
-                label="Price (₹)"
-                placeholder="e.g., 25000"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="numeric"
-                style={{ flex: 1, marginRight: 8 }}
-              />
-              <Input
-                label="Area (sq ft)"
-                placeholder="e.g., 1200"
-                value={area}
-                onChangeText={setArea}
-                keyboardType="numeric"
-                style={{ flex: 1 }}
-              />
-            </View>
-
-            <View style={styles.rowInputs}>
-              <Input
-                label="Bedrooms"
-                placeholder="e.g., 3"
-                value={bedrooms}
-                onChangeText={setBedrooms}
-                keyboardType="numeric"
-                style={{ flex: 1, marginRight: 8 }}
-              />
-              <Input
-                label="Bathrooms"
-                placeholder="e.g., 2"
-                value={bathrooms}
-                onChangeText={setBathrooms}
-                keyboardType="numeric"
-                style={{ flex: 1 }}
-              />
-            </View>
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Location
-            </Text>
-
-            <Input
-              label="Address"
-              placeholder="Street address"
-              value={address}
-              onChangeText={setAddress}
-            />
-
-            <View style={styles.rowInputs}>
-              <Input
-                label="City"
-                placeholder="e.g., Delhi"
-                value={city}
-                onChangeText={setCity}
-                style={{ flex: 1, marginRight: 8 }}
-              />
-              <Input
-                label="State"
-                placeholder="e.g., Delhi"
-                value={state}
-                onChangeText={setState}
-                style={{ flex: 1 }}
-              />
-            </View>
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Features
-            </Text>
-
-            <View style={styles.featureInputContainer}>
-              <Input
-                placeholder="Add feature (e.g., Swimming Pool)"
-                value={featureInput}
-                onChangeText={setFeatureInput}
-                style={{ flex: 1 }}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.addFeatureButton,
-                  { backgroundColor: colors.primaryColor },
-                ]}
-                onPress={handleAddFeature}
-              >
-                <Text style={styles.addFeatureButtonText}>Add</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.featuresContainer}>
-              {features.map((feature, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.featureTag,
-                    { backgroundColor: colors.grayLight },
-                  ]}
-                >
-                  <Text style={[styles.featureText, { color: colors.text }]}>
-                    {feature}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => handleRemoveFeature(index)}
-                    style={styles.removeFeatureButton}
-                  >
-                    <X size={12} color={colors.text} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Images
-            </Text>
-
+          <View style={styles.header}>
             <TouchableOpacity
-              style={[
-                styles.uploadButton,
-                { borderColor: colors.primaryColor },
-              ]}
-              onPress={handleAddImage}
+              onPress={() => router.back()}
+              style={styles.backButton}
             >
-              <Upload size={24} color={colors.primaryColor} />
-              <Text
-                style={[
-                  styles.uploadButtonText,
-                  { color: colors.primaryColor },
-                ]}
-              >
-                Upload Images
-              </Text>
+              <ArrowLeft size={24} color={colors.text} />
             </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              Add Property
+            </Text>
+            <View style={styles.placeholder} />
+          </View>
 
-            <View style={styles.imagesContainer}>
-              {images.map((image, index) => (
-                <View key={index} style={styles.imagePreviewContainer}>
-                  <View style={styles.imagePreview}>
-                    <TouchableOpacity
-                      style={styles.removeImageButton}
-                      onPress={() => handleRemoveImage(index)}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.formSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Property Details
+              </Text>
+
+              <Input
+                label="Title"
+                placeholder="e.g., Spacious 3BHK Apartment"
+                value={title}
+                onChangeText={setTitle}
+              />
+
+              <Text style={[styles.label, { color: colors.text }]}>
+                Property Type
+              </Text>
+              <View style={styles.typeContainer}>
+                {propertyTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.typeButton,
+                      selectedType === type && {
+                        backgroundColor: colors.primaryColor,
+                      },
+                    ]}
+                    onPress={() => setSelectedType(type)}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedType === type && { color: 'white' },
+                      ]}
                     >
-                      <X size={16} color="white" />
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={[styles.label, { color: colors.text }]}>
+                Listing Type
+              </Text>
+              <View style={styles.typeContainer}>
+                {listingTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.typeButton,
+                      selectedListingType === type && {
+                        backgroundColor: colors.primaryColor,
+                      },
+                    ]}
+                    onPress={() => setSelectedListingType(type)}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        selectedListingType === type && { color: 'white' },
+                      ]}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Input
+                label="Description"
+                placeholder="Describe your property..."
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+              />
+
+              <View style={styles.rowInputs}>
+                <Input
+                  label="Price (₹)"
+                  placeholder="e.g., 25000"
+                  value={price}
+                  onChangeText={setPrice}
+                  keyboardType="numeric"
+                  style={{ flex: 1, marginRight: 8 }}
+                />
+                <Input
+                  label="Area (sq ft)"
+                  placeholder="e.g., 1200"
+                  value={area}
+                  onChangeText={setArea}
+                  keyboardType="numeric"
+                  style={{ flex: 1 }}
+                />
+              </View>
+
+              <View style={styles.rowInputs}>
+                <Input
+                  label="Bedrooms"
+                  placeholder="e.g., 3"
+                  value={bedrooms}
+                  onChangeText={setBedrooms}
+                  keyboardType="numeric"
+                  style={{ flex: 1, marginRight: 8 }}
+                />
+                <Input
+                  label="Bathrooms"
+                  placeholder="e.g., 2"
+                  value={bathrooms}
+                  onChangeText={setBathrooms}
+                  keyboardType="numeric"
+                  style={{ flex: 1 }}
+                />
+              </View>
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Location
+              </Text>
+
+              <Input
+                label="Address"
+                placeholder="Street address"
+                value={address}
+                onChangeText={setAddress}
+              />
+
+              <View style={styles.rowInputs}>
+                <Input
+                  label="City"
+                  placeholder="e.g., Delhi"
+                  value={city}
+                  onChangeText={setCity}
+                  style={{ flex: 1, marginRight: 8 }}
+                />
+                <Input
+                  label="State"
+                  placeholder="e.g., Delhi"
+                  value={state}
+                  onChangeText={setState}
+                  style={{ flex: 1 }}
+                />
+              </View>
+            </View>
+
+            <View style={styles.formSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Features
+              </Text>
+
+              <View style={styles.featureInputContainer}>
+                <Input
+                  placeholder="Add feature (e.g., Swimming Pool)"
+                  value={featureInput}
+                  onChangeText={setFeatureInput}
+                  style={{ flex: 1 }}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.addFeatureButton,
+                    { backgroundColor: colors.primaryColor },
+                  ]}
+                  onPress={handleAddFeature}
+                >
+                  <Text style={styles.addFeatureButtonText}>Add</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.featuresContainer}>
+                {features.map((feature, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.featureTag,
+                      { backgroundColor: colors.grayLight },
+                    ]}
+                  >
+                    <Text style={[styles.featureText, { color: colors.text }]}>
+                      {feature}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveFeature(index)}
+                      style={styles.removeFeatureButton}
+                    >
+                      <X size={12} color={colors.text} />
                     </TouchableOpacity>
                   </View>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
-          </View>
 
-          <Button
-            title="List Property"
-            onPress={handleSubmit}
-            loading={isLoading}
-            fullWidth
-            size="large"
-            style={styles.submitButton}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <View style={styles.formSection}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Images
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.uploadButton,
+                  { borderColor: colors.primaryColor },
+                ]}
+                onPress={handleAddImage}
+              >
+                <Upload size={24} color={colors.primaryColor} />
+                <Text
+                  style={[
+                    styles.uploadButtonText,
+                    { color: colors.primaryColor },
+                  ]}
+                >
+                  Upload Images
+                </Text>
+              </TouchableOpacity>
+
+              <View style={styles.imagesContainer}>
+                {images.map((image, index) => (
+                  <View key={index} style={styles.imagePreviewContainer}>
+                    <View style={styles.imagePreview}>
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={() => handleRemoveImage(index)}
+                      >
+                        <X size={16} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <Button
+              title="List Property"
+              onPress={handleSubmit}
+              loading={isLoading}
+              fullWidth
+              size="large"
+              style={styles.submitButton}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

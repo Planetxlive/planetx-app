@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import Logo from '@/assets/images/logo';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function SplashScreen() {
   const { user, isLoading } = useAuth();
@@ -32,13 +33,15 @@ export default function SplashScreen() {
   }, [isLoading, user]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Logo width={160} height={160} />
-      <Text style={[styles.title, { color: colors.text }]}>PLANET X</Text>
-      <Text style={[styles.subtitle, { color: colors.grayDark }]}>
-        Every Space for every Need
-      </Text>
-    </View>
+    <SafeAreaProvider>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Logo width={160} height={160} />
+        <Text style={[styles.title, { color: colors.text }]}>PLANET X</Text>
+        <Text style={[styles.subtitle, { color: colors.grayDark }]}>
+          Every Space for every Need
+        </Text>
+      </View>
+    </SafeAreaProvider>
   );
 }
 

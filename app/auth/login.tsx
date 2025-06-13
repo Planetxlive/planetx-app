@@ -17,6 +17,7 @@ import Logo from '@/assets/images/logo';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { Phone } from 'lucide-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const colorScheme = useColorScheme() || 'light';
@@ -32,16 +33,16 @@ export default function LoginScreen() {
       setError('Please enter a valid phone number');
       return;
     }
-    
+
     setError('');
     setIsLoading(true);
-    
+
     try {
       // Format phone number with country code if needed
-      const formattedNumber = phoneNumber.startsWith('+') 
-        ? phoneNumber 
+      const formattedNumber = phoneNumber.startsWith('+')
+        ? phoneNumber
         : `+91${phoneNumber.replace(/\s+/g, '')}`;
-      
+
       await signIn(formattedNumber);
       // Navigation to OTP screen is handled in the signIn function
     } catch (error) {
@@ -53,61 +54,79 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaProvider>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <View style={styles.logoContainer}>
-            <View style={[styles.logoCircle, { backgroundColor: colors.grayLight }]}>
-              <Logo width={80} height={80} />
-            </View>
-            <Text style={[styles.title, { color: colors.text }]}>Login</Text>
-            <Text style={[styles.subtitle, { color: colors.grayDark }]}>
-              Login to continue using the app
-            </Text>
-          </View>
-
-          <View style={styles.formContainer}>
-            <Text style={[styles.label, { color: colors.text }]}>Mobile number</Text>
-            <View style={styles.phoneInputContainer}>
-              <TouchableOpacity 
-                style={[styles.countryCode, { borderColor: colors.grayMedium }]}
-                activeOpacity={0.7}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View
+            style={[styles.container, { backgroundColor: colors.background }]}
+          >
+            <View style={styles.logoContainer}>
+              <View
+                style={[
+                  styles.logoCircle,
+                  { backgroundColor: colors.grayLight },
+                ]}
               >
-                <Image
-                  source={{ uri: 'https://flagcdn.com/w80/in.png' }}
-                  style={styles.flagIcon}
+                <Logo width={80} height={80} />
+              </View>
+              <Text style={[styles.title, { color: colors.text }]}>Login</Text>
+              <Text style={[styles.subtitle, { color: colors.grayDark }]}>
+                Login to continue using the app
+              </Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Mobile number
+              </Text>
+              <View style={styles.phoneInputContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.countryCode,
+                    { borderColor: colors.grayMedium },
+                  ]}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={{ uri: 'https://flagcdn.com/w80/in.png' }}
+                    style={styles.flagIcon}
+                  />
+                  <Text
+                    style={[styles.countryCodeText, { color: colors.text }]}
+                  >
+                    +91
+                  </Text>
+                </TouchableOpacity>
+                <Input
+                  placeholder="Enter Mobile Number"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                  style={styles.phoneInput}
+                  leftIcon={<Phone size={20} color={colors.grayDark} />}
+                  error={error}
                 />
-                <Text style={[styles.countryCodeText, { color: colors.text }]}>+91</Text>
-              </TouchableOpacity>
-              <Input
-                placeholder="Enter Mobile Number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-                style={styles.phoneInput}
-                leftIcon={<Phone size={20} color={colors.grayDark} />}
-                error={error}
+              </View>
+
+              <Button
+                title="Send OTP"
+                onPress={handleSendOTP}
+                loading={isLoading}
+                fullWidth
+                style={styles.button}
               />
             </View>
-
-            <Button
-              title="Send OTP"
-              onPress={handleSendOTP}
-              loading={isLoading}
-              fullWidth
-              style={styles.button}
-            />
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaProvider>
   );
 }
 

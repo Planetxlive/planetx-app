@@ -1,6 +1,16 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Appearance, SafeAreaView, TouchableOpacity, Share } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Appearance,
+  SafeAreaView,
+  TouchableOpacity,
+  Share,
+} from 'react-native';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const ShareApp = () => {
   const colorScheme = useColorScheme() || 'light';
@@ -79,7 +89,8 @@ const ShareApp = () => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: 'Check out PlanetX! Download the app to explore amazing features and join our community: https://planetx-live.com',
+        message:
+          'Check out PlanetX! Download the app to explore amazing features and join our community: https://planetx-live.com',
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
@@ -99,53 +110,67 @@ const ShareApp = () => {
   };
 
   return (
-    <SafeAreaView style={dynamicStyles.container}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text style={dynamicStyles.title}>Share PlanetX</Text>
-        <Text style={dynamicStyles.lastUpdated}>Last Updated: January 1, 2025</Text>
-        
-        <View style={dynamicStyles.cardContainer}>
-          {/* Share the App */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>Spread the Word</Text>
-            <Text style={dynamicStyles.cardSubtitle}>
-              Invite your friends and family to join PlanetX and explore its exciting features!
-            </Text>
-            <Text style={dynamicStyles.itemText}>
-              Share the PlanetX app with others to help grow our community. Use the button below to send a link to the app via your favorite messaging or social media platforms.
-            </Text>
-            <TouchableOpacity style={dynamicStyles.shareButton} onPress={onShare}>
-              <Text style={dynamicStyles.shareButtonText}>Share Now</Text>
-            </TouchableOpacity>
-          </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={dynamicStyles.container}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Text style={dynamicStyles.title}>Share PlanetX</Text>
+          <Text style={dynamicStyles.lastUpdated}>
+            Last Updated: January 1, 2025
+          </Text>
 
-          {/* How Sharing Works */}
-          <View style={dynamicStyles.card}>
-            <Text style={dynamicStyles.cardTitle}>How Sharing Works</Text>
-            <Text style={dynamicStyles.cardSubtitle}>
-              Learn about the sharing process:
-            </Text>
-            <View style={dynamicStyles.cardContent}>
-              <Text style={dynamicStyles.itemText}>
-                Tap the "Share Now" button to open your device's native sharing options.
+          <View style={dynamicStyles.cardContainer}>
+            {/* Share the App */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>Spread the Word</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Invite your friends and family to join PlanetX and explore its
+                exciting features!
               </Text>
-              <View style={dynamicStyles.divider} />
               <Text style={dynamicStyles.itemText}>
-                Choose your preferred platform (e.g., WhatsApp, Email, SMS) to share the app link.
+                Share the PlanetX app with others to help grow our community.
+                Use the button below to send a link to the app via your favorite
+                messaging or social media platforms.
               </Text>
-              <View style={dynamicStyles.divider} />
-              <Text style={dynamicStyles.itemText}>
-                The shared link directs to the official PlanetX website or app store for easy download.
+              <TouchableOpacity
+                style={dynamicStyles.shareButton}
+                onPress={onShare}
+              >
+                <Text style={dynamicStyles.shareButtonText}>Share Now</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* How Sharing Works */}
+            <View style={dynamicStyles.card}>
+              <Text style={dynamicStyles.cardTitle}>How Sharing Works</Text>
+              <Text style={dynamicStyles.cardSubtitle}>
+                Learn about the sharing process:
               </Text>
+              <View style={dynamicStyles.cardContent}>
+                <Text style={dynamicStyles.itemText}>
+                  Tap the "Share Now" button to open your device's native
+                  sharing options.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  Choose your preferred platform (e.g., WhatsApp, Email, SMS) to
+                  share the app link.
+                </Text>
+                <View style={dynamicStyles.divider} />
+                <Text style={dynamicStyles.itemText}>
+                  The shared link directs to the official PlanetX website or app
+                  store for easy download.
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <Text style={dynamicStyles.footerText}>
-          By sharing PlanetX, you help us bring more users to our community. Thank you for your support!
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={dynamicStyles.footerText}>
+            By sharing PlanetX, you help us bring more users to our community.
+            Thank you for your support!
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
