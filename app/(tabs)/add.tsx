@@ -157,7 +157,7 @@ export default function AddPropertyScreen() {
         [
           {
             text: 'View Listings',
-            onPress: () => router.push('/(tabs)'),
+            onPress: () => router.replace('/(tabs)'),
           },
         ]
       );

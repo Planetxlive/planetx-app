@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { backendUrl } from '@/lib/uri';
+import { useFocusEffect } from 'expo-router';
 
 export type BlogCategory = 'Roommate Wanted' | 'Property For Sale' | 'Property For Rent' | 'Community Updates' | 'Market Insights';
 
@@ -60,9 +61,10 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
+  useFocusEffect(() => {
     const getToken = async () => {
       try {
+        // console.log("called")
         const storedToken = await AsyncStorage.getItem('accessToken');
         if (storedToken) {
           setToken(storedToken.replace(/^"|"$/g, ''));
@@ -72,7 +74,7 @@ export const BlogProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     getToken();
-  }, []);
+  });
 
   const addPost = async (post: Omit<BlogPost, '_id' | 'createdAt' | 'updatedAt' | 'isApproved' | '__v'>) => {
     if (!token) throw new Error('No authentication token found');

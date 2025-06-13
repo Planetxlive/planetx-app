@@ -1,6 +1,7 @@
 import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useFocusEffect } from 'expo-router';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 export type PropertyCategory =
@@ -144,15 +145,18 @@ interface PropertyContextType {
   ) => Promise<void>;
   updateProperty: (id: string, property: Partial<Property>) => Promise<void>;
   deleteProperty: (id: string) => Promise<void>;
-  getPropertyById: (id: string) => Property | undefined;
-  getPropertiesByOwnerId: (ownerId: string) => Property[];
+  getPropertyById: (id: string) => Property | undefined | null;
+  getPropertiesByOwnerId: (ownerId: string) => Property[] | null;
   getUserProperties: () => Promise<Property[]>;
-  getPropertiesByCategory: (category: PropertyCategory) => Property[];
+  getPropertiesByCategory: (category: PropertyCategory) => Property[] | null;
   getPropertiesByPostingType: (
     propertyType: Property['propertyType']
-  ) => Property[];
-  getPropertiesByCity: (city: string) => Property[];
-  getPropertiesByPriceRange: (minPrice: number, maxPrice: number) => Property[];
+  ) => Property[] | null;
+  getPropertiesByCity: (city: string) => Property[] | null;
+  getPropertiesByPriceRange: (
+    minPrice: number,
+    maxPrice: number
+  ) => Property[] | null;
   createPropertyTitle: (prop: Property) => string;
   toggleFavorite: (id: string) => Promise<void>;
   favorites: string[];
@@ -166,7 +170,7 @@ interface PropertyContextType {
     category: Property['category'];
     pricing: Property['pricing'];
     user: string;
-  }>>;
+  }> | null>;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(
@@ -205,18 +209,20 @@ const fetchAvailableProperties = async (): Promise<Property[]> => {
 export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<Property[] | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  useFocusEffect(() => {
     const fetchAll = async () => {
-      const props = await fetchAvailableProperties();
-      setProperties(props);
-      await fetchWishlist();
+      if (properties === null) {
+        const props = await fetchAvailableProperties();
+        setProperties(props);
+        await fetchWishlist();
+      }
     };
     fetchAll();
-  }, []);
+  });
 
   const fetchWishlist = async () => {
     try {
@@ -236,7 +242,9 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
       );
 
       if (wishlistResponse.status === 200) {
-        const wishlistProperties = wishlistResponse.data.wishlistsData?.map((item: any) => item._id) || [];
+        const wishlistProperties =
+          wishlistResponse.data.wishlistsData?.map((item: any) => item._id) ||
+          [];
         setFavorites(wishlistProperties);
       }
     } catch (error) {
@@ -253,65 +261,81 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-
-    setProperties([...properties, newProperty]);
+    if (properties !== null) setProperties([...properties, newProperty]);
   };
 
   const updateProperty = async (id: string, property: Partial<Property>) => {
-    setProperties(
-      properties.map((p) =>
-        p._id === id
-          ? { ...p, ...property, updatedAt: new Date().toISOString() }
-          : p
-      )
-    );
+    if (properties !== null)
+      setProperties(
+        properties.map((p) =>
+          p._id === id
+            ? { ...p, ...property, updatedAt: new Date().toISOString() }
+            : p
+        )
+      );
   };
 
   const deleteProperty = async (id: string) => {
-    setProperties(properties.filter((p) => p._id !== id));
+    if (properties !== null)
+      setProperties(properties.filter((p) => p._id !== id));
   };
 
   const getPropertyById = (id: string) => {
-    return properties.find((p) => p._id === id);
+    if (properties !== null) return properties.find((p) => p._id === id);
+    else return null;
   };
 
   const getPropertiesByOwnerId = (ownerId: string) => {
-    return properties.filter((p) => p.user === ownerId);
+    if (properties !== null)
+      return properties.filter((p) => p.user === ownerId);
+    else return null;
   };
 
   const getPropertiesByCategory = (category: PropertyCategory) => {
-    return properties.filter((p) => p.category === category);
+    if (properties !== null)
+      return properties.filter((p) => p.category === category);
+    else return null;
   };
 
   const getPropertiesByPostingType = (
     propertyType: Property['propertyType']
   ) => {
-    return properties.filter((p) => p.propertyType === propertyType);
+    if (properties !== null)
+      return properties.filter((p) => p.propertyType === propertyType);
+    else return null;
   };
 
   const getPropertiesByCity = (city: string) => {
-    return properties.filter(
-      (p) => p.location.city.toLowerCase() === city.toLowerCase()
-    );
+    if (properties !== null)
+      return properties.filter(
+        (p) => p.location.city.toLowerCase() === city.toLowerCase()
+      );
+    else return null;
   };
   const getAllVideos = async () => {
-    return properties.map(property => ({
-      id: property._id,
-      video: property.video,
-      title: property.title,
-      location: property.location,
-      propertyType: property.propertyType,
-      category: property.category,
-      pricing: property.pricing,
-      user: property.user
-    })).filter(p => p.video !== '');
+    if (properties !== null)
+      return properties
+        .map((property) => ({
+          id: property._id,
+          video: property.video,
+          title: property.title,
+          location: property.location,
+          propertyType: property.propertyType,
+          category: property.category,
+          pricing: property.pricing,
+          user: property.user,
+        }))
+        .filter((p) => p.video !== '');
+    else return null;
   };
   const getPropertiesByPriceRange = (minPrice: number, maxPrice: number) => {
-    return properties.filter(
-      (p) =>
-        p.pricing.expectedPrice >= minPrice &&
-        p.pricing.expectedPrice <= maxPrice
-    );
+    if (properties !== null)
+      return properties.filter(
+        (p) =>
+          p.pricing.expectedPrice >= minPrice &&
+          p.pricing.expectedPrice <= maxPrice
+      );
+    else return null;
   };
 
   const toggleFavorite = async (propertyId: string) => {
@@ -325,10 +349,9 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
       const isInWishlist = favorites.includes(propertyId);
 
       if (isInWishlist) {
-        await axios.delete(
-          `${backendUrl}/wishlist/remove/${propertyId}`,
-          { headers: { Authorization: token } }
-        );
+        await axios.delete(`${backendUrl}/wishlist/remove/${propertyId}`, {
+          headers: { Authorization: token },
+        });
         setFavorites(favorites.filter((id) => id !== propertyId));
       } else {
         const userResponse = await axios.get(`${backendUrl}/auth/get-user`, {
@@ -371,7 +394,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <PropertyContext.Provider
       value={{
-        properties,
+        properties: properties ?? [],
         createPropertyTitle,
         getUserProperties,
         addProperty,

@@ -117,7 +117,7 @@ export default function ManageBlogPost() {
 
   const handleUpdate = async () => {
     if (!user) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
 
@@ -134,7 +134,7 @@ export default function ManageBlogPost() {
       console.log({ ...formData, image: urls });
       await updatePost(id as string, { ...formData, image: urls });
       Alert.alert('Success', 'Post updated successfully');
-      router.push('/my-blog');
+      router.replace('/my-blog');
     } catch (err) {
       console.error('Error updating post:', err);
       Alert.alert('Error', 'Failed to update post. Please try again.');
@@ -160,7 +160,7 @@ export default function ManageBlogPost() {
             try {
               await deletePost(id as string);
               Alert.alert('Success', 'Post deleted successfully');
-              router.push('/blog');
+              router.replace('/blog');
             } catch (err) {
               console.error('Error deleting post:', err);
               Alert.alert('Error', 'Failed to delete post. Please try again.');

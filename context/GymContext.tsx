@@ -1,6 +1,7 @@
 import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useFocusEffect } from 'expo-router';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 export type GymType = 'Public' | 'Private' | 'Celebrity';
@@ -319,7 +320,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
   const [gyms, setGyms] = useState<Gym[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  useEffect(() => {
+  useFocusEffect(() => {
     const fetchAll = async () => {
       const token = await AsyncStorage.getItem('accessToken');
 
@@ -331,7 +332,7 @@ export const GymProvider = ({ children }: { children: React.ReactNode }) => {
       setGyms(res.data.gyms);
     };
     fetchAll();
-  }, []);
+  });
 
   const addGym = async (gym: Omit<Gym, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newGym: Omit<Gym, 'id' | 'createdAt' | 'updatedAt'> = {

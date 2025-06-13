@@ -1,6 +1,7 @@
 import { backendUrl } from '@/lib/uri';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useFocusEffect } from 'expo-router';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 export type ParkingType =
@@ -196,13 +197,12 @@ export const ParkingProvider = ({
   children: React.ReactNode;
 }) => {
   const [parkingSpots, setParkingSpots] =
-    useState<ParkingSpot[]>(MOCK_PARKING_SPOTS);
+    useState<ParkingSpot[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  useEffect(() => {
+  useFocusEffect(() => {
     const fetchAll = async () => {
       const token = await AsyncStorage.getItem('accessToken');
-
       const res = await axios.get(
         `${backendUrl}/Parking/`,
         {
@@ -214,7 +214,7 @@ export const ParkingProvider = ({
       setParkingSpots(res.data.parkings);
     };
     fetchAll();
-  }, []);
+  });
 
   const addParkingSpot = async (
     spot: Omit<ParkingSpot, 'id' | 'createdAt' | 'updatedAt'>

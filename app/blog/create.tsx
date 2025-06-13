@@ -114,7 +114,7 @@ export default function CreateBlogPost() {
 
   const handleSubmit = async () => {
     if (!user) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
 
@@ -133,7 +133,7 @@ export default function CreateBlogPost() {
         image: urls,
         userId: user.id,
       });
-      router.push('/blog');
+      router.replace('/blog');
     } catch (err) {
       console.error('Error creating post:', err);
       Alert.alert('Error', 'Failed to create post. Please try again.');

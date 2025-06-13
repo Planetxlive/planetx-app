@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosResponse } from 'axios';
 import { Use } from 'react-native-svg';
@@ -85,12 +85,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     null
   );
 
-  useEffect(() => {
+  useFocusEffect(() => {
     // Check for existing auth
     const loadUser = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        if (token) {
+        if (token && user === null) {
           setUser(await updateUser(token));
         }
       } catch (error) {
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     loadUser();
-  }, []);
+  });
 
   const signIn = async (phoneNumber: string) => {
     try {
@@ -175,6 +175,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (user) {
         const token = await AsyncStorage.getItem('accessToken');
         // const updatedUser = { ...user, ...data };
+        console.log(data)
         const url = `${backendUrl}/auth/update-user`;
         console.log(url);
         const res = await axios.patch(url, data, {

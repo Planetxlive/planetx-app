@@ -2,13 +2,20 @@ import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { AuthProvider } from '@/context/AuthContext';
 import { PropertyProvider } from '@/context/PropertyContext';
 import { BlogProvider } from '@/context/BlogContext';
 import { SplashScreen } from 'expo-router';
 import { GymProvider } from '@/context/GymContext';
 import { ParkingProvider } from '@/context/ParkingContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -40,14 +47,15 @@ export default function RootLayout() {
       <PropertyProvider>
         <BlogProvider>
           <ParkingProvider>
-        <GymProvider>
-          <>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </>
-          </GymProvider>
+            <GymProvider>
+              
+              <SafeAreaProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+                <StatusBar style="auto" />
+              </SafeAreaProvider>
+            </GymProvider>
           </ParkingProvider>
         </BlogProvider>
       </PropertyProvider>

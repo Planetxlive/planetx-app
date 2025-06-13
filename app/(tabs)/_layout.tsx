@@ -1,10 +1,28 @@
 import React, { useState } from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { Chrome as Home, Heart, Video, User, Plus, FileText, Home as HomeIcon, Car, Dumbbell } from 'lucide-react-native';
-import { View, StyleSheet, TouchableOpacity, Modal, Text, Animated, Dimensions } from 'react-native';
+import {
+  Chrome as Home,
+  Heart,
+  Video,
+  User,
+  Plus,
+  FileText,
+  Home as HomeIcon,
+  Car,
+  Dumbbell,
+} from 'lucide-react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Text,
+  Animated,
+  Dimensions,
+} from 'react-native';
 
 function AddButton() {
   const colorScheme = useColorScheme() || 'light';
@@ -12,8 +30,10 @@ function AddButton() {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [scaleValue] = useState(new Animated.Value(0));
-  
-  const handleOptionPress = (route: '/blog/create' | '/add-property' | '/add-parking' | '/add-gym') => {
+
+  const handleOptionPress = (
+    route: '/blog/create' | '/add-property' | '/add-parking' | '/add-gym'
+  ) => {
     setModalVisible(false);
     router.push(route);
   };
@@ -37,104 +57,156 @@ function AddButton() {
   };
 
   return (
-    <View style={styles.addButtonContainer}>
-      <TouchableOpacity
-        style={[styles.addButton, { backgroundColor: colors.primaryColor }]}
-        activeOpacity={0.8}
-        onPress={showModal}
-      >
-        <Plus size={24} color="white" />
-      </TouchableOpacity>
-
-      <Modal
-        animationType="none"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={hideModal}
-      >
+    <SafeAreaProvider>
+      <View style={styles.addButtonContainer}>
         <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={hideModal}
+          style={[styles.addButton, { backgroundColor: colors.primaryColor }]}
+          activeOpacity={0.8}
+          onPress={showModal}
         >
-          <Animated.View 
-            style={[
-              styles.modalContent,
-              { 
-                backgroundColor: colors.background,
-                transform: [{ scale: scaleValue }]
-              }
-            ]}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Create New</Text>
-            </View>
-            
-            <View style={styles.optionsContainer}>
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.background }]}
-                onPress={() => handleOptionPress('/blog/create')}
-              >
-                <View style={styles.optionContent}>
-                  <FileText size={24} color={colors.primaryColor} />
-                  <View style={styles.optionTextContainer}>
-                    <Text style={[styles.optionTitle, { color: colors.text }]}>Add Blog</Text>
-                    <Text style={[styles.optionDescription, { color: colors.grayDark }]}>
-                      Share your thoughts and experiences
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.background }]}
-                onPress={() => handleOptionPress('/add-property')}
-              >
-                <View style={styles.optionContent}>
-                  <HomeIcon size={24} color={colors.primaryColor} />
-                  <View style={styles.optionTextContainer}>
-                    <Text style={[styles.optionTitle, { color: colors.text }]}>Add Property</Text>
-                    <Text style={[styles.optionDescription, { color: colors.grayDark }]}>
-                      List your property for sale or rent
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.background }]}
-                onPress={() => handleOptionPress('/add-parking')}
-              >
-                <View style={styles.optionContent}>
-                  <Car size={24} color={colors.primaryColor} />
-                  <View style={styles.optionTextContainer}>
-                    <Text style={[styles.optionTitle, { color: colors.text }]}>Add Parking</Text>
-                    <Text style={[styles.optionDescription, { color: colors.grayDark }]}>
-                      List available parking spaces
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.optionButton, { backgroundColor: colors.background }]}
-                onPress={() => handleOptionPress('/add-gym')}
-              >
-                <View style={styles.optionContent}>
-                  <Dumbbell size={24} color={colors.primaryColor} />
-                  <View style={styles.optionTextContainer}>
-                    <Text style={[styles.optionTitle, { color: colors.text }]}>Add Gym</Text>
-                    <Text style={[styles.optionDescription, { color: colors.grayDark }]}>
-                      List your fitness facility
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+          <Plus size={24} color="white" />
         </TouchableOpacity>
-      </Modal>
-    </View>
+
+        <Modal
+          animationType="none"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={hideModal}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={hideModal}
+          >
+            <Animated.View
+              style={[
+                styles.modalContent,
+                {
+                  backgroundColor: colors.background,
+                  transform: [{ scale: scaleValue }],
+                },
+              ]}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  Create New
+                </Text>
+              </View>
+
+              <View style={styles.optionsContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    { backgroundColor: colors.background },
+                  ]}
+                  onPress={() => handleOptionPress('/blog/create')}
+                >
+                  <View style={styles.optionContent}>
+                    <FileText size={24} color={colors.primaryColor} />
+                    <View style={styles.optionTextContainer}>
+                      <Text
+                        style={[styles.optionTitle, { color: colors.text }]}
+                      >
+                        Add Blog
+                      </Text>
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          { color: colors.grayDark },
+                        ]}
+                      >
+                        Share your thoughts and experiences
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    { backgroundColor: colors.background },
+                  ]}
+                  onPress={() => handleOptionPress('/add-property')}
+                >
+                  <View style={styles.optionContent}>
+                    <HomeIcon size={24} color={colors.primaryColor} />
+                    <View style={styles.optionTextContainer}>
+                      <Text
+                        style={[styles.optionTitle, { color: colors.text }]}
+                      >
+                        Add Property
+                      </Text>
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          { color: colors.grayDark },
+                        ]}
+                      >
+                        List your property for sale or rent
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    { backgroundColor: colors.background },
+                  ]}
+                  onPress={() => handleOptionPress('/add-parking')}
+                >
+                  <View style={styles.optionContent}>
+                    <Car size={24} color={colors.primaryColor} />
+                    <View style={styles.optionTextContainer}>
+                      <Text
+                        style={[styles.optionTitle, { color: colors.text }]}
+                      >
+                        Add Parking
+                      </Text>
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          { color: colors.grayDark },
+                        ]}
+                      >
+                        List available parking spaces
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    { backgroundColor: colors.background },
+                  ]}
+                  onPress={() => handleOptionPress('/add-gym')}
+                >
+                  <View style={styles.optionContent}>
+                    <Dumbbell size={24} color={colors.primaryColor} />
+                    <View style={styles.optionTextContainer}>
+                      <Text
+                        style={[styles.optionTitle, { color: colors.text }]}
+                      >
+                        Add Gym
+                      </Text>
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          { color: colors.grayDark },
+                        ]}
+                      >
+                        List your fitness facility
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </TouchableOpacity>
+        </Modal>
+      </View>
+    </SafeAreaProvider>
   );
 }
 
@@ -143,63 +215,76 @@ export default function TabLayout() {
   const colors = Colors[colorScheme];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['bottom']}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: colors.primaryColor,
-          tabBarInactiveTintColor: colors.grayDark,
-          tabBarStyle: {
-            borderTopWidth: 1,
-            borderTopColor: colors.divider,
-            height: 60,
-            paddingBottom: 2,
-            paddingTop: 2,
-            backgroundColor: colors.background,
-          },
-          tabBarLabelStyle: {
-            fontFamily: 'Inter-Medium',
-            fontSize: 12,
-          },
-        }}
+    <SafeAreaProvider>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: colors.background }]}
+        edges={['bottom']}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: colors.primaryColor,
+            tabBarInactiveTintColor: colors.grayDark,
+            tabBarStyle: {
+              borderTopWidth: 1,
+              borderTopColor: colors.divider,
+              height: 60,
+              paddingBottom: 2,
+              paddingTop: 2,
+              backgroundColor: colors.background,
+            },
+            tabBarLabelStyle: {
+              fontFamily: 'Inter-Medium',
+              fontSize: 12,
+            },
           }}
-        />
-        <Tabs.Screen
-          name="wishlist"
-          options={{
-            title: 'Wishlist',
-            tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="add"
-          options={{
-            title: '',
-            tabBarButton: () => <AddButton />,
-          }}
-        />
-        <Tabs.Screen
-          name="highlight"
-          options={{
-            title: 'Highlight',
-            tabBarIcon: ({ color, size }) => <Video size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
-          }}
-        />
-      </Tabs>
-    </SafeAreaView>
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ color, size }) => (
+                <Home size={size} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="wishlist"
+            options={{
+              title: 'Wishlist',
+              tabBarIcon: ({ color, size }) => (
+                <Heart size={size} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="add"
+            options={{
+              title: '',
+              tabBarButton: () => <AddButton />,
+            }}
+          />
+          <Tabs.Screen
+            name="highlight"
+            options={{
+              title: 'Highlight',
+              tabBarIcon: ({ color, size }) => (
+                <Video size={size} color={color} />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: 'Profile',
+              tabBarIcon: ({ color, size }) => (
+                <User size={size} color={color} />
+              ),
+            }}
+          />
+        </Tabs>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
