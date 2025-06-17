@@ -9,14 +9,16 @@ import {
   Image,
   RefreshControl,
   Alert,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useBlog, BlogPost } from '@/context/BlogContext';
 import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { Plus, MapPin, Calendar, Edit2, Trash2 } from 'lucide-react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Plus, MapPin, Calendar, Edit2, Trash2, ArrowLeft } from 'lucide-react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MyBlogScreen() {
   const colorScheme = useColorScheme();
@@ -24,6 +26,7 @@ export default function MyBlogScreen() {
   const { posts, deletePost } = useBlog();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const myPosts = posts.filter((post) => post.userId === user?.id);
 
@@ -130,13 +133,31 @@ export default function MyBlogScreen() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
+      />
       <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[
+          styles.container,
+          { 
+            backgroundColor: colors.background,
+            paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0
+          }
+        ]}
       >
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            My Posts
-          </Text>
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <ArrowLeft size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              My Posts
+            </Text>
+          </View>
           <TouchableOpacity
             style={[
               styles.createButton,
@@ -189,20 +210,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    backgroundColor: 'transparent',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  createButton: {
+  backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-SemiBold',
+  },
+  createButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   listContent: {
     padding: 16,

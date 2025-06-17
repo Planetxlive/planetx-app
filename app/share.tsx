@@ -8,24 +8,43 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Share,
+  Platform,
 } from 'react-native';
 import { useColorScheme } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 const ShareApp = () => {
   const colorScheme = useColorScheme() || 'light';
   const isDarkMode = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: isDarkMode ? '#121212' : '#f5f5f5',
+      paddingTop: Platform.OS === 'android' ? insets.top : 0,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: isDarkMode ? '#333333' : '#e0e0e0',
+    },
+    backButton: {
+      padding: 8,
+      marginRight: 8,
+    },
+    backButtonText: {
+      fontSize: 16,
+      color: isDarkMode ? '#ffffff' : '#000000',
     },
     title: {
       fontSize: 24,
       fontWeight: '600',
-      marginLeft: 8,
-      marginBottom: 8,
       color: isDarkMode ? '#ffffff' : '#000000',
     },
     lastUpdated: {
@@ -66,7 +85,7 @@ const ShareApp = () => {
       color: isDarkMode ? '#aaaaaa' : '#6C696A',
     },
     shareButton: {
-      backgroundColor: isDarkMode ? '#0288d1' : '#0288d1', // Blue button color for both modes
+      backgroundColor: isDarkMode ? '#0288d1' : '#0288d1',
       paddingVertical: 12,
       paddingHorizontal: 16,
       borderRadius: 8,
@@ -84,6 +103,14 @@ const ShareApp = () => {
       marginLeft: 8,
       marginBottom: 16,
     },
+    cardContent: {
+      marginTop: 8,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: isDarkMode ? '#333333' : '#e0e0e0',
+      marginVertical: 12,
+    },
   });
 
   const onShare = async () => {
@@ -94,17 +121,14 @@ const ShareApp = () => {
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // Shared via specific activity (e.g., WhatsApp, Email)
           console.log(`Shared via ${result.activityType}`);
         } else {
-          // Shared successfully
           console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
-        // Share dialog dismissed
         console.log('Share dismissed');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sharing:', error.message);
     }
   };
@@ -112,8 +136,16 @@ const ShareApp = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={dynamicStyles.container}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <View style={dynamicStyles.header}>
+          <TouchableOpacity
+            style={dynamicStyles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={dynamicStyles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
           <Text style={dynamicStyles.title}>Share PlanetX</Text>
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Text style={dynamicStyles.lastUpdated}>
             Last Updated: January 1, 2025
           </Text>

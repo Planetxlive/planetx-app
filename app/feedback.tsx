@@ -8,6 +8,8 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -99,10 +101,21 @@ export default function FeedbackScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[
+          styles.container,
+          { backgroundColor: colors.background },
+          Platform.OS === 'android' && styles.androidSafeArea,
+        ]}
       >
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.background}
+        />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -111,7 +124,11 @@ export default function FeedbackScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        <ScrollView style={styles.content}>
+        <ScrollView 
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={[styles.title, { color: colors.text }]}>
             How would you rate your experience?
           </Text>
@@ -187,7 +204,7 @@ export default function FeedbackScreen() {
           />
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { backgroundColor: colors.background }]}>
           <Button
             title="Submit Feedback"
             onPress={handleSubmit}
@@ -205,22 +222,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  androidSafeArea: {
+    paddingTop: StatusBar.currentHeight,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    backgroundColor: 'transparent',
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
   },
   headerTitle: {
     fontSize: 18,
     fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    flex: 1,
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 20,
@@ -276,5 +306,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
+    paddingBottom: Platform.OS === 'ios' ? 16 : 24,
   },
 });

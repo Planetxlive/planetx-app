@@ -52,14 +52,29 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     }
   };
 
-  const formatPrice = (price: number) => {
-    if (price >= 10000000) {
-      return `₹${(price / 10000000).toFixed(1)} Cr`;
-    } else if (price >= 100000) {
-      return `₹${(price / 100000).toFixed(1)} Lac`;
+  const formatPrice = (property: Property) => {
+    if (property.pricing?.price?.amount) {
+      return `₹${property.pricing.price.amount.toLocaleString('en-IN')}`;
+    } else if (property.pricing?.expectedPrice) {
+      return `₹${property.pricing.expectedPrice.toLocaleString('en-IN')}`;
+    } else if (property.pricing?.monthlyRent) {
+      return `₹${property.pricing.monthlyRent.toLocaleString('en-IN')}/mo`;
+    } else if (property.pricing?.finalPrice) {
+      return `₹${property.pricing.finalPrice.toLocaleString('en-IN')}`;
+    } else if (property.pricing?.basePricePerNight) {
+      return `₹${property.pricing.basePricePerNight.toLocaleString('en-IN')}/night`;
+    } else if (property.pricing?.rentalDetails?.monthlyRent) {
+      return `₹${property.pricing.rentalDetails.monthlyRent.toLocaleString('en-IN')}/mo`;
     } else {
-      return `₹${price}`;
+      return 'Price N/A';
     }
+  };
+
+  const formatPricePerSqft = (property: Property) => {
+    if (property.pricing?.PricePerSqft) {
+      return `₹${property.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft`;
+    }
+    return null;
   };
 
   const getAverageRating = (reviews:Property["reviews"]) =>
@@ -80,7 +95,7 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     >
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: property.images[0].url }}
+          source={{ uri: property.images[0]?.url || '/placeholder.svg?height=400&width=600' }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -88,19 +103,15 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
           <Text style={styles.typeText}>{property.category}</Text>
         </View>
         <TouchableOpacity
-          style={styles.wishlistButton}
+          style={[styles.wishlistButton, { backgroundColor: colors.cardBackground }]}
           onPress={handleWishlistToggle}
-          disabled={isWishlistLoading || isLoading}
+          disabled={isWishlistLoading}
         >
-          {isWishlistLoading || isLoading ? (
-            <ActivityIndicator size="small" color={colors.primaryColor} />
-          ) : (
-            <Heart
-              size={24}
-              color={isFavorite ? colors.primaryColor : colors.grayDark}
-              fill={isFavorite ? colors.primaryColor : 'none'}
-            />
-          )}
+          <Heart
+            size={24}
+            color={isFavorite ? colors.primaryColor : colors.grayDark}
+            fill={isFavorite ? colors.primaryColor : 'none'}
+          />
         </TouchableOpacity>
       </View>
       
@@ -124,8 +135,13 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
         
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: colors.primaryColor }]}>
-            {formatPrice(property.pricing.expectedPrice)}
+            {formatPrice(property)}
           </Text>
+          {formatPricePerSqft(property) && (
+            <Text style={[styles.pricePerSqft, { color: colors.grayDark }]}>
+              {formatPricePerSqft(property)}
+            </Text>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -197,6 +213,10 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  pricePerSqft: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   typeTag: {
     position: 'absolute',

@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    marginTop: 8,
   },
   headerTitle: {
     fontSize: 18,
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
   },
   categoryTag: {
     position: 'absolute',
-    top: 12,
+    top: 20,
     left: 12,
     backgroundColor: 'rgba(124, 58, 237, 0.9)',
     paddingHorizontal: 12,

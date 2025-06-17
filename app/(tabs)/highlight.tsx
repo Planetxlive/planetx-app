@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Video, AVPlaybackStatus, ResizeMode, Audio } from 'expo-av';
 import { useProperties } from '@/context/PropertyContext';
+import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
@@ -28,10 +29,15 @@ import {
   MoreVertical,
   Home,
   Building2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import axios from 'axios';
+import { backendUrl } from '@/lib/uri';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 83 : 60; // Approximate tab bar height
@@ -45,7 +51,8 @@ interface VideoItem {
   location: string;
   price: number;
   priceUnit: string;
-  user: {
+  owner: {
+    id: string;
     name: string;
     avatar: string;
     verified: boolean;
@@ -63,8 +70,10 @@ export default function HighlightScreen() {
   const colors = Colors[colorScheme];
   const router = useRouter();
   const { getAllVideos, toggleFavorite, favorites } = useProperties();
+  const { user } = useAuth();
   const flatListRef = useRef<FlatList>(null);
   const videoRefs = useRef<Record<string, Video>>({});
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -91,32 +100,68 @@ export default function HighlightScreen() {
 
   React.useEffect(() => {
     const loadVideos = async () => {
-      const videoData = await getAllVideos();
-      setVideos(
-        (videoData ?? []).map((property, index) => ({
-          id: property.id,
-          videoUrl: property.video,
-          title: property.title,
-          description: `Amazing ${property.propertyType.toLowerCase()} in ${
-            property.location.city
-          }`,
-          location: `${property.location.locality}, ${property.location.city}`,
-          price: property.pricing.expectedPrice,
-          priceUnit:
-            property.propertyType === 'For Rent' ? 'perMonth' : 'total',
-          user: {
-            name: `User ${index + 1}`,
-            avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
-            verified: Math.random() > 0.5,
-          },
-          stats: {
-            likes: Math.floor(Math.random() * 1000) + 50,
-            comments: Math.floor(Math.random() * 100) + 10,
-            shares: Math.floor(Math.random() * 50) + 5,
-          },
-          timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
-        }))
-      );
+      try {
+        const videoData = await getAllVideos();
+        const token = await AsyncStorage.getItem('accessToken');
+        
+        const videosWithOwners = await Promise.all(
+          (videoData ?? []).map(async (property, index) => {
+            let ownerData = {
+              id: '',
+              name: 'Unknown Owner',
+              avatar: `https://i.pravatar.cc/150?img=${index + 1}`,
+              verified: false
+            };
+
+            try {
+              if (property.user) {
+                const response = await axios.get(`${backendUrl}/auth/get-user/${property.user}`, {
+                  headers: { Authorization: token }
+                });
+                if (response.data) {
+                  ownerData = {
+                    id: response.data._id,
+                    name: response.data.name || 'Unknown Owner',
+                    avatar: response.data.profileImage || `https://i.pravatar.cc/150?img=${index + 1}`,
+                    verified: response.data.role === 'admin'
+                  };
+                }
+              }
+            } catch (error) {
+              console.error('Error fetching owner data:', error);
+            }
+
+            return {
+              id: property.id,
+              videoUrl: property.video,
+              title: property.title,
+              description: `Amazing ${property.propertyType.toLowerCase()} in ${property.location.city}`,
+              location: `${property.location.locality}, ${property.location.city}`,
+              price: property.pricing.expectedPrice,
+              priceUnit: property.propertyType === 'For Rent' ? 'perMonth' : 'total',
+              owner: ownerData,
+              stats: {
+                likes: Math.floor(Math.random() * 1000) + 50,
+                comments: Math.floor(Math.random() * 100) + 10,
+                shares: Math.floor(Math.random() * 50) + 5,
+              },
+              timestamp: `${Math.floor(Math.random() * 24) + 1}h ago`,
+            };
+          })
+        );
+
+        setVideos(videosWithOwners);
+        
+        // Fade in animation
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      } catch (error) {
+        console.error('Error loading videos:', error);
+        Alert.alert('Error', 'Failed to load videos. Please try again.');
+      }
     };
     loadVideos();
   }, []);
@@ -148,6 +193,10 @@ export default function HighlightScreen() {
       console.error('Error toggling play/pause:', error);
       Alert.alert('Error', 'Failed to play/pause video. Please try again.');
     }
+  };
+
+  const toggleAudio = () => {
+    setIsAudioEnabled(!isAudioEnabled);
   };
 
   const onViewableItemsChanged = useRef(
@@ -201,7 +250,12 @@ export default function HighlightScreen() {
     const isInWishlist = favorites.includes(item.id);
 
     return (
-      <View style={styles.videoContainer}>
+      <Animated.View 
+        style={[
+          styles.videoContainer,
+          { opacity: fadeAnim }
+        ]}
+      >
         <TouchableOpacity
           style={styles.videoPlayer}
           onPress={() => handlePlayPause(item.id)}
@@ -236,6 +290,19 @@ export default function HighlightScreen() {
             </View>
           )}
 
+          <TouchableOpacity 
+            style={styles.audioButton}
+            onPress={toggleAudio}
+          >
+            <BlurView intensity={20} style={styles.audioButtonBlur}>
+              {isAudioEnabled ? (
+                <Volume2 size={24} color="white" />
+              ) : (
+                <VolumeX size={24} color="white" />
+              )}
+            </BlurView>
+          </TouchableOpacity>
+
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.2)', 'rgba(0,0,0,0.8)']}
             locations={[0, 0.6, 1]}
@@ -248,14 +315,14 @@ export default function HighlightScreen() {
             <TouchableOpacity style={styles.userProfile}>
               <BlurView intensity={20} style={styles.userAvatarBlur}>
                 <Image
-                  source={{ uri: item.user.avatar }}
+                  source={{ uri: item.owner.avatar }}
                   style={styles.userAvatar}
                 />
               </BlurView>
               <View style={styles.userDetails}>
                 <View style={styles.userNameContainer}>
-                  <Text style={styles.userName}>{item.user.name}</Text>
-                  {item.user.verified && (
+                  <Text style={styles.userName}>{item.owner.name}</Text>
+                  {item.owner.verified && (
                     <View style={styles.verifiedBadge}>
                       <Text style={styles.verifiedText}>✓</Text>
                     </View>
@@ -333,7 +400,7 @@ export default function HighlightScreen() {
             </BlurView>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     );
   };
 
@@ -579,5 +646,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Inter-SemiBold',
     marginRight: 8,
+  },
+  audioButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
+  },
+  audioButtonBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

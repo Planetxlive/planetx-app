@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
@@ -13,12 +12,13 @@ import { useAuth } from '@/context/AuthContext';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, CreditCard as Edit } from 'lucide-react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileDetailsScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const renderInfoItem = (label: string, value: string) => (
     <View style={styles.infoItem}>
@@ -31,11 +31,12 @@ export default function ProfileDetailsScreen() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -44,7 +45,11 @@ export default function ProfileDetailsScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        <ScrollView style={styles.content}>
+        <ScrollView 
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.profileSection}>
             <View
               style={[
@@ -91,7 +96,7 @@ export default function ProfileDetailsScreen() {
             {renderInfoItem('City', user?.city || 'Not set')}
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 }
@@ -105,54 +110,88 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
+  backButton: {
+    padding: 4,
+  },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Inter-SemiBold',
   },
   content: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   profileSection: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 32,
     position: 'relative',
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   editButton: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 32,
     right: '35%',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   infoSection: {
-    padding: 16,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   infoItem: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   infoLabel: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginBottom: 4,
+    marginBottom: 6,
+    opacity: 0.7,
   },
   infoValue: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
   },
   initialsText: {
-    fontSize: 48,
+    fontSize: 52,
     fontFamily: 'Inter-Bold',
   },
 });

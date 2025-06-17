@@ -7,17 +7,20 @@ import {
   SafeAreaView,
   Image,
   ActivityIndicator,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { useProperties, Property } from '@/context/PropertyContext';
 import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function WishlistScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   const { properties, favorites, isLoading } = useProperties();
+  const insets = useSafeAreaInsets();
 
   // Get favorite properties
   const favoriteProperties = properties.filter((property) =>
@@ -29,7 +32,7 @@ export default function WishlistScreen() {
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyStateContainer}>
+    <View style={[styles.emptyStateContainer, { paddingTop: insets.top + 20 }]}>
       <Image
         source={{
           uri: 'https://images.pexels.com/photos/7176026/pexels-photo-7176026.jpeg',
@@ -49,8 +52,15 @@ export default function WishlistScreen() {
   if (isLoading) {
     return (
       <SafeAreaProvider>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.background}
+        />
         <SafeAreaView
-          style={[styles.container, { backgroundColor: colors.background }]}
+          style={[
+            styles.container,
+            { backgroundColor: colors.background, paddingTop: insets.top }
+          ]}
         >
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primaryColor} />
@@ -65,8 +75,15 @@ export default function WishlistScreen() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
+      />
       <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[
+          styles.container,
+          { backgroundColor: colors.background, paddingTop: insets.top }
+        ]}
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Wishlist</Text>
@@ -76,8 +93,12 @@ export default function WishlistScreen() {
           data={favoriteProperties}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            favoriteProperties.length === 0 && { flex: 1 }
+          ]}
           ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -93,23 +114,22 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    marginBottom: 8,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: 'Inter-SemiBold',
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 20,
-    flexGrow: 1,
   },
   emptyStateContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
-    marginTop: 80,
   },
   emptyStateImage: {
     width: 200,
@@ -118,9 +138,9 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   emptyStateTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Inter-SemiBold',
-    marginBottom: 8,
+    marginBottom: 12,
     textAlign: 'center',
   },
   emptyStateText: {

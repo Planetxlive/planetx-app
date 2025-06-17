@@ -51,7 +51,6 @@
     "react-hook-form": "^7.56.4",
     "react-native": "0.79.2",
     "react-native-config": "^1.5.5",
-    "react-native-dark-mode": "^0.2.2",
     "react-native-elements": "^3.4.3",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.24.0",

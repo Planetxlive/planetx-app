@@ -16,8 +16,10 @@ import {
   Platform,
   StatusBar,
   useWindowDimensions,
+  Linking,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { backendUrl } from '@/lib/uri';
 import {
   PropertyCategory,
   useProperties,
@@ -48,6 +50,8 @@ import {
   User,
 } from 'lucide-react-native';
 import { useAuth } from '@/context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 interface PropertyImage {
   src: string;
@@ -162,6 +166,7 @@ interface PropertyData {
 interface Review {
   _id: string;
   user: {
+    _id: string;
     name: string;
   };
   stars: number;
@@ -1193,7 +1198,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                   { backgroundColor: colors.successColor },
                 ]}
                 onPress={() => {
-                  /* Handle WhatsApp */
+                  Linking.openURL(`https://wa.me/${user?.whatsappMobile}`);
                 }}
                 activeOpacity={0.7}
               >
@@ -1207,7 +1212,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                   { backgroundColor: colors.primaryColor },
                 ]}
                 onPress={() => {
-                  /* Handle Call */
+                  Linking.openURL(`tel:${user?.mobile}`);
                 }}
                 activeOpacity={0.7}
               >
@@ -1235,6 +1240,98 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
   );
 };
 
+interface EditReviewModalProps {
+  visible: boolean;
+  onClose: () => void;
+  currentStars: number;
+  currentText: string;
+  onSubmit: (stars: number, text: string) => void;
+}
+
+const EditReviewModal: React.FC<EditReviewModalProps> = ({
+  visible,
+  onClose,
+  currentStars,
+  currentText,
+  onSubmit,
+}) => {
+  const [stars, setStars] = useState(currentStars);
+  const [text, setText] = useState(currentText);
+  const colorScheme = useColorScheme() || 'light';
+  const colors = Colors[colorScheme];
+
+  useEffect(() => {
+    setStars(currentStars);
+    setText(currentText);
+  }, [currentStars, currentText]);
+
+  const handleSubmit = () => {
+    if (!text.trim() || stars < 1 || stars > 5) {
+      Alert.alert('Error', 'Please provide a valid review and rating (1-5).');
+      return;
+    }
+    onSubmit(stars, text);
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+        <View style={[styles.modalContent, { backgroundColor: colors.cardBackground }]}>
+          <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Review</Text>
+          
+          <View style={styles.starContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity
+                key={star}
+                onPress={() => setStars(star)}
+                activeOpacity={0.7}
+              >
+                <Star
+                  size={24}
+                  color={star <= stars ? colors.warningColor : colors.grayLight}
+                  fill={star <= stars ? colors.warningColor : 'transparent'}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TextInput
+            style={[
+              styles.reviewInput,
+              { borderColor: colors.divider, color: colors.text },
+            ]}
+            placeholder="Edit your review..."
+            value={text}
+            onChangeText={setText}
+            multiline
+            placeholderTextColor={colors.grayDark}
+          />
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.grayLight }]}
+              onPress={onClose}
+            >
+              <Text style={[styles.modalButtonText, { color: colors.text }]}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: colors.primaryColor }]}
+              onPress={handleSubmit}
+            >
+              <Text style={[styles.modalButtonText, { color: colors.background }]}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function PropertyDetailScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
@@ -1250,15 +1347,40 @@ export default function PropertyDetailScreen() {
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationText, setNotificationText] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<PropertyImage | null>(
-    null
-  );
+  const [selectedImage, setSelectedImage] = useState<PropertyImage | null>(null);
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showOwnerModal, setShowOwnerModal] = useState(false);
+  const [user, setUser] = useState<{ _id: string; name: string } | null>(null);
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
+  const [editingReview, setEditingReview] = useState<{
+    id: string;
+    stars: number;
+    text: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          const response = await axios.get(`${backendUrl}/auth/get-user`, {
+            headers: { Authorization: token },
+          });
+          setUser({
+            _id: response.data.user._id,
+            name: response.data.user.name
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -1270,6 +1392,16 @@ export default function PropertyDetailScreen() {
         }
         const transformedProperty = transformPropertyData(rawProperty);
         setProperty(transformedProperty);
+        
+        // Fetch reviews for the property
+        const token = await AsyncStorage.getItem('accessToken');
+        const response = await axios.get(
+          `${backendUrl}/properties/reviews/${id}`,
+          {
+            headers: { Authorization: token },
+          }
+        );
+        setReviews(response.data.reviews);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -1322,7 +1454,7 @@ export default function PropertyDetailScreen() {
     setShowShareOptions(false);
   };
 
-  const handleSubmitNotification = () => {
+  const handleSubmitNotification = async () => {
     if (!notificationTitle.trim() || !notificationText.trim()) {
       Alert.alert(
         'Error',
@@ -1331,76 +1463,142 @@ export default function PropertyDetailScreen() {
       return;
     }
 
-    Alert.alert('Success', 'Notification sent successfully!');
-    setShowNotify(false);
-    setNotificationTitle('');
-    setNotificationText('');
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'Please log in to send notifications.');
+        return;
+      }
+
+      const response = await axios.post(
+        `${backendUrl}/properties/post-notifications`,
+        {
+          propertyId: id,
+          title: notificationTitle,
+          text: notificationText,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (response.status === 201) {
+        Alert.alert('Success', 'Notification sent successfully!');
+        setShowNotify(false);
+        setNotificationTitle('');
+        setNotificationText('');
+      }
+    } catch (error: any) {
+      console.error('Error sending notification:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to send notification.'
+      );
+    }
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!userRating || !reviewText.trim()) {
       Alert.alert('Error', 'Please provide a rating and review text.');
       return;
     }
 
-    const newReview: Review = {
-      _id: Math.random().toString(36).substring(2, 11),
-      user: { name: 'Anonymous' },
-      stars: userRating,
-      text: reviewText,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'Please log in to submit a review.');
+        return;
+      }
 
-    setReviews([...reviews, newReview]);
-    setUserRating(0);
-    setReviewText('');
-    Alert.alert('Success', 'Review submitted successfully!');
+      const response = await axios.post(
+        `${backendUrl}/properties/add-review`,
+        {
+          propertyId: id,
+          stars: userRating,
+          text: reviewText,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (response.status === 201) {
+        // Add the user information to the review before adding it to the state
+        const newReview = {
+          ...response.data.review,
+          user: {
+            _id: user?._id || '',
+            name: user?.name || 'Anonymous'
+          }
+        };
+        setReviews([newReview, ...reviews]);
+        setUserRating(0);
+        setReviewText('');
+        Alert.alert('Success', 'Review submitted successfully!');
+      }
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.error || 'Failed to submit review.'
+      );
+    }
   };
 
-  const handleEditReview = (
+  const handleEditReview = async (
     reviewId: string,
     currentStars: number,
     currentText: string
   ) => {
-    Alert.prompt(
-      'Edit Review',
-      'Edit your review:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: (newText) => {
-            if (!newText) return;
-            const newStars = parseInt(
-              prompt('Edit your rating (1-5):', currentStars.toString()) || '0'
-            );
-            if (!newText || isNaN(newStars) || newStars < 1 || newStars > 5) {
-              Alert.alert(
-                'Error',
-                'Invalid input. Please provide a valid review and rating (1-5).'
-              );
-              return;
-            }
-            setReviews(
-              reviews.map((review) =>
-                review._id === reviewId
-                  ? { ...review, stars: newStars, text: newText }
-                  : review
-              )
-            );
-            Alert.alert('Success', 'Review updated successfully!');
-          },
-        },
-      ],
-      'plain-text',
-      currentText
-    );
+    setEditingReview({
+      id: reviewId,
+      stars: currentStars,
+      text: currentText,
+    });
   };
 
-  const handleDeleteReview = (reviewId: string) => {
+  const handleEditSubmit = async (stars: number, text: string) => {
+    if (!editingReview) return;
+
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        Alert.alert('Error', 'Please log in to edit your review.');
+        return;
+      }
+
+      const response = await axios.patch(
+        `${backendUrl}/properties/edit-review/${editingReview.id}`,
+        {
+          stars,
+          text,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      if (response.status === 200) {
+        setReviews(
+          reviews.map((review) =>
+            review._id === editingReview.id
+              ? { ...review, stars, text }
+              : review
+          )
+        );
+        setEditingReview(null);
+        Alert.alert('Success', 'Review updated successfully!');
+      }
+    } catch (error: any) {
+      console.error('Error updating review:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Failed to update review.'
+      );
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
     Alert.alert(
       'Confirm Delete',
       'Are you sure you want to delete this review?',
@@ -1409,9 +1607,32 @@ export default function PropertyDetailScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setReviews(reviews.filter((review) => review._id !== reviewId));
-            Alert.alert('Success', 'Review deleted successfully!');
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('accessToken');
+              if (!token) {
+                Alert.alert('Error', 'Please log in to delete your review.');
+                return;
+              }
+
+              const response = await axios.delete(
+                `${backendUrl}/properties/delete-review/${reviewId}`,
+                {
+                  headers: { Authorization: token },
+                }
+              );
+
+              if (response.status === 200) {
+                setReviews(reviews.filter((review) => review._id !== reviewId));
+                Alert.alert('Success', 'Review deleted successfully!');
+              }
+            } catch (error: any) {
+              console.error('Error deleting review:', error);
+              Alert.alert(
+                'Error',
+                error.response?.data?.message || 'Failed to delete review.'
+              );
+            }
           },
         },
       ]
@@ -1809,40 +2030,42 @@ export default function PropertyDetailScreen() {
                     >
                       {item.text}
                     </Text>
-                    <View style={styles.reviewActions}>
-                      <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() =>
-                          handleEditReview(item._id, item.stars, item.text)
-                        }
-                        activeOpacity={0.7}
-                      >
-                        <Edit size={16} color={colors.primaryColor} />
-                        <Text
-                          style={[
-                            styles.actionText,
-                            { color: colors.primaryColor },
-                          ]}
+                    {user && item.user?._id === user._id && (
+                      <View style={styles.reviewActions}>
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() =>
+                            handleEditReview(item._id, item.stars, item.text)
+                          }
+                          activeOpacity={0.7}
                         >
-                          Edit
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => handleDeleteReview(item._id)}
-                        activeOpacity={0.7}
-                      >
-                        <Trash size={16} color={colors.errorColor} />
-                        <Text
-                          style={[
-                            styles.actionText,
-                            { color: colors.errorColor },
-                          ]}
+                          <Edit size={16} color={colors.primaryColor} />
+                          <Text
+                            style={[
+                              styles.actionText,
+                              { color: colors.primaryColor },
+                            ]}
+                          >
+                            Edit
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() => handleDeleteReview(item._id)}
+                          activeOpacity={0.7}
                         >
-                          Delete
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                          <Trash size={16} color={colors.errorColor} />
+                          <Text
+                            style={[
+                              styles.actionText,
+                              { color: colors.errorColor },
+                            ]}
+                          >
+                            Delete
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 )}
                 keyExtractor={(item) => item._id}
@@ -2145,6 +2368,13 @@ export default function PropertyDetailScreen() {
             setShowOwnerModal(false);
             setShowNotify(true);
           }}
+        />
+        <EditReviewModal
+          visible={editingReview !== null}
+          onClose={() => setEditingReview(null)}
+          currentStars={editingReview?.stars || 0}
+          currentText={editingReview?.text || ''}
+          onSubmit={handleEditSubmit}
         />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -2601,6 +2831,39 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Inter-SemiBold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 10,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
   },
   modalCloseButton: {
     position: 'absolute',

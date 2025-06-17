@@ -6,32 +6,58 @@ import {
   StyleSheet,
   Appearance,
   SafeAreaView,
+  TouchableOpacity,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 // Import Privacy component if available
 // import Privacy from './Privacy';
 
 const TermsAndConditions = () => {
   const colorScheme = useColorScheme() || 'light';
   const isDarkMode = colorScheme === 'dark';
+  const router = useRouter();
 
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: isDarkMode ? '#121212' : '#f5f5f5',
+      paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: isDarkMode ? '#333333' : '#e0e0e0',
+      backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+    },
+    backButton: {
+      padding: 8,
+      marginRight: 8,
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: isDarkMode ? '#ffffff' : '#000000',
+    },
+    contentContainer: {
+      padding: 16,
     },
     title: {
       fontSize: 24,
       fontWeight: '600',
-      marginLeft: 8,
       marginBottom: 8,
       color: isDarkMode ? '#ffffff' : '#000000',
     },
     lastUpdated: {
       fontSize: 14,
       color: isDarkMode ? '#aaaaaa' : '#6C696A',
-      marginLeft: 8,
       marginBottom: 16,
     },
     cardContainer: {
@@ -93,7 +119,20 @@ const TermsAndConditions = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={dynamicStyles.container}>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <View style={dynamicStyles.header}>
+          <TouchableOpacity
+            style={dynamicStyles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={isDarkMode ? '#ffffff' : '#000000'}
+            />
+          </TouchableOpacity>
+          <Text style={dynamicStyles.headerTitle}>Terms & Conditions</Text>
+        </View>
+        <ScrollView contentContainerStyle={dynamicStyles.contentContainer}>
           <Text style={dynamicStyles.title}>Terms & Conditions</Text>
           <Text style={dynamicStyles.lastUpdated}>
             Last Updated: January 1, 2025

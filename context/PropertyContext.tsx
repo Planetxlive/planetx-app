@@ -38,10 +38,15 @@ export interface Property {
   video: string;
   reviews: any[]; // Can be typed further if structure is known
   pricing: {
-    expectedPrice: number;
-    PricePerSqft: number;
-    maintenanceFrequency: 'monthly' | 'quarterly' | 'yearly' | string;
-    maintenancePrice: number;
+    expectedPrice?: number;
+    PricePerSqft?: number;
+    maintenanceFrequency?: 'monthly' | 'quarterly' | 'yearly' | string;
+    maintenancePrice?: number;
+    price?: { amount: number };
+    monthlyRent?: number;
+    finalPrice?: number;
+    basePricePerNight?: number;
+    rentalDetails?: { monthlyRent: number };
   };
   description: string;
   amenities: {

@@ -3,9 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
@@ -14,7 +15,7 @@ import PropertyCard from '@/components/PropertyCard';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft, Plus } from 'lucide-react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MyPropertyScreen() {
   const colorScheme = useColorScheme();
@@ -29,16 +30,23 @@ export default function MyPropertyScreen() {
       setUserProperties(propertiesRes);
     };
     fetchData();
-    console.log(userProperties);
-  });
+  }, []); // Added dependency array to prevent infinite loop
 
   return (
     <SafeAreaProvider>
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background }]}
+        edges={['top', 'right', 'left']}
       >
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.background}
+        />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -82,19 +90,27 @@ export default function MyPropertyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ? StatusBar.currentHeight - 16 : 0 : 0,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    marginTop: 0,
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Inter-SemiBold',
+    flex: 1,
+    textAlign: 'center',
   },
   addButton: {
     width: 40,
@@ -102,9 +118,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: -8,
   },
   listContent: {
     padding: 16,
+    flexGrow: 1,
   },
   emptyState: {
     flex: 1,
@@ -116,11 +134,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     marginBottom: 16,
+    textAlign: 'center',
   },
   addPropertyButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   addPropertyButtonText: {
     color: 'white',

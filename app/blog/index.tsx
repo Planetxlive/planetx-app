@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    marginTop: 8,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -215,6 +216,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 12,
+    padding: 4,
   },
   headerTitle: {
     fontSize: 24,
@@ -229,9 +231,11 @@ const styles = StyleSheet.create({
   },
   categories: {
     paddingVertical: 12,
+    marginTop: 4,
   },
   categoriesContent: {
     paddingHorizontal: 16,
+    paddingBottom: 4,
   },
   categoryButton: {
     paddingHorizontal: 16,

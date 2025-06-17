@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
   Animated,
-  Dimensions,
+  StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -161,10 +161,12 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView>
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
+      />
+      <SafeAreaView style={styles.safeArea}>
         <BlurView intensity={80} style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -218,13 +220,17 @@ export default function NotificationsScreen() {
           />
         )}
       </SafeAreaView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     flexDirection: 'row',
