@@ -51,7 +51,7 @@ export default function RootLayout() {
               
               <SafeAreaProvider>
                 <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="+not-found" />
+                  <Stack.Screen name="index" />
                 </Stack>
                 <StatusBar style="auto" />
               </SafeAreaProvider>
