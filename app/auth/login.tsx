@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import { Phone } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { storage } from '@/utils/storage';
 
 export default function LoginScreen() {
   const colorScheme = useColorScheme() || 'light';
@@ -27,24 +28,29 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    checkOnboarding();
+  }, []);
+
+  const checkOnboarding = async () => {
+    const isCompleted = await storage.isOnboardingCompleted();
+    if (!isCompleted) {
+      router.replace('/onboarding');
+    }
+  };
+
   const handleSendOTP = async () => {
-    // Simple validation
     if (!phoneNumber || phoneNumber.length < 10) {
       setError('Please enter a valid phone number');
       return;
     }
-
     setError('');
     setIsLoading(true);
-
     try {
-      // Format phone number with country code if needed
       const formattedNumber = phoneNumber.startsWith('+')
         ? phoneNumber
         : `+91${phoneNumber.replace(/\s+/g, '')}`;
-
       await signIn(formattedNumber);
-      // Navigation to OTP screen is handled in the signIn function
     } catch (error) {
       setError('Failed to send OTP. Please try again.');
       console.error(error);
@@ -64,64 +70,43 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
         >
-          <View
-            style={[styles.container, { backgroundColor: colors.background }]}
-          >
-            <View style={styles.logoContainer}>
-              <View
-                style={[
-                  styles.logoCircle,
-                  { backgroundColor: colors.grayLight },
-                ]}
-              >
-                <Logo width={80} height={80} />
+          <View style={[styles.container, { backgroundColor: colors.background }]}>  
+            <View style={styles.centerContent}>
+              <View style={styles.logoContainer}>
+                <View style={[styles.logoCircle, { backgroundColor: colors.grayLight }]}>  
+                  <Logo width={160} height={160} />
+                </View>
+                <Text style={[styles.title, { color: colors.text }]}>Login</Text>
+                <Text style={[styles.subtitle, { color: colors.grayDark }]}>Login to continue using the app</Text>
               </View>
-              <Text style={[styles.title, { color: colors.text }]}>Login</Text>
-              <Text style={[styles.subtitle, { color: colors.grayDark }]}>
-                Login to continue using the app
-              </Text>
-            </View>
 
-            <View style={styles.formContainer}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Mobile number
-              </Text>
-              <View style={styles.phoneInputContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.countryCode,
-                    { borderColor: colors.grayMedium },
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  <Image
-                    source={{ uri: 'https://flagcdn.com/w80/in.png' }}
-                    style={styles.flagIcon}
-                  />
-                  <Text
-                    style={[styles.countryCodeText, { color: colors.text }]}
-                  >
-                    +91
-                  </Text>
-                </TouchableOpacity>
-                <Input
-                  placeholder="Enter Mobile Number"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  keyboardType="phone-pad"
-                  style={styles.phoneInput}
-                  leftIcon={<Phone size={20} color={colors.grayDark} />}
-                  error={error}
+              <View style={styles.formContainer}>
+                <Text style={[styles.label, { color: colors.text }]}>Mobile number</Text>
+                <View style={styles.inputWrapper}>
+                  <View style={styles.phoneInputUnified}>
+                    <View style={styles.countryCodeContainer}>
+                      <Image source={{ uri: 'https://flagcdn.com/w80/in.png' }} style={styles.flagIcon} />
+                      <Text style={[styles.countryCodeText, { color: colors.text }]}>+91</Text>
+                    </View>
+                    <Input
+                      placeholder="Enter Mobile Number"
+                      value={phoneNumber}
+                      onChangeText={setPhoneNumber}
+                      keyboardType="phone-pad"
+                      style={styles.phoneInputUnifiedInput}
+                      leftIcon={<Phone size={20} color={colors.grayDark} />}
+                      error={error}
+                    />
+                  </View>
+                </View>
+                <Button
+                  title="Send OTP"
+                  onPress={handleSendOTP}
+                  loading={isLoading}
+                  fullWidth
+                  style={styles.button}
                 />
               </View>
-
-              <Button
-                title="Send OTP"
-                onPress={handleSendOTP}
-                loading={isLoading}
-                fullWidth
-                style={styles.button}
-              />
             </View>
           </View>
         </ScrollView>
@@ -133,54 +118,72 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
+    minHeight: '100%',
   },
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100%',
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 60,
     marginBottom: 40,
   },
   logoCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
+    marginBottom: 0,
   },
   formContainer: {
     width: '100%',
+    marginTop: 32,
   },
   label: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
     marginBottom: 8,
+    marginLeft: 4,
   },
-  phoneInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  inputWrapper: {
     marginBottom: 24,
   },
-  countryCode: {
+  phoneInputUnified: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: '#E0E0E0',
+    paddingHorizontal: 12,
+    height: 56,
+  },
+  countryCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 8,
+    borderRightWidth: 1,
+    borderRightColor: '#E0E0E0',
     marginRight: 8,
   },
   flagIcon: {
@@ -192,10 +195,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Medium',
   },
-  phoneInput: {
+  phoneInputUnifiedInput: {
     flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    height: 56,
+    paddingVertical: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    alignSelf: 'center',
   },
   button: {
     marginTop: 8,
+    borderRadius: 12,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#8000FF',
   },
 });

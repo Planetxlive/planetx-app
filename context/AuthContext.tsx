@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosResponse } from 'axios';
 import { Use } from 'react-native-svg';
 import { backendUrl } from '@/lib/uri';
+import { storage } from '@/utils/storage';
 
 // type User = {
 //   id: string;
@@ -163,6 +164,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await AsyncStorage.removeItem('accessToken');
+      await storage.clearOnboardingStatus();
       setUser(null);
       router.replace('/auth/login');
     } catch (error) {

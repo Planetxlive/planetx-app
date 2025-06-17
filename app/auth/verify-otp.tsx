@@ -7,6 +7,10 @@ import {
   Platform,
   TouchableOpacity,
   SafeAreaView,
+  Modal,
+  Image,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { router, useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
@@ -17,6 +21,8 @@ import useColorScheme from '@/hooks/useColorScheme';
 import { ArrowLeft } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export default function VerifyOTPScreen() {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme] || Colors['light'];
@@ -26,6 +32,7 @@ export default function VerifyOTPScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isResending, setIsResending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -49,15 +56,16 @@ export default function VerifyOTPScreen() {
       setError('Please enter a valid 4-digit OTP');
       return;
     }
-
     setError('');
     setIsLoading(true);
-
     try {
       const success = await verifyOTP(otp);
       if (success) {
-        // If verification is successful, user will be redirected to main app
-        router.replace('/');
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.replace('/');
+        }, 1800);
       } else {
         setError('Invalid OTP. Please try again.');
       }
@@ -94,98 +102,94 @@ export default function VerifyOTPScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-              <ArrowLeft size={24} color={colors.text} />
-              <Text style={[styles.backText, { color: colors.text }]}>
-                OTP verification
-              </Text>
-            </TouchableOpacity>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.container}>
+              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+                <ArrowLeft size={24} color={colors.text} />
+                <Text style={[styles.backText, { color: colors.text }]}>OTP verification</Text>
+              </TouchableOpacity>
 
-            <View style={styles.content}>
-              <View style={styles.illustrationContainer}>
-                <View style={styles.illustration}>
-                  {/* Illustration can be an SVG or Image */}
-                  <View
-                    style={[
-                      styles.illustrationCircle,
-                      { backgroundColor: colors.grayLight },
-                    ]}
+              <View style={styles.content}>
+                {/* Illustration with image */}
+                <View style={styles.illustrationContainer}>
+                  <Image
+                    source={require('@/assets/images/verify-otp.png')}
+                    style={styles.illustrationImage}
+                    resizeMode="contain"
+                  />
+                </View>
+
+                <Text style={[styles.message, { color: colors.grayDark }]}>We've sent a Verification Code to</Text>
+                <Text style={[styles.phoneNumber, { color: colors.text }]}>{pendingPhoneNumber}</Text>
+
+                <View style={styles.otpContainer}>
+                  <OTPInput
+                    length={4}
+                    value={otp}
+                    onChange={setOtp}
+                    error={error}
+                    style={styles.otpInputBoxes}
+                  />
+                  {error ? (
+                    <Text style={styles.otpErrorText}>{error}</Text>
+                  ) : null}
+                </View>
+
+                <Button
+                  title="Verify OTP"
+                  onPress={handleVerifyOTP}
+                  loading={isLoading}
+                  fullWidth
+                  style={styles.button}
+                />
+
+                <View style={styles.timerContainer}>
+                  <Text style={styles.timerText}>
+                    Code expired in{' '}
+                    <Text style={styles.timerCountdown}>{formatTime(timeLeft)}</Text>
+                  </Text>
+                </View>
+
+                <View style={styles.resendContainer}>
+                  <Text style={styles.resendText}>Didn't receive the OTP? </Text>
+                  <TouchableOpacity
+                    onPress={handleResendOTP}
+                    disabled={timeLeft > 0 || isResending}
                   >
-                    <View
-                      style={[
-                        styles.checkmark,
-                        { backgroundColor: colors.primaryColor },
-                      ]}
+                    <Text
+                      style={
+                        timeLeft > 0 || isResending
+                          ? styles.resendLinkDisabled
+                          : styles.resendLink
+                      }
                     >
-                      <Text style={styles.checkmarkText}>✓</Text>
-                    </View>
-                  </View>
+                      Resend OTP
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
 
-              <Text style={[styles.message, { color: colors.grayDark }]}>
-                We've sent a Verification Code to
-              </Text>
-              <Text style={[styles.phoneNumber, { color: colors.text }]}>
-                {pendingPhoneNumber}
-              </Text>
-
-              <View style={styles.otpContainer}>
-                <OTPInput
-                  length={4}
-                  value={otp}
-                  onChange={setOtp}
-                  error={error}
-                />
-              </View>
-
-              <Button
-                title="Verify OTP"
-                onPress={handleVerifyOTP}
-                loading={isLoading}
-                fullWidth
-                style={styles.button}
-              />
-
-              <View style={styles.timerContainer}>
-                <Text style={[styles.timerText, { color: colors.grayDark }]}>
-                  Code expired in{' '}
-                  <Text
-                    style={{
-                      color: timeLeft === 0 ? colors.errorColor : '#FF6B6B',
-                    }}
-                  >
-                    {formatTime(timeLeft)}
-                  </Text>
-                </Text>
-              </View>
-
-              <View style={styles.resendContainer}>
-                <Text style={[styles.resendText, { color: colors.grayDark }]}>
-                  Didn't receive the OTP?{' '}
-                </Text>
-                <TouchableOpacity
-                  onPress={handleResendOTP}
-                  disabled={timeLeft > 0 || isResending}
-                >
-                  <Text
-                    style={[
-                      styles.resendLink,
-                      {
-                        color:
-                          timeLeft > 0 || isResending
-                            ? colors.grayDark
-                            : colors.primaryColor,
-                      },
-                    ]}
-                  >
-                    Resend OTP
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {/* Success Modal */}
+              <Modal
+                visible={showSuccess}
+                transparent
+                animationType="fade"
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.successModal}>
+                    <View style={styles.successCircle}>
+                      <Text style={styles.successCheck}>✔️</Text>
+                    </View>
+                    <Text style={styles.successTitle}>Success</Text>
+                    <Text style={styles.successMessage}>You have successfully logged in!</Text>
+                  </View>
+                </View>
+              </Modal>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -196,6 +200,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#fff',
   },
   backButton: {
     flexDirection: 'row',
@@ -210,71 +215,140 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   illustrationContainer: {
-    marginVertical: 32,
+    marginVertical: 16,
     alignItems: 'center',
   },
-  illustration: {
-    width: 180,
-    height: 180,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  illustrationCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkmark: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkmarkText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
+  illustrationImage: {
+    height: SCREEN_HEIGHT * 0.4,
+    width: SCREEN_WIDTH * 0.8,
+    marginBottom: 8,
+    alignSelf: 'center',
   },
   message: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   phoneNumber: {
     fontSize: 18,
     fontFamily: 'Inter-SemiBold',
-    marginBottom: 32,
+    marginBottom: 24,
+    textAlign: 'center',
   },
   otpContainer: {
     width: '100%',
+    alignItems: 'center',
     marginBottom: 24,
+  },
+  otpInputBoxes: {
+    width: '100%',
+    marginBottom: 0,
+  },
+  otpErrorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    fontFamily: 'Inter-Medium',
   },
   button: {
     marginBottom: 16,
+    borderRadius: 12,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#8000FF',
   },
   timerContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   timerText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    color: '#888',
+    textAlign: 'center',
+  },
+  timerCountdown: {
+    color: '#FF3B30',
+    fontFamily: 'Inter-SemiBold',
   },
   resendContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   resendText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    color: '#888',
   },
   resendLink: {
     fontSize: 14,
     fontFamily: 'Inter-Medium',
+    color: '#8000FF',
+    textDecorationLine: 'underline',
+  },
+  resendLinkDisabled: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#bbb',
+    textDecorationLine: 'underline',
+  },
+  // Success Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successModal: {
+    width: 320,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  successCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#4CD964',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  successCheck: {
+    fontSize: 48,
+    color: '#fff',
+  },
+  successTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 8,
+    color: '#222',
+    textAlign: 'center',
+  },
+  successMessage: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    color: '#666',
+    textAlign: 'center',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    minHeight: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

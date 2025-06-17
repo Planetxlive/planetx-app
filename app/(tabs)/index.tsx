@@ -6,6 +6,7 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import {
   SafeAreaProvider,
@@ -174,7 +175,7 @@ export default function HomeScreen() {
           decelerationRate="fast"
           renderItem={({ item }) => (
             <View style={styles.horizontalCard}>
-              <GymCard gym={item} horizontal />
+              <GymCard gym={item}  />
             </View>
           )}
           keyExtractor={(item) => item._id}
@@ -219,7 +220,7 @@ export default function HomeScreen() {
           decelerationRate="fast"
           renderItem={({ item }) => (
             <View style={styles.horizontalCard}>
-              <ParkingCard parkingSpot={item} horizontal />
+              <ParkingCard parkingSpot={item}  />
             </View>
           )}
           keyExtractor={(item) => item.id}
@@ -290,9 +291,21 @@ export default function HomeScreen() {
         >
           <View style={styles.banner}>
             <View style={styles.bannerContent}>
-              <Text style={styles.bannerTitle}>Find your</Text>
-              <Text style={styles.bannerTitle}>Project</Text>
-              <Text style={styles.bannerTitle}>with PLANET X</Text>
+              <View style={styles.bannerTextContainer}>
+                <Text style={styles.bannerTitle}>Find your</Text>
+                <Text style={styles.bannerTitle}>Project</Text>
+                <Text style={styles.bannerTitle}>with PLANET X</Text>
+                <View style={styles.bannerDots}>
+                  {/* <View style={styles.dot} />
+                  <View style={styles.dot} /> */}
+                  {/* <View style={[styles.dot, styles.dotActive]} /> */}
+                </View>
+              </View>
+              <Image
+                source={require('@/assets/images/building.png')}
+                style={styles.bannerImage}
+                resizeMode="cover"
+              />
             </View>
           </View>
 
@@ -488,23 +501,55 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   banner: {
-    height: 140,
+    height: 160,
     marginHorizontal: 8,
     marginTop: 12,
     backgroundColor: '#7C3AED',
-    borderRadius: 12,
+    borderRadius: 24,
     overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'stretch',
   },
   bannerContent: {
     flex: 1,
-    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  bannerTextContainer: {
+    flex: 1.2,
     justifyContent: 'center',
+    paddingLeft: 20,
+    zIndex: 2,
   },
   bannerTitle: {
     fontSize: 22,
     color: 'white',
     fontFamily: 'Inter-Bold',
     lineHeight: 28,
+  },
+  bannerImage: {
+    flex: 1,
+    height: '100%',
+    width: undefined,
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
+    alignSelf: 'stretch',
+  },
+  bannerDots: {
+    flexDirection: 'row',
+    marginTop: 18,
+    gap: 10,
+  },
+  dot: {
+    width: 36,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#fff',
+    opacity: 0.4,
+  },
+  dotActive: {
+    opacity: 1,
+    backgroundColor: '#6EE7B7',
   },
   listingTypesContainer: {
     marginTop: 16,

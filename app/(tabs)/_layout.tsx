@@ -13,6 +13,7 @@ import {
   Home as HomeIcon,
   Car,
   Dumbbell,
+  House,
 } from 'lucide-react-native';
 import {
   View,
@@ -244,7 +245,7 @@ export default function TabLayout() {
             options={{
               title: 'Home',
               tabBarIcon: ({ color, size }) => (
-                <Home size={size} color={color} />
+                <House size={size} color={color} />
               ),
             }}
           />
