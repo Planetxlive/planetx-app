@@ -236,25 +236,22 @@ export default function CreateBlogPost() {
           style={{ flex: 1 }}
           keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 24}
         >
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: colors.background, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 4, zIndex: 20 }] }>
             <TouchableOpacity onPress={() => router.back()}>
               <ArrowLeft size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Create New Post
-            </Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Create New Post</Text>
             <View style={{ width: 24 }} />
           </View>
+          <View style={{ height: 1, backgroundColor: '#E5E7EB', width: '100%' }} />
 
           <ScrollView
             style={styles.content}
             contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Category
-              </Text>
+            <View style={[styles.section, { marginTop: 8 }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Category</Text>
               <View style={styles.categoryContainer}>
                 {CATEGORIES.map((category) => (
                   <TouchableOpacity
@@ -299,10 +296,8 @@ export default function CreateBlogPost() {
               true
             )}
 
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Location
-              </Text>
+            <View style={[styles.section, { marginTop: 8 }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Location</Text>
               {renderLocationField('houseNumber', 'House Number (Optional)', false)}
               {renderLocationField('apartment', 'Apartment (Optional)', false)}
               {renderLocationField('subLocality', 'Sub Locality (Optional)', false)}
@@ -311,10 +306,8 @@ export default function CreateBlogPost() {
               {renderLocationField('state', 'State', true)}
             </View>
 
-            <View style={styles.section}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Add Image
-              </Text>
+            <View style={[styles.section, { marginTop: 8 }]}>
+              <Text style={[styles.label, { color: colors.text }]}>Add Image</Text>
               <TouchableOpacity
                 style={styles.imageUploadEnhanced}
                 onPress={handleImagePick}
@@ -345,7 +338,21 @@ export default function CreateBlogPost() {
             )}
           </ScrollView>
 
-          <View style={[styles.footerEnhanced, { paddingBottom: insets.bottom || 16 }] }>
+          <View style={[
+            styles.footerEnhanced,
+            {
+              paddingBottom: insets.bottom || 16,
+              backgroundColor: 'rgba(255,255,255,0.96)',
+              borderTopWidth: 1,
+              borderTopColor: '#EEEEEE',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
+              elevation: 8,
+              zIndex: 10,
+            },
+          ]}>
             <Button
               title={isLoading ? 'Creating Post...' : 'Create Post'}
               onPress={handleSubmit}

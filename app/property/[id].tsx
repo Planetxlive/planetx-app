@@ -473,7 +473,7 @@ const transformPropertyData = (data: PropertyData): Property => {
           icon: 'tag',
           label: pricing.PricePerSqft
             ? `₹${pricing.PricePerSqft.toLocaleString('en-IN')} / sq.ft.`
-            : 'N/A',
+            : ' ',
         },
         {
           icon: 'home',
@@ -809,12 +809,12 @@ const transformPropertyData = (data: PropertyData): Property => {
       : 'Price N/A',
     pricePerSqft: data.pricing && data.pricing.PricePerSqft
       ? `₹${data.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft`
-      : 'N/A',
-    isNegotiable: true,
+      : ' ',
+    isNegotiable: false,
     tags: [
       category,
       data.availabilityStatus || 'N/A',
-      data.furnishingStatus || 'Unfurnished',
+      data.furnishingStatus || '',
     ].filter(Boolean),
     features,
     owner,
@@ -2228,22 +2228,21 @@ export default function PropertyDetailScreen() {
                 <Text style={[styles.pricePerSqft, { color: colors.grayDark }]}>
                   {property.pricePerSqft}
                 </Text>
-                {property.isNegotiable && (
-                  <View
+                <View
+                  style={[
+                    styles.negotiableTag,
+                    { backgroundColor: property.isNegotiable ? colors.successColor + '20' : colors.errorColor + '20' },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.negotiableTag,
-                      { backgroundColor: colors.successColor + '20' },
+                      styles.negotiableText,
+                      { color: property.isNegotiable ? colors.successColor : colors.errorColor },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.negotiableText,
-                        { color: colors.successColor },
-                      ]}
-                    >
-                      Negotiable
-                    </Text>
-                  </View>
+                    {property.isNegotiable ? 'Negotiable' : 'Non-Negotiable'}
+                  </Text>
+                </View>
                 )}
               </View>
               <View style={styles.tagContainer}>
