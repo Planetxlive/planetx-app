@@ -22,7 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Button from '@/components/ui/Button';
 import { uploadPropertyImages } from '@/lib/s3';
 import { backendUrl } from '@/lib/uri';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 const BACKEND_URL = backendUrl || 'http://localhost:3001';
 
 const CATEGORIES: BlogCategory[] = [
@@ -70,6 +70,7 @@ const validateForm = (formData: any) => {
 };
 
 export default function CreateBlogPost() {
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme];
   const { addPost } = useBlog();
@@ -211,10 +212,9 @@ export default function CreateBlogPost() {
         >
           <View
             style={{
-              display: 'flex',
+              flex: 1,
               justifyContent: 'center',
               alignItems: 'center',
-              height: '100%',
             }}
           >
             <Text
@@ -234,6 +234,7 @@ export default function CreateBlogPost() {
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 24}
         >
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
@@ -245,7 +246,11 @@ export default function CreateBlogPost() {
             <View style={{ width: 24 }} />
           </View>
 
-          <ScrollView style={styles.content}>
+          <ScrollView
+            style={styles.content}
+            contentContainerStyle={{ paddingBottom: 120 + insets.bottom }}
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Category
@@ -258,6 +263,12 @@ export default function CreateBlogPost() {
                       styles.categoryButton,
                       formData.category === category && {
                         backgroundColor: colors.primaryColor,
+                        borderColor: colors.primaryColor,
+                        shadowColor: colors.primaryColor,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: 2,
                       },
                     ]}
                     onPress={() => setFormData({ ...formData, category })}
@@ -265,7 +276,7 @@ export default function CreateBlogPost() {
                     <Text
                       style={[
                         styles.categoryButtonText,
-                        formData.category === category && { color: 'white' },
+                        formData.category === category && { color: 'white', fontWeight: '700' },
                       ]}
                     >
                       {category}
@@ -278,30 +289,23 @@ export default function CreateBlogPost() {
               )}
             </View>
 
-            {renderFormField('title', 'Title', 'Enter post title')}
+            {renderFormField('title', 'Title', 'Enter post title', false, 1, true)}
             {renderFormField(
               'description',
               'Description',
               'Provide detailed information',
               true,
-              6
+              6,
+              true
             )}
 
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Location
               </Text>
-              {renderLocationField(
-                'houseNumber',
-                'House Number (Optional)',
-                false
-              )}
+              {renderLocationField('houseNumber', 'House Number (Optional)', false)}
               {renderLocationField('apartment', 'Apartment (Optional)', false)}
-              {renderLocationField(
-                'subLocality',
-                'Sub Locality (Optional)',
-                false
-              )}
+              {renderLocationField('subLocality', 'Sub Locality (Optional)', false)}
               {renderLocationField('locality', 'Locality', true)}
               {renderLocationField('city', 'City', true)}
               {renderLocationField('state', 'State', true)}
@@ -312,29 +316,21 @@ export default function CreateBlogPost() {
                 Add Image
               </Text>
               <TouchableOpacity
-                style={[
-                  styles.imageUpload,
-                  { backgroundColor: colors.inputBackground },
-                ]}
+                style={styles.imageUploadEnhanced}
                 onPress={handleImagePick}
+                activeOpacity={0.8}
               >
                 {formData.image ? (
                   <Image
                     source={{ uri: formData.image }}
-                    style={styles.uploadedImage}
+                    style={styles.uploadedImageEnhanced}
+                    resizeMode="cover"
                   />
                 ) : (
-                  <>
-                    <ImageIcon size={24} color={colors.grayDark} />
-                    <Text
-                      style={[
-                        styles.imageUploadText,
-                        { color: colors.grayDark },
-                      ]}
-                    >
-                      Choose image
-                    </Text>
-                  </>
+                  <View style={{ alignItems: 'center' }}>
+                    <ImageIcon size={32} color={colors.grayDark} />
+                    <Text style={[styles.imageUploadText, { color: colors.grayDark }]}>Choose image</Text>
+                  </View>
                 )}
               </TouchableOpacity>
             </View>
@@ -342,11 +338,14 @@ export default function CreateBlogPost() {
             {renderFormField(
               'contactInfo',
               'Contact Information',
-              'Email, phone number, or other contact info'
+              'Email, phone number, or other contact info',
+              false,
+              1,
+              true
             )}
           </ScrollView>
 
-          <View style={styles.footer}>
+          <View style={[styles.footerEnhanced, { paddingBottom: insets.bottom || 16 }] }>
             <Button
               title={isLoading ? 'Creating Post...' : 'Create Post'}
               onPress={handleSubmit}
@@ -437,25 +436,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     marginTop: 4,
   },
-  imageUpload: {
-    height: 120,
-    borderRadius: 8,
+  imageUploadEnhanced: {
+    height: 160,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginTop: 8,
+    marginBottom: 8,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   imageUploadText: {
     marginTop: 8,
     fontSize: 14,
     fontFamily: 'Inter-Medium',
   },
-  footer: {
+  footerEnhanced: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff',
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 10,
   },
-  uploadedImage: {
+  uploadedImageEnhanced: {
     width: '100%',
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 16,
   },
 });

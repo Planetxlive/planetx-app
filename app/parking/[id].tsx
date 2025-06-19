@@ -190,197 +190,205 @@ export default function ParkingDetailScreen() {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: 88 }]}
         >
-          <ImageCarousel images={parkingSpot.images} height={250} />
+          <View style={styles.cardContainer}>
+            <ImageCarousel images={parkingSpot.images} height={250} />
 
-          <View style={styles.contentContainer}>
-            <View style={styles.titleContainer}>
-              <View style={styles.typeAndStatus}>
-                <View
-                  style={[
-                    styles.typeTag,
-                    { backgroundColor: getTypeColor(parkingSpot.type) },
-                  ]}
-                >
-                  <Text style={styles.typeText}>
-                    {parkingSpot.type} • {parkingSpot.size}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.statusTag,
-                    {
-                      backgroundColor: getAvailabilityColor(
-                        parkingSpot.isAvailable
-                      ),
-                    },
-                  ]}
-                >
-                  <Text style={styles.statusText}>
-                    {parkingSpot.isAvailable ? 'Available' : 'Occupied'}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[styles.title, { color: colors.text }]}>
-                Parking Spot {parkingSpot.spotNumber}
-              </Text>
-              <View style={styles.locationContainer}>
-                <MapPin size={16} color={colors.grayDark} />
-                <Text style={[styles.location, { color: colors.grayDark }]}>
-                  {parkingSpot.locality}, {parkingSpot.city},{' '}
-                  {parkingSpot.state}
-                </Text>
-              </View>
-              {parkingSpot.sublocality && (
-                <Text style={[styles.subLocation, { color: colors.grayDark }]}>
-                  {parkingSpot.sublocality}
-                  {parkingSpot.areaNumber && ` • ${parkingSpot.areaNumber}`}
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.infoContainer}>
-              {parkingSpot.rating && (
-                <View style={styles.ratingContainer}>
-                  <Star size={16} color="#FFD700" fill="#FFD700" />
-                  <Text style={[styles.ratingText, { color: colors.text }]}>
-                    {parkingSpot.rating}
-                  </Text>
-                </View>
-              )}
-              <View style={styles.sizeContainer}>
-                <Text style={styles.sizeIcon}>
-                  {getSizeIcon(parkingSpot.size)}
-                </Text>
-                <Text style={[styles.sizeText, { color: colors.text }]}>
-                  {parkingSpot.size} size
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.priceContainer}>
-              <Text style={[styles.price, { color: colors.primaryColor }]}>
-                {formatPrice(parkingSpot.hourlyRate)}
-              </Text>
-              <Text style={[styles.priceNote, { color: colors.grayDark }]}>
-                Hourly rate
-              </Text>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Amenities & Features
-              </Text>
-              <View style={styles.featuresGrid}>
-                {amenitiesList.map((amenity) => (
+            <View style={styles.contentContainer}>
+              <View style={styles.titleContainer}>
+                <View style={styles.typeAndStatus}>
                   <View
-                    key={amenity.key}
                     style={[
-                      styles.featureItem,
+                      styles.typeTag,
+                      { backgroundColor: getTypeColor(parkingSpot.type) },
+                    ]}
+                  >
+                    <Text style={styles.typeText}>
+                      {parkingSpot.type} • {parkingSpot.size}
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusTag,
                       {
-                        backgroundColor: amenity.enabled
-                          ? colors.successColor + '20'
-                          : colors.grayLight,
-                        opacity: amenity.enabled ? 1 : 0.5,
+                        backgroundColor: getAvailabilityColor(
+                          parkingSpot.isAvailable
+                        ),
                       },
                     ]}
                   >
-                    <amenity.icon
-                      size={16}
-                      color={
-                        amenity.enabled ? colors.successColor : colors.grayDark
-                      }
-                    />
-                    <Text
-                      style={[
-                        styles.featureText,
-                        {
-                          color: amenity.enabled
-                            ? colors.text
-                            : colors.grayDark,
-                        },
-                      ]}
-                    >
-                      {amenity.label}
+                    <Text style={styles.statusText}>
+                      {parkingSpot.isAvailable ? 'Available' : 'Occupied'}
                     </Text>
-                    {amenity.enabled && (
-                      <Check
-                        size={14}
-                        color={colors.successColor}
-                        style={styles.checkIcon}
-                      />
-                    )}
                   </View>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                Accessibility
-              </Text>
-              <View style={styles.accessibilityContainer}>
-                {accessibilityFeatures.map((feature) => (
-                  <View key={feature.key} style={styles.accessibilityItem}>
-                    <View
-                      style={[
-                        styles.accessibilityIcon,
-                        {
-                          backgroundColor: feature.enabled
-                            ? colors.primaryColor + '20'
-                            : colors.grayLight,
-                        },
-                      ]}
-                    >
-                      <Text style={styles.accessibilityEmoji}>
-                        {feature.key === 'wheelchairAccessible' ? '♿' : '🚪'}
-                      </Text>
-                    </View>
-                    <Text
-                      style={[
-                        styles.accessibilityText,
-                        {
-                          color: feature.enabled
-                            ? colors.text
-                            : colors.grayDark,
-                        },
-                      ]}
-                    >
-                      {feature.label}
-                    </Text>
-                    {feature.enabled && (
-                      <Check size={16} color={colors.successColor} />
-                    )}
-                  </View>
-                ))}
-              </View>
-            </View>
-
-            {parkingSpot.coordinates && (
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  Location Details
+                </View>
+                <Text style={[styles.title, { color: colors.text }]}>
+                  Parking Spot {parkingSpot.spotNumber}
                 </Text>
-                <View style={styles.coordinatesContainer}>
-                  <Navigation size={16} color={colors.primaryColor} />
-                  <Text
-                    style={[styles.coordinatesText, { color: colors.text }]}
-                  >
-                    {parkingSpot.coordinates.latitude.toFixed(6)},{' '}
-                    {parkingSpot.coordinates.longitude.toFixed(6)}
+                <View style={styles.locationContainer}>
+                  <MapPin size={16} color={colors.grayDark} />
+                  <Text style={[styles.location, { color: colors.grayDark }]}>
+                    {parkingSpot.locality}, {parkingSpot.city},{' '}
+                    {parkingSpot.state}
+                  </Text>
+                </View>
+                {parkingSpot.sublocality && (
+                  <Text style={[styles.subLocation, { color: colors.grayDark }]}>
+                    {parkingSpot.sublocality}
+                    {parkingSpot.areaNumber && ` • ${parkingSpot.areaNumber}`}
+                  </Text>
+                )}
+              </View>
+
+              <View style={styles.infoContainer}>
+                {parkingSpot.rating && (
+                  <View style={styles.ratingContainer}>
+                    <Star size={16} color="#FFD700" fill="#FFD700" />
+                    <Text style={[styles.ratingText, { color: colors.text }]}>
+                      {parkingSpot.rating}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.sizeContainer}>
+                  <Text style={styles.sizeIcon}>
+                    {getSizeIcon(parkingSpot.size)}
+                  </Text>
+                  <Text style={[styles.sizeText, { color: colors.text }]}>
+                    {parkingSpot.size} size
                   </Text>
                 </View>
               </View>
-            )}
+
+              <View style={styles.priceContainer}>
+                <Text style={[styles.price, { color: colors.primaryColor }]}>
+                  {formatPrice(parkingSpot.hourlyRate)}
+                </Text>
+                <Text style={[styles.priceNote, { color: colors.grayDark }]}>
+                  Hourly rate
+                </Text>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Amenities & Features
+                </Text>
+                <View style={styles.featuresGrid}>
+                  {amenitiesList.map((amenity) => (
+                    <View
+                      key={amenity.key}
+                      style={[
+                        styles.featureItem,
+                        {
+                          backgroundColor: amenity.enabled
+                            ? colors.successColor + '20'
+                            : colors.grayLight,
+                          opacity: amenity.enabled ? 1 : 0.5,
+                        },
+                      ]}
+                    >
+                      <amenity.icon
+                        size={16}
+                        color={
+                          amenity.enabled ? colors.successColor : colors.grayDark
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.featureText,
+                          {
+                            color: amenity.enabled
+                              ? colors.text
+                              : colors.grayDark,
+                          },
+                        ]}
+                      >
+                        {amenity.label}
+                      </Text>
+                      {amenity.enabled && (
+                        <Check
+                          size={14}
+                          color={colors.successColor}
+                          style={styles.checkIcon}
+                        />
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  Accessibility
+                </Text>
+                <View style={styles.accessibilityContainer}>
+                  {accessibilityFeatures.map((feature) => (
+                    <View key={feature.key} style={styles.accessibilityItem}>
+                      <View
+                        style={[
+                          styles.accessibilityIcon,
+                          {
+                            backgroundColor: feature.enabled
+                              ? colors.primaryColor + '20'
+                              : colors.grayLight,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.accessibilityEmoji}>
+                          {feature.key === 'wheelchairAccessible' ? '♿' : '🚪'}
+                        </Text>
+                      </View>
+                      <Text
+                        style={[
+                          styles.accessibilityText,
+                          {
+                            color: feature.enabled
+                              ? colors.text
+                              : colors.grayDark,
+                          },
+                        ]}
+                      >
+                        {feature.label}
+                      </Text>
+                      {feature.enabled && (
+                        <Check size={16} color={colors.successColor} />
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {parkingSpot.coordinates && (
+                <View style={styles.section}>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                    Location Details
+                  </Text>
+                  <View style={styles.coordinatesContainer}>
+                    <Navigation size={16} color={colors.primaryColor} />
+                    <Text
+                      style={[styles.coordinatesText, { color: colors.text }]}
+                    >
+                      {parkingSpot.coordinates.latitude.toFixed(6)},{' '}
+                      {parkingSpot.coordinates.longitude.toFixed(6)}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
         </ScrollView>
 
         <View
-          style={[styles.footer, { backgroundColor: colors.cardBackground }]}
+          style={[
+            styles.footer,
+            { backgroundColor: colors.cardBackground, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 8 },
+          ]}
         >
           <TouchableOpacity
-            style={[styles.contactButton, { backgroundColor: '#25D366' }]}
+            style={[
+              styles.contactButton,
+              { backgroundColor: '#25D366', borderWidth: 1, borderColor: '#1DA851' },
+            ]}
             onPress={() => {
               /* Handle WhatsApp */
             }}
@@ -392,7 +400,7 @@ export default function ParkingDetailScreen() {
           <TouchableOpacity
             style={[
               styles.contactButton,
-              { backgroundColor: colors.primaryColor },
+              { backgroundColor: colors.primaryColor, borderWidth: 1, borderColor: colors.primaryColor },
             ]}
             onPress={() => {
               /* Handle Call */
@@ -420,6 +428,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 16,
+    marginHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   headerButton: {
     width: 40,
@@ -437,8 +453,21 @@ const styles = StyleSheet.create({
   headerRightButtons: {
     flexDirection: 'row',
   },
+  cardContainer: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    marginHorizontal: 8,
+    marginTop: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+    overflow: 'hidden',
+  },
   scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 100,
   },
   contentContainer: {
     padding: 16,
@@ -535,7 +564,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 32,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    paddingBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -613,6 +645,12 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#EEEEEE',
+    backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
   },
   contactButton: {
     flex: 1,
@@ -622,6 +660,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   contactButtonText: {
     color: 'white',

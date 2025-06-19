@@ -32,21 +32,23 @@ export default function GymScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[styles.container, { backgroundColor: colors.background, flex: 1 }]}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <ArrowLeft size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Gyms & Fitness
-          </Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Gyms & Fitness</Text>
           <View style={{ width: 24 }} />
         </View>
 
         <View style={styles.searchContainer}>
           <View
-            style={[styles.searchBar, { backgroundColor: colors.grayLight }]}
+            style={[
+              styles.searchBar,
+              { backgroundColor: colors.grayLight, shadowColor: colors.grayDark },
+              styles.searchBarShadow,
+            ]}
           >
             <Search size={20} color={colors.grayDark} />
             <TextInput
@@ -58,9 +60,10 @@ export default function GymScreen() {
             />
           </View>
           <TouchableOpacity
-            style={[styles.filterButton, { backgroundColor: colors.grayLight }]}
+            style={styles.fabFilterButton}
+            activeOpacity={0.8}
           >
-            <SlidersHorizontal size={20} color={colors.text} />
+            <SlidersHorizontal size={22} color={colors.text} />
           </TouchableOpacity>
         </View>
 
@@ -68,12 +71,11 @@ export default function GymScreen() {
           data={filteredGyms}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => <GymCard gym={item} />}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 40 }]}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={[styles.emptyStateText, { color: colors.text }]}>
-                No gyms found
-              </Text>
+              <Text style={[styles.emptyStateIcon, { color: colors.grayDark }]}>🏋️‍♂️</Text>
+              <Text style={[styles.emptyStateText, { color: colors.text }]}>No gyms found</Text>
             </View>
           }
         />
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 18,
@@ -100,16 +103,27 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    padding: 16,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    height: 40,
-    borderRadius: 8,
+    height: 44,
+    borderRadius: 22,
     marginRight: 8,
+    backgroundColor: '#F5F5F5',
+  },
+  searchBarShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
@@ -124,17 +138,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  fabFilterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
   listContent: {
     padding: 16,
+    paddingTop: 0,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 60,
+  },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 16,
     fontFamily: 'Inter-Medium',
+    textAlign: 'center',
+    color: '#888',
   },
 });

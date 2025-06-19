@@ -4,87 +4,108 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Appearance,
-  SafeAreaView,
   TouchableOpacity,
   Platform,
   StatusBar,
 } from 'react-native';
 import { useColorScheme } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const PrivacyPolicy = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
 
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDarkMode ? '#121212' : '#f5f5f5',
+      backgroundColor: isDarkMode ? '#181A20' : '#f5f7fa',
+    },
+    gradient: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: -1,
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
-      borderBottomWidth: 1,
-      borderBottomColor: isDarkMode ? '#333333' : '#e0e0e0',
+      paddingHorizontal: 20,
+      paddingTop: insets.top + (Platform.OS === 'android' ? 8 : 0),
+      paddingBottom: 16,
+      backgroundColor: isDarkMode ? 'rgba(30,30,30,0.98)' : 'rgba(255,255,255,0.98)',
+      borderBottomWidth: 0.5,
+      borderBottomColor: isDarkMode ? '#333' : '#e0e0e0',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 8,
+      zIndex: 10,
     },
     backButton: {
-      padding: 8,
-      marginRight: 8,
+      padding: 10,
+      borderRadius: 100,
+      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+      marginRight: 12,
     },
     headerTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: isDarkMode ? '#ffffff' : '#000000',
+      fontSize: 22,
+      fontWeight: '700',
+      color: isDarkMode ? '#fff' : '#181A20',
+      flex: 1,
+      textAlign: 'center',
+      letterSpacing: 0.2,
     },
     contentContainer: {
-      padding: 16,
-      paddingTop: statusBarHeight + 16,
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: insets.bottom + 32,
     },
     title: {
-      fontSize: 24,
-      fontWeight: '600',
-      marginBottom: 8,
-      color: isDarkMode ? '#ffffff' : '#000000',
+      fontSize: 28,
+      fontWeight: '700',
+      marginBottom: 6,
+      color: isDarkMode ? '#fff' : '#181A20',
+      letterSpacing: 0.1,
+      textAlign: 'center',
     },
     lastUpdated: {
       fontSize: 14,
       color: isDarkMode ? '#aaaaaa' : '#6C696A',
-      marginBottom: 16,
+      marginBottom: 18,
+      textAlign: 'center',
     },
     cardContainer: {
-      backgroundColor: isDarkMode ? '#1e1e1e' : '#fff',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: isDarkMode ? '#333333' : '#e0e0e0',
-      padding: 16,
+      marginTop: 8,
       marginBottom: 16,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDarkMode ? 0.3 : 0.1,
-      shadowRadius: 8,
-      elevation: 5,
+      gap: 18,
     },
     card: {
-      marginBottom: 16,
+      backgroundColor: isDarkMode ? '#23242a' : '#fff',
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: isDarkMode ? '#2c2c2c' : '#e0e0e0',
+      padding: 18,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDarkMode ? 0.18 : 0.08,
+      shadowRadius: 10,
+      elevation: 6,
+      marginBottom: 0,
     },
     cardTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      marginBottom: 8,
-      color: isDarkMode ? '#ffffff' : '#000000',
+      fontSize: 18,
+      fontWeight: '700',
+      marginBottom: 6,
+      color: isDarkMode ? '#fff' : '#181A20',
     },
     cardSubtitle: {
       fontSize: 14,
       color: isDarkMode ? '#aaaaaa' : '#6C696A',
-      marginBottom: 12,
+      marginBottom: 10,
     },
     cardContent: {
       flexDirection: 'column',
@@ -94,44 +115,55 @@ const PrivacyPolicy = () => {
       flexDirection: 'column',
     },
     itemTitle: {
-      fontSize: 14,
+      fontSize: 15,
       fontWeight: '600',
-      color: isDarkMode ? '#ffffff' : '#000000',
+      color: isDarkMode ? '#fff' : '#181A20',
     },
     itemText: {
       fontSize: 14,
-      color: isDarkMode ? '#aaaaaa' : '#6C696A',
+      color: isDarkMode ? '#cccccc' : '#6C696A',
     },
     divider: {
       height: 1,
       backgroundColor: isDarkMode ? '#333333' : '#e0e0e0',
       marginVertical: 8,
+      borderRadius: 1,
     },
     footerText: {
       fontSize: 14,
       color: isDarkMode ? '#aaaaaa' : '#6C696A',
-      marginLeft: 8,
-      marginBottom: 16,
+      marginTop: 12,
+      marginBottom: 24,
+      textAlign: 'center',
     },
   });
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={dynamicStyles.container}>
+      <View style={dynamicStyles.container}>
+        <LinearGradient
+          colors={isDarkMode ? ['#181A20', '#23242a'] : ['#f5f7fa', '#e9e9f0']}
+          style={dynamicStyles.gradient}
+        />
         <View style={dynamicStyles.header}>
           <TouchableOpacity
             style={dynamicStyles.backButton}
             onPress={() => router.back()}
+            activeOpacity={0.7}
           >
             <Ionicons
               name="arrow-back"
               size={24}
-              color={isDarkMode ? '#ffffff' : '#000000'}
+              color={isDarkMode ? '#fff' : '#181A20'}
             />
           </TouchableOpacity>
           <Text style={dynamicStyles.headerTitle}>Privacy Policy</Text>
+          <View style={{ width: 36 }} />
         </View>
-        <ScrollView contentContainerStyle={dynamicStyles.contentContainer}>
+        <ScrollView
+          contentContainerStyle={dynamicStyles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={dynamicStyles.title}>Privacy Policy</Text>
           <Text style={dynamicStyles.lastUpdated}>
             Last Updated: January 1, 2025
@@ -338,7 +370,7 @@ const PrivacyPolicy = () => {
             these Terms and Conditions and Privacy Policy.
           </Text>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 };

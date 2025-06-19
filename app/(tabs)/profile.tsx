@@ -26,6 +26,7 @@ import {
   ChevronRight,
   CreditCard as Edit,
   BookOpen,
+  House,
 } from 'lucide-react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -76,7 +77,7 @@ export default function ProfileScreen() {
       onPress: () => router.push('/profile-details'),
     },
     {
-      icon: Home,
+      icon: House,
       title: 'My Property',
       onPress: () => router.push('/my-property'),
     },
@@ -120,11 +121,19 @@ export default function ProfileScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[
+          styles.container,
+          { backgroundColor: colors.background },
+        ]}
       >
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{
+            paddingBottom: 40, // Extra bottom padding for Android nav bar
+          }}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <View style={styles.profileSection}>
+            <View style={styles.profileCard}>
               <View
                 style={[
                   styles.profileImage,
@@ -149,25 +158,28 @@ export default function ProfileScreen() {
                 </Text>
               </View>
               <View style={styles.profileInfo}>
-                <Text style={[styles.name, { color: colors.text }]}>
+                <Text style={[styles.name, { color: colors.text }]}> 
                   {user?.name || 'Hello, User'}
                 </Text>
-                <Text style={[styles.lastLogin, { color: colors.grayDark }]}>
+                <Text style={[styles.lastLogin, { color: colors.grayDark }]}> 
                   Last Login: Nov 21, 2024
                 </Text>
                 <TouchableOpacity
                   style={styles.editButton}
                   onPress={() => router.push('/edit-profile')}
+                  activeOpacity={0.8}
                 >
-                  <Text
-                    style={[
-                      styles.editButtonText,
-                      { color: colors.primaryColor },
-                    ]}
-                  >
-                    Edit Profile
-                  </Text>
-                  <Edit size={16} color={colors.primaryColor} />
+                  <View style={styles.editButtonInner}>
+                    <Edit size={16} color={colors.primaryColor} style={{ marginRight: 6 }} />
+                    <Text
+                      style={[
+                        styles.editButtonText,
+                        { color: colors.primaryColor },
+                      ]}
+                    >
+                      Edit Profile
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -175,13 +187,15 @@ export default function ProfileScreen() {
 
           <View style={styles.menuContainer}>
             {menuItems.map((item, index) => (
-              <MenuItem
-                key={index}
-                icon={item.icon}
-                title={item.title}
-                onPress={item.onPress}
-                color={colors.text}
-              />
+              <View key={index}>
+                <MenuItem
+                  icon={item.icon}
+                  title={item.title}
+                  onPress={item.onPress}
+                  color={colors.text}
+                />
+                <View style={styles.divider} />
+              </View>
             ))}
             <MenuItem
               icon={LogOut}
@@ -203,10 +217,23 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingBottom: 0,
   },
-  profileSection: {
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4, // Android shadow
+    marginBottom: 18,
+  },
+  profileSection: {
+    display: 'none', // Hide old style
   },
   profileImage: {
     width: 80,
@@ -218,30 +245,47 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   profileInfo: {
-    marginLeft: 16,
+    marginLeft: 18,
     flex: 1,
   },
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Inter-Bold',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   lastLogin: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter-Regular',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   editButton: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    borderRadius: 20,
+    backgroundColor: '#F3F6FA',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  editButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   editButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Medium',
-    marginRight: 4,
   },
   menuContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    marginHorizontal: 8,
+    marginTop: 8,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
   menuItem: {
     flexDirection: 'row',
@@ -260,5 +304,10 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontFamily: 'Inter-SemiBold',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginLeft: 36,
   },
 });
