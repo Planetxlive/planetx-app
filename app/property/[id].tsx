@@ -681,15 +681,17 @@ const transformPropertyData = (data: PropertyData): Property => {
       areaDetails = [
         {
           label: 'Carpet Area',
-          value: data?.pricing.PricePerSqft
-            ? `${data?.pricing.PricePerSqft} Sq.ft.`
+          value: data.pricing && data.pricing.PricePerSqft
+            ? `${data.pricing.PricePerSqft} Sq.ft.`
             : 'N/A',
           // ? `${data.propertyDetails?.carpetArea?.size || data.carpetArea?.size} Sq.ft.` : 'N/A',
           subValue:
-            data.propertyDetails?.carpetArea?.size || data.carpetArea?.size
+            ((data.propertyDetails && data.propertyDetails.carpetArea && typeof data.propertyDetails.carpetArea.size === 'number') ||
+              (data.carpetArea && typeof data.carpetArea.size === 'number'))
               ? `${(
-                  (data.propertyDetails?.carpetArea?.size ||
-                    data.carpetArea?.size) * 0.092903
+                  ((data.propertyDetails && data.propertyDetails.carpetArea && typeof data.propertyDetails.carpetArea.size === 'number')
+                    ? data.propertyDetails.carpetArea.size
+                    : data.carpetArea?.size || 0) * 0.092903
                 ).toFixed(2)} Sq.m.`
               : 'N/A',
         },
@@ -774,12 +776,10 @@ const transformPropertyData = (data: PropertyData): Property => {
     name: data.user?.name || 'Unknown Owner',
     image: '/placeholder.svg?height=80&width=80',
     rating: data.reviews?.length
-      ? Number(
-          (
-            data.reviews.reduce((sum, r) => sum + (r.stars ?? 0), 0) /
-            data.reviews.length
-          ).toFixed(1)
-        )
+      ? Math.round(
+          (data.reviews.reduce((sum, r) => sum + (r.stars ?? 0), 0) /
+            data.reviews.length) * 10
+        ) / 10
       : 0,
     reviews: data.reviews?.length || 0,
     phone: data.user?.mobile || '+91 00000 00000',
@@ -800,14 +800,14 @@ const transformPropertyData = (data: PropertyData): Property => {
     ]
       .filter(Boolean)
       .join(', '),
-    price: data.pricing?.expectedPrice
+    price: data.pricing && data.pricing.expectedPrice
       ? `₹${data.pricing.expectedPrice.toLocaleString('en-IN')}`
-      : data.pricing?.price?.amount
+      : data.pricing && data.pricing.price && data.pricing.price.amount
       ? `₹${data.pricing.price.amount.toLocaleString('en-IN')}`
-      : data.pricing?.monthlyRent
+      : data.pricing && data.pricing.monthlyRent
       ? `₹${data.pricing.monthlyRent.toLocaleString('en-IN')}/mo`
       : 'Price N/A',
-    pricePerSqft: data.pricing?.PricePerSqft
+    pricePerSqft: data.pricing && data.pricing.PricePerSqft
       ? `₹${data.pricing.PricePerSqft.toLocaleString('en-IN')} / sqft`
       : 'N/A',
     isNegotiable: true,
@@ -1131,7 +1131,6 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
 }) => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
-  const { user } = useAuth();
 
   if (!visible) return null;
 
@@ -1147,9 +1146,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
           ]}
         >
           <View style={styles.ownerModalHeader}>
-            <Text style={[styles.ownerModalTitle, { color: colors.text }]}>
-              Property Owner
-            </Text>
+            <Text style={[styles.ownerModalTitle, { color: colors.text }]}>Property Owner</Text>
             <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
               <X size={20} color={colors.text} />
             </TouchableOpacity>
@@ -1161,12 +1158,12 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                 { backgroundColor: colors.primaryColor + '20' },
               ]}
             >
-              <Text style={[styles.avatarText, { color: colors.text }]}>
-                {user?.name.slice(0, 2).toUpperCase()}
+              <Text style={[styles.avatarText, { color: colors.text }]}> 
+                {owner?.name?.slice(0, 2).toUpperCase()}
               </Text>
             </View>
-            <Text style={[styles.ownerName, { color: colors.text }]}>
-              {user?.name}
+            <Text style={[styles.ownerName, { color: colors.text }]}> 
+              {owner?.name}
             </Text>
             <View style={styles.starContainer}>
               {Array(5)
@@ -1175,19 +1172,11 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                   <Star
                     key={i}
                     size={16}
-                    color={
-                      i < Math.floor(owner.rating)
-                        ? colors.warningColor
-                        : colors.grayLight
-                    }
-                    fill={
-                      i < Math.floor(owner.rating)
-                        ? colors.warningColor
-                        : 'transparent'
-                    }
+                    color={i < Math.floor(owner.rating) ? colors.warningColor : colors.grayLight}
+                    fill={i < Math.floor(owner.rating) ? colors.warningColor : 'transparent'}
                   />
                 ))}
-              <Text style={[styles.ownerRating, { color: colors.text }]}>
+              <Text style={[styles.ownerRating, { color: colors.text }]}> 
                 {owner.rating} ({owner.reviews})
               </Text>
             </View>
@@ -1198,13 +1187,11 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                   { backgroundColor: colors.successColor },
                 ]}
                 onPress={() => {
-                  Linking.openURL(`https://wa.me/${user?.whatsappMobile}`);
+                  Linking.openURL(`https://wa.me/${owner.WhatsApp.replace(/\s+/g, '')}`);
                 }}
                 activeOpacity={0.7}
               >
-                <Text style={styles.ownerActionButtonText}>
-                  Message on WhatsApp
-                </Text>
+                <Text style={styles.ownerActionButtonText}>Message on WhatsApp</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -1212,7 +1199,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                   { backgroundColor: colors.primaryColor },
                 ]}
                 onPress={() => {
-                  Linking.openURL(`tel:${user?.mobile}`);
+                  Linking.openURL(`tel:${owner.phone.replace(/\s+/g, '')}`);
                 }}
                 activeOpacity={0.7}
               >
@@ -1226,11 +1213,7 @@ const OwnerModal: React.FC<OwnerModalProps> = ({
                 onPress={onNotify}
                 activeOpacity={0.7}
               >
-                <Text
-                  style={[styles.ownerActionButtonText, { color: colors.text }]}
-                >
-                  Notify
-                </Text>
+                <Text style={[styles.ownerActionButtonText, { color: colors.text }]}>Notify</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1390,7 +1373,8 @@ export default function PropertyDetailScreen() {
         if (!rawProperty) {
           throw new Error('Property not found');
         }
-        const transformedProperty = transformPropertyData(rawProperty);
+        // Fix: cast to PropertyData for transformPropertyData
+        const transformedProperty = transformPropertyData(rawProperty as any);
         setProperty(transformedProperty);
         
         // Fetch reviews for the property

@@ -14,9 +14,20 @@ export type PropertyCategory =
   | 'Shared Warehouse'
   | 'EventSpace';
 
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  whatsappMobile: string;
+  state: string;
+  role: string;
+  city: string;
+}
+
 export interface Property {
   _id: string;
-  user: string;
+  user: string | User;
   title: string;
   propertyType: 'For Sale' | 'For Rent' | string; // Can be narrowed if more types known
   category: PropertyCategory;
@@ -204,10 +215,22 @@ const fetchAvailableProperties = async (): Promise<Property[]> => {
   });
 
   let data: Property[] = res.data.properties;
-  data = data.map((val, ind) => {
-    val.title = createPropertyTitle(val);
-    return val;
+  // Fetch user details for each property
+  const userPromises = data.map(async (property) => {
+    try {
+      console.log('Fetching user details for property:', property.user);
+      const userRes = await axios.get(`${backendUrl}/auth/get-user-by-id/${property.user}`);
+      console.log('Fetched user details:', userRes.data);
+      property.user = userRes.data;
+      console.log('Fetched property owner details:', property.user); // Debug log for owner details
+    } catch (e) {
+      // fallback: keep user as id string
+    }
+    property.title = createPropertyTitle(property);
+    return property;
   });
+  data = await Promise.all(userPromises);
+
   return data;
 };
 
@@ -328,7 +351,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
           propertyType: property.propertyType,
           category: property.category,
           pricing: property.pricing,
-          user: property.user,
+          user: typeof property.user === 'string' ? property.user : property.user._id,
         }))
         .filter((p) => p.video !== '');
     else return null;
@@ -337,6 +360,8 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({
     if (properties !== null)
       return properties.filter(
         (p) =>
+          p.pricing &&
+          typeof p.pricing.expectedPrice === 'number' &&
           p.pricing.expectedPrice >= minPrice &&
           p.pricing.expectedPrice <= maxPrice
       );
