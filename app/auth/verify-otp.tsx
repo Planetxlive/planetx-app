@@ -97,100 +97,94 @@ export default function VerifyOTPScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.container}>
-              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-                <ArrowLeft size={24} color={colors.text} />
-                <Text style={[styles.backText, { color: colors.text }]}>OTP verification</Text>
-              </TouchableOpacity>
+          <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+              <ArrowLeft size={24} color={colors.text} />
+              <Text style={[styles.backText, { color: colors.text }]}>OTP verification</Text>
+            </TouchableOpacity>
 
-              <View style={styles.content}>
-                {/* Illustration with image */}
-                <View style={styles.illustrationContainer}>
-                  <Image
-                    source={require('@/assets/images/verify-otp.png')}
-                    style={styles.illustrationImage}
-                    resizeMode="contain"
-                  />
-                </View>
-
-                <Text style={[styles.message, { color: colors.grayDark }]}>We've sent a Verification Code to</Text>
-                <Text style={[styles.phoneNumber, { color: colors.text }]}>{pendingPhoneNumber}</Text>
-
-                <View style={styles.otpContainer}>
-                  <OTPInput
-                    length={4}
-                    value={otp}
-                    onChange={setOtp}
-                    error={error}
-                    style={styles.otpInputBoxes}
-                  />
-                  {error ? (
-                    <Text style={styles.otpErrorText}>{error}</Text>
-                  ) : null}
-                </View>
-
-                <Button
-                  title="Verify OTP"
-                  onPress={handleVerifyOTP}
-                  loading={isLoading}
-                  fullWidth
-                  style={styles.button}
+            <View style={styles.content}>
+              {/* Illustration with image */}
+              <View style={styles.illustrationContainer}>
+                <Image
+                  source={require('@/assets/images/verify-otp.png')}
+                  style={styles.illustrationImage}
+                  resizeMode="contain"
                 />
-
-                <View style={styles.timerContainer}>
-                  <Text style={styles.timerText}>
-                    Code expired in{' '}
-                    <Text style={styles.timerCountdown}>{formatTime(timeLeft)}</Text>
-                  </Text>
-                </View>
-
-                <View style={styles.resendContainer}>
-                  <Text style={styles.resendText}>Didn't receive the OTP? </Text>
-                  <TouchableOpacity
-                    onPress={handleResendOTP}
-                    disabled={timeLeft > 0 || isResending}
-                  >
-                    <Text
-                      style={
-                        timeLeft > 0 || isResending
-                          ? styles.resendLinkDisabled
-                          : styles.resendLink
-                      }
-                    >
-                      Resend OTP
-                    </Text>
-                  </TouchableOpacity>
-                </View>
               </View>
 
-              {/* Success Modal */}
-              <Modal
-                visible={showSuccess}
-                transparent
-                animationType="fade"
-              >
-                <View style={styles.modalOverlay}>
-                  <View style={styles.successModal}>
-                    <View style={styles.successCircle}>
-                      <Text style={styles.successCheck}>✔️</Text>
-                    </View>
-                    <Text style={styles.successTitle}>Success</Text>
-                    <Text style={styles.successMessage}>You have successfully logged in!</Text>
-                  </View>
-                </View>
-              </Modal>
+              <Text style={[styles.message, { color: colors.grayDark }]}>We've sent a Verification Code to</Text>
+              <Text style={[styles.phoneNumber, { color: colors.text }]}>{pendingPhoneNumber}</Text>
+
+              <View style={styles.otpContainer}>
+                <OTPInput
+                  length={4}
+                  value={otp}
+                  onChange={setOtp}
+                  error={error}
+                  style={styles.otpInputBoxes}
+                />
+                {error ? (
+                  <Text style={styles.otpErrorText}>{error}</Text>
+                ) : null}
+              </View>
+
+              <Button
+                title="Verify OTP"
+                onPress={handleVerifyOTP}
+                loading={isLoading}
+                fullWidth
+                style={styles.button}
+              />
+
+              <View style={styles.timerContainer}>
+                <Text style={styles.timerText}>
+                  Code expired in{' '}
+                  <Text style={styles.timerCountdown}>{formatTime(timeLeft)}</Text>
+                </Text>
+              </View>
+
+              <View style={styles.resendContainer}>
+                <Text style={styles.resendText}>Didn't receive the OTP? </Text>
+                <TouchableOpacity
+                  onPress={handleResendOTP}
+                  disabled={timeLeft > 0 || isResending}
+                >
+                  <Text
+                    style={
+                      timeLeft > 0 || isResending
+                        ? styles.resendLinkDisabled
+                        : styles.resendLink
+                    }
+                  >
+                    Resend OTP
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+
+            {/* Success Modal */}
+            <Modal
+              visible={showSuccess}
+              transparent
+              animationType="fade"
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.successModal}>
+                  <View style={styles.successCircle}>
+                    <Text style={styles.successCheck}>✔️</Text>
+                  </View>
+                  <Text style={styles.successTitle}>Success</Text>
+                  <Text style={styles.successMessage}>You have successfully logged in!</Text>
+                </View>
+              </View>
+            </Modal>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

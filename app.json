@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "PlanetX-live",
+    "name": "PlanetX",
     "slug": "planetx-live",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/favicon.png",
     "userInterfaceStyle": "light",
